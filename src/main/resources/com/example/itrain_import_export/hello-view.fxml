@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
 
@@ -19,12 +22,27 @@
                     <MenuItem fx:id="openMenuItem" text="Öffnen..." onAction="#onOpenFile"/>
                     <MenuItem fx:id="saveMenuItem" text="Speichern unter..." onAction="#onSaveAs"/>
                 </Menu>
+                <Menu fx:id="editMenu" text="Bearbeiten">
+                    <MenuItem fx:id="undoMenuItem" text="Rückgängig" onAction="#onUndo"/>
+                    <MenuItem fx:id="redoMenuItem" text="Wiederholen" onAction="#onRedo"/>
+                </Menu>
                 <Menu fx:id="settingsMenu" text="Einstellungen">
-                    <MenuItem fx:id="pathsMenuItem" text="Pfade" onAction="#onSettingsPaths"/>
-                    <MenuItem fx:id="languageMenuItem" text="Sprache" onAction="#onSettingsLanguage"/>
-                    <MenuItem fx:id="viewMenuItem" text="Ansicht" onAction="#onSettingsView"/>
+                    <MenuItem fx:id="preferencesMenuItem" text="Voreinstellungen" onAction="#onPreferences"/>
+                </Menu>
+                <Menu fx:id="helpMenu" text="Hilfe">
+                    <MenuItem fx:id="helpMenuItem" text="Hilfe" onAction="#onHelp"/>
+                    <MenuItem fx:id="updateMenuItem" text="Update (kommt noch)" disable="true"/>
+                    <SeparatorMenuItem/>
+                    <MenuItem fx:id="aboutMenuItem" text="Über" onAction="#onAbout"/>
                 </Menu>
             </MenuBar>
+            <ToolBar fx:id="ribbonToolBar">
+                <Button fx:id="openToolButton" onAction="#onOpenFile"/>
+                <Button fx:id="saveToolButton" onAction="#onSaveAs"/>
+                <Button fx:id="undoToolButton" onAction="#onUndo"/>
+                <Button fx:id="redoToolButton" onAction="#onRedo"/>
+                <Button fx:id="preferencesToolButton" onAction="#onPreferences"/>
+            </ToolBar>
             <Label fx:id="fileNameLabel" text="Keine Datei geladen.">
                 <VBox.margin>
                     <Insets top="6" right="10" bottom="6" left="10"/>

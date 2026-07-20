@@ -27,6 +27,10 @@
     -fx-text-fill: #e0e0e0;
 }
 
+.tool-bar {
+    -fx-background-color: #313335;
+}
+
 .tab-pane .tab-header-area .tab {
     -fx-background-color: #3c3f41;
 }

@@ -9,6 +9,8 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
@@ -20,28 +22,43 @@ import java.io.File;
 import java.io.InputStream;
 
 /**
- * Einstellungen, aufgeteilt in drei eigenständige Dialoge - passend zu den
- * drei Einträgen im "Einstellungen"-Menü: {@link #showPaths}, "Pfade" (die
- * beiden Standard-Ordner für iTrain-Dateien und Exports); {@link
- * #showLanguage}, "Sprache" (mit Flagge je Sprache); {@link #showView},
- * "Ansicht" (Hell/Dunkel-Farbschema). Alle Änderungen wirken sofort und
- * werden dauerhaft über {@link AppSettings} gespeichert.
+ * Ein einziges "Voreinstellungen"-Fenster mit drei Reitern - Pfade, Sprache,
+ * Ansicht - statt vormals drei getrennter Dialoge. Erreichbar über einen
+ * einzelnen Menüpunkt "Voreinstellungen" im "Einstellungen"-Menü. Alle
+ * Änderungen wirken sofort und werden dauerhaft über {@link AppSettings}
+ * gespeichert.
  */
 public final class SettingsDialog {
 
     private SettingsDialog() {
     }
 
-    /** Dialog "Pfade": Standard-Ordner für iTrain-Dateien und für Exports. */
-    public static void showPaths(Stage owner) {
+    /** Öffnet das Voreinstellungen-Fenster mit allen drei Reitern. */
+    public static void showPreferences(Stage owner) {
         I18n i18n = I18n.getInstance();
         AppSettings settings = AppSettings.getInstance();
 
         Dialog<Void> dialog = new Dialog<>();
         dialog.initOwner(owner);
-        dialog.setTitle(i18n.t("menu.settingsPaths"));
+        dialog.setTitle(i18n.t("menu.preferences"));
         dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
 
+        TabPane tabPane = new TabPane();
+        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+
+        Tab pathsTab = new Tab(i18n.t("menu.settingsPaths"), buildPathsContent(owner, settings, i18n));
+        Tab languageTab = new Tab(i18n.t("menu.settingsLanguage"), buildLanguageContent(i18n));
+        Tab viewTab = new Tab(i18n.t("menu.settingsView"), buildViewContent(owner, dialog, settings, i18n));
+        tabPane.getTabs().addAll(pathsTab, languageTab, viewTab);
+
+        dialog.getDialogPane().setContent(tabPane);
+        dialog.getDialogPane().setPrefSize(560, 320);
+        applyThemeOnceShown(dialog, settings);
+        dialog.showAndWait();
+    }
+
+    /** Inhalt des Reiters "Pfade": Standard-Ordner für iTrain-Dateien, Exports und Backups. */
+    private static javafx.scene.Node buildPathsContent(Stage owner, AppSettings settings, I18n i18n) {
         Label tcdPathLabel = new Label(pathOrPlaceholder(settings.getTcdDirectory(), i18n));
         Button tcdBrowseButton = new Button(i18n.t("settings.browse"));
         tcdBrowseButton.setOnAction(e -> {
@@ -100,22 +117,11 @@ public final class SettingsDialog {
         grid.addRow(0, new Label(i18n.t("settings.tcdPath")), tcdRow);
         grid.addRow(1, new Label(i18n.t("settings.exportPath")), exportRow);
         grid.addRow(2, new Label(i18n.t("settings.backupPath")), backupRow);
-
-        dialog.getDialogPane().setContent(grid);
-        applyThemeOnceShown(dialog, settings);
-        dialog.showAndWait();
+        return grid;
     }
 
-    /** Dialog "Sprache": Sprachauswahl mit Flagge je Sprache. */
-    public static void showLanguage(Stage owner) {
-        I18n i18n = I18n.getInstance();
-        AppSettings settings = AppSettings.getInstance();
-
-        Dialog<Void> dialog = new Dialog<>();
-        dialog.initOwner(owner);
-        dialog.setTitle(i18n.t("menu.settingsLanguage"));
-        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
-
+    /** Inhalt des Reiters "Sprache": Sprachauswahl mit Flagge je Sprache. */
+    private static javafx.scene.Node buildLanguageContent(I18n i18n) {
         ComboBox<String> languageCombo = new ComboBox<>(FXCollections.observableArrayList(I18n.LANGUAGE_CODES));
         languageCombo.setValue(i18n.getCurrentLanguage());
         languageCombo.setCellFactory(list -> new LanguageCell());
@@ -131,22 +137,11 @@ public final class SettingsDialog {
         grid.setVgap(12);
         grid.setPadding(new Insets(15));
         grid.addRow(0, new Label(i18n.t("settings.language")), languageCombo);
-
-        dialog.getDialogPane().setContent(grid);
-        applyThemeOnceShown(dialog, settings);
-        dialog.showAndWait();
+        return grid;
     }
 
-    /** Dialog "Ansicht": Farbschema Hell/Dunkel. */
-    public static void showView(Stage owner) {
-        I18n i18n = I18n.getInstance();
-        AppSettings settings = AppSettings.getInstance();
-
-        Dialog<Void> dialog = new Dialog<>();
-        dialog.initOwner(owner);
-        dialog.setTitle(i18n.t("menu.settingsView"));
-        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
-
+    /** Inhalt des Reiters "Ansicht": Farbschema sowie Spalten-/Bereichs-Sichtbarkeit. */
+    private static javafx.scene.Node buildViewContent(Stage owner, Dialog<Void> dialog, AppSettings settings, I18n i18n) {
         ComboBox<String> themeCombo = new ComboBox<>(FXCollections.observableArrayList(
                 AppSettings.THEME_LIGHT, AppSettings.THEME_DARK));
         themeCombo.setValue(settings.getTheme());
@@ -168,6 +163,10 @@ public final class SettingsDialog {
         showSelectionBox.setSelected(settings.getShowSelectionCheckbox());
         showSelectionBox.selectedProperty().addListener((obs, oldV, newV) -> settings.setShowSelectionCheckbox(newV));
 
+        CheckBox showDataEditorBox = new CheckBox();
+        showDataEditorBox.setSelected(settings.getShowDataEditor());
+        showDataEditorBox.selectedProperty().addListener((obs, oldV, newV) -> settings.setShowDataEditor(newV));
+
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(12);
@@ -175,16 +174,14 @@ public final class SettingsDialog {
         grid.addRow(0, new Label(i18n.t("settings.theme")), themeCombo);
         grid.addRow(1, new Label(i18n.t("settings.showType")), showTypeBox);
         grid.addRow(2, new Label(i18n.t("settings.showSelectionCheckbox")), showSelectionBox);
-
-        dialog.getDialogPane().setContent(grid);
-        applyThemeOnceShown(dialog, settings);
-        dialog.showAndWait();
+        grid.addRow(3, new Label(i18n.t("settings.showDataEditor")), showDataEditorBox);
+        return grid;
     }
 
     /**
      * Der Dialog bekommt seine eigene Scene erst beim Anzeigen - deshalb
      * das aktuelle Farbschema erst anwenden, sobald sie tatsächlich existiert,
-     * damit auch die Einstellungen-Dialoge selbst im Dunkel-Modus dunkel sind.
+     * damit auch das Voreinstellungen-Fenster selbst im Dunkel-Modus dunkel ist.
      */
     private static void applyThemeOnceShown(Dialog<?> dialog, AppSettings settings) {
         dialog.getDialogPane().sceneProperty().addListener((obs, oldScene, newScene) ->

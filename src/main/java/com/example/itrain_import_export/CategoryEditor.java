@@ -10,6 +10,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceDialog;
@@ -24,6 +25,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -33,6 +35,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
@@ -41,10 +45,15 @@ import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
 import java.io.File;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Baut die komplette Bearbeitungsoberfläche für eine control-items-Kategorie
@@ -86,6 +95,19 @@ public class CategoryEditor {
     private final I18n i18n = I18n.getInstance();
     /** Wird bei jeder tatsächlichen inhaltlichen Änderung aufgerufen (siehe {@link TcdDocument#markDirty()}). */
     private final Runnable onModified;
+    /**
+     * Wird aufgerufen, wenn sich durch diesen Editor die Struktur ANDERER
+     * Kategorien geändert hat (z.B. durch einen Mehrfach-Kategorie-Import,
+     * siehe {@link #onImport()}) - damit deren eigene, bereits aufgebaute
+     * Reiter neu an den aktuellen XML-Baum gebunden werden.
+     */
+    private final Runnable onStructuralChange;
+    /**
+     * Wird VOR jeder tatsächlichen inhaltlichen Änderung aufgerufen, damit
+     * der aktuelle Stand für "Rückgängig" gesichert werden kann (siehe
+     * {@code HelloController.recordUndoSnapshot()}).
+     */
+    private final Runnable beforeChange;
 
     private final TableView<XmlNode> entryTable = new TableView<>();
     private final TreeView<XmlNode> detailTree = new TreeView<>();
@@ -93,6 +115,7 @@ public class CategoryEditor {
     private final TextField textContentField = new TextField();
     private final GridPane tagGrid = new GridPane();
     private final SimpleIntegerProperty entryCount = new SimpleIntegerProperty(0);
+    private final SimpleIntegerProperty selectedCount = new SimpleIntegerProperty(0);
 
     /**
      * Spezialisierte Tabelle für {@code <configuration>}-Knoten von
@@ -111,15 +134,23 @@ public class CategoryEditor {
     private XmlNode selectedTreeNode;
     private int lastClickedIndex = -1;
 
-    public CategoryEditor(String categoryName, XmlNode controlItemsNode, Runnable onModified) {
+    public CategoryEditor(String categoryName, XmlNode controlItemsNode, Runnable onModified,
+                           Runnable onStructuralChange, Runnable beforeChange) {
         this.categoryName = categoryName;
         this.controlItemsNode = controlItemsNode;
         this.onModified = onModified;
+        this.onStructuralChange = onStructuralChange;
+        this.beforeChange = beforeChange;
         this.categoryNode = controlItemsNode.findChild(categoryName);
     }
 
     public ReadOnlyIntegerProperty entryCountProperty() {
         return entryCount;
+    }
+
+    /** Anzahl der aktuell markierten Einträge in der Tabelle dieser Kategorie. */
+    public ReadOnlyIntegerProperty selectedCountProperty() {
+        return selectedCount;
     }
 
     public String getDisplayName() {
@@ -170,6 +201,151 @@ public class CategoryEditor {
         return categoryNode;
     }
 
+    /**
+     * Wie {@link #ensureCategoryNode()}, aber für eine BELIEBIGE Kategorie
+     * (nicht nur die dieses Editors) - wird beim Mehrfach-Kategorie-Import
+     * gebraucht, wenn eine importierte Zeile zu einer anderen Kategorie
+     * gehört (siehe {@link #onImport()}).
+     */
+    private XmlNode ensureCategoryNodeGeneric(String category) {
+        XmlNode existing = controlItemsNode.findChild(category);
+        if (existing != null) {
+            return existing;
+        }
+        XmlNode newCategoryNode = new XmlNode(category);
+        controlItemsNode.getChildren().add(newCategoryNode);
+        return newCategoryNode;
+    }
+
+    /** Prüft, ob eine Kategorie bereits einen direkten Eintrag mit diesem Tag-Namen + "name"-Attribut hat. */
+    private static boolean categoryHasEntry(XmlNode category, String tag, String name) {
+        for (XmlNode entry : category.getChildren()) {
+            if (entry.getTagName().equals(tag) && name.equals(entry.getAttribute("name"))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Findet zu einem Eintrag rekursiv alle Einträge, die er (an beliebiger
+     * Stelle in seiner Struktur, nicht nur innerhalb von {@code <condition>}/
+     * {@code <items>}) über Tag-Name + {@code name}-Attribut referenziert -
+     * z.B. {@code <feedback name="RM1" change="on"/>} in einer Aktion oder
+     * {@code <train-type name="DB Dampf GZ"/>} direkt unter einem Zug. In
+     * iTrains Dateiformat ist der {@code name} pro Kategorie eindeutig und
+     * dient genau so als Fremdschlüssel - jedes Element mit demselben
+     * Tag-Namen + {@code name}-Wert wie ein tatsächlicher Eintrag einer
+     * Kategorie IST eine Referenz auf diesen Eintrag, unabhängig davon, in
+     * welchem umschließenden Element es steht. Es wird bewusst NICHT über
+     * eine feste Tag→Kategorie-Zuordnung oder eine feste Liste erlaubter
+     * Wrapper-Tags gearbeitet (Kategorien wie "accessories" enthalten
+     * mehrere unterschiedliche Tags, und neue Referenzmuster wie
+     * "train"→"train-type" kommen ohne Vorwarnung dazu), sondern direkt im
+     * Dokument gesucht - das bleibt auch bei uns unbekannten/künftigen
+     * Referenzmustern korrekt.
+     * <p>
+     * Wird auch auf neu gefundene Einträge rekursiv angewendet (falls diese
+     * selbst wieder Referenzen enthalten, z.B. ein referenzierter Block, der
+     * seinerseits Feedbacks/Signale/Weichen referenziert). Liefert eine
+     * Zuordnung gefundener Eintrag → seine tatsächliche Kategorie, ohne die
+     * ursprünglich übergebenen Einträge.
+     */
+    private Map<XmlNode, String> resolveLinkedEntries(List<XmlNode> selectedEntries) {
+        Map<XmlNode, String> result = new LinkedHashMap<>();
+        Set<XmlNode> alreadyHandled = new HashSet<>(selectedEntries);
+        Deque<XmlNode> toScan = new ArrayDeque<>(selectedEntries);
+
+        while (!toScan.isEmpty()) {
+            XmlNode current = toScan.poll();
+            for (XmlNode reference : allDescendants(current)) {
+                String refName = reference.getAttribute("name");
+                if (refName == null || refName.isBlank()) {
+                    continue;
+                }
+                XmlNode found = findEntryByReference(reference.getTagName(), refName);
+                if (found != null && !alreadyHandled.contains(found)) {
+                    alreadyHandled.add(found);
+                    String category = findCategoryNameOf(found);
+                    if (category != null) {
+                        result.put(found, category);
+                        toScan.add(found);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    /** Alle Nachfahren (rekursiv, alle Ebenen) eines Knotens. */
+    private static List<XmlNode> allDescendants(XmlNode node) {
+        List<XmlNode> result = new ArrayList<>();
+        for (XmlNode child : node.getChildren()) {
+            result.add(child);
+            result.addAll(allDescendants(child));
+        }
+        return result;
+    }
+
+    /**
+     * Löst eine Referenz (Tag + name-Attribut) zum tatsächlichen Eintrag auf.
+     * Zuerst wird ein exakter Tag+Name-Treffer versucht (der Normalfall,
+     * z.B. {@code <feedback name="RM1"/>} → {@code <feedback name="RM1">}
+     * unter feedbacks). Manche Referenzen verwenden aber je nach
+     * struktureller Rolle einen ANDEREN Tag-Namen als die eigentliche
+     * Definition - z.B. referenziert ein Block im Rangier-Kontext ein
+     * Signal als {@code <shunt-signal name="B67_RS_N"/>}, obwohl die
+     * Definition selbst unter accessories als
+     * {@code <signal name="B67_RS_N" type="de_sh0_1f">} steht (belegt durch
+     * eine reale iTrain-Referenzdatei). Da {@code name} in iTrains
+     * Datenmodell der eindeutige Objekt-Identifikator ist, wird als
+     * Fallback ohne Tag-Bedingung gesucht - aber NUR als Fallback, da
+     * gleichlautende Namen über Kategorien hinweg vorkommen können (z.B.
+     * teilen sich eine Lok und der zugehörige Zug oft denselben Namen); der
+     * exakte Tag-Treffer bleibt deshalb immer die erste Wahl.
+     */
+    private XmlNode findEntryByReference(String tag, String name) {
+        XmlNode exact = findEntryByTagAndName(tag, name);
+        if (exact != null) {
+            return exact;
+        }
+        return findEntryByName(name);
+    }
+
+    /** Sucht in ALLEN Kategorien nach einem direkten Eintrag mit passendem "name"-Attribut, unabhängig vom Tag. */
+    private XmlNode findEntryByName(String name) {
+        for (XmlNode category : controlItemsNode.getChildren()) {
+            for (XmlNode entry : category.getChildren()) {
+                if (name.equals(entry.getAttribute("name"))) {
+                    return entry;
+                }
+            }
+        }
+        return null;
+    }
+
+    /** Sucht in ALLEN Kategorien nach einem direkten Eintrag mit passendem Tag-Namen und "name"-Attribut. */
+    private XmlNode findEntryByTagAndName(String tag, String name) {
+        for (XmlNode category : controlItemsNode.getChildren()) {
+            for (XmlNode entry : category.getChildren()) {
+                if (entry.getTagName().equals(tag) && name.equals(entry.getAttribute("name"))) {
+                    return entry;
+                }
+            }
+        }
+        return null;
+    }
+
+    /** Ermittelt, unter welcher Kategorie (direktes Kind von control-items) ein Eintrag tatsächlich steht. */
+    private String findCategoryNameOf(XmlNode entry) {
+        for (XmlNode category : controlItemsNode.getChildren()) {
+            if (category.getChildren().contains(entry)) {
+                return category.getTagName();
+            }
+        }
+        return null;
+    }
+
     private void bindEntryItems(ObservableList<XmlNode> items) {
         entryTable.setItems(items);
         items.addListener((ListChangeListener<XmlNode>) change -> entryCount.set(items.size()));
@@ -190,6 +366,8 @@ public class CategoryEditor {
 
     private javafx.scene.Node buildListSide() {
         entryTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        entryTable.getSelectionModel().getSelectedIndices().addListener((ListChangeListener<Integer>) change ->
+                selectedCount.set(entryTable.getSelectionModel().getSelectedIndices().size()));
 
         TableColumn<XmlNode, Void> selectColumn = buildSelectionColumn();
 
@@ -202,6 +380,10 @@ public class CategoryEditor {
         typeColumn.setVisible(AppSettings.getInstance().getShowTypeColumn());
 
         TableColumn<XmlNode, String> nameColumn = new TableColumn<>(i18n.t("editor.columnName"));
+        // Verknüpfte, mit-importierte Einträge tragen jetzt bereits ein "~"
+        // direkt im "name"-Attribut (siehe CategoryEditor.onExport /
+        // renameReferencedChildren) - hier also einfach der echte Name, ohne
+        // Sonderbehandlung.
         nameColumn.setCellValueFactory(data -> new ReadOnlyStringWrapper(data.getValue().getName()));
         nameColumn.setPrefWidth(220);
 
@@ -250,24 +432,34 @@ public class CategoryEditor {
             return row;
         });
 
-        Button addButton = new Button(i18n.t("editor.newEntry"));
-        addButton.setOnAction(e -> onAddEntry());
+        Button exportSelectedButton = new Button(i18n.t("editor.exportSelected"));
+        exportSelectedButton.setOnAction(e -> onExport());
 
-        Button deleteButton = new Button(i18n.t("editor.delete"));
+        Button importButton = new Button(i18n.t("editor.import"));
+        importButton.setOnAction(e -> onImport());
+
+        // "Neuer Eintrag" und "Löschen" als reine Symbol-Buttons ("+"/rotes
+        // "X"), rechtsbündig über der Tabelle - der Tooltip trägt weiterhin
+        // den vollen (übersetzten) Text.
+        Button addButton = new Button("+");
+        addButton.setOnAction(e -> onAddEntry());
+        addButton.setTooltip(new Tooltip(i18n.t("editor.newEntry")));
+        addButton.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-min-width: 32px;");
+
+        Button deleteButton = new Button("X");
         deleteButton.setOnAction(e -> {
             XmlNode selected = entryTable.getSelectionModel().getSelectedItem();
             if (selected != null) {
                 deleteEntry(selected);
             }
         });
+        deleteButton.setTooltip(new Tooltip(i18n.t("editor.delete")));
+        deleteButton.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-min-width: 32px; -fx-text-fill: #c0392b;");
 
-        Button importButton = new Button(i18n.t("editor.import"));
-        importButton.setOnAction(e -> onImport());
+        Region toolbarSpacer = new Region();
+        HBox.setHgrow(toolbarSpacer, Priority.ALWAYS);
 
-        Button exportSelectedButton = new Button(i18n.t("editor.exportSelected"));
-        exportSelectedButton.setOnAction(e -> onExport());
-
-        HBox toolbar = new HBox(10, addButton, deleteButton, importButton, exportSelectedButton);
+        HBox toolbar = new HBox(10, exportSelectedButton, importButton, toolbarSpacer, addButton, deleteButton);
         toolbar.setPadding(new Insets(8));
 
         Label hint = new Label(i18n.t("editor.deleteHint"));
@@ -377,6 +569,23 @@ public class CategoryEditor {
             return;
         }
 
+        // Verknüpfte Einträge anderer Kategorien (condition/items, z.B. bei
+        // Aktionen) müssen mit exportiert werden, sonst lässt sich die
+        // Zieldatei nach dem Import in iTrain nicht mehr öffnen.
+        Map<XmlNode, String> linkedEntries = resolveLinkedEntries(selected);
+
+        ButtonType cancelButton = new ButtonType(i18n.t("editor.exportConfirmCancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+        ButtonType continueButton = new ButtonType(i18n.t("editor.exportConfirmContinue"), ButtonBar.ButtonData.OK_DONE);
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                i18n.t("editor.exportConfirmMessage", selected.size(), linkedEntries.size()),
+                cancelButton, continueButton);
+        confirm.setTitle(i18n.t("editor.exportConfirmTitle"));
+        confirm.setHeaderText(null);
+        Optional<ButtonType> confirmResult = confirm.showAndWait();
+        if (confirmResult.isEmpty() || confirmResult.get() != continueButton) {
+            return;
+        }
+
         String exportDir = AppSettings.getInstance().getExportDirectory();
         if (exportDir == null || exportDir.isBlank() || !new File(exportDir).isDirectory()) {
             DirectoryChooser dirChooser = new DirectoryChooser();
@@ -406,22 +615,85 @@ public class CategoryEditor {
             List<String> header = List.of("Kategorie",
                     i18n.t("editor.columnType"), i18n.t("editor.columnName"),
                     i18n.t("editor.columnDescription"), "XML");
+
+            // Verknüpfte Einträge werden beim Export UMBENANNT (Original-Name
+            // -> "~"+Original-Name) - sowohl ihre eigene Definition als auch
+            // JEDE Stelle, an der sie innerhalb der exportierten Menge
+            // referenziert werden (z.B. <feedback name="RM1"/> in einer
+            // Aktion). So bleibt die Zieldatei nach dem Import in iTrain
+            // konsistent und öffnbar, auch wenn der Nutzer die importierten
+            // Daten (erkennbar am "~") noch nicht manuell bereinigt hat.
+            // Gearbeitet wird auf tiefen KOPIEN - das Original im gerade
+            // geöffneten Dokument bleibt unverändert.
+            Map<String, String> renameMap = new LinkedHashMap<>();
+            for (XmlNode linked : linkedEntries.keySet()) {
+                String originalName = linked.getName();
+                if (!originalName.isBlank()) {
+                    renameMap.put(originalName, "~" + originalName);
+                }
+            }
+
             List<List<String>> rows = new ArrayList<>();
             for (XmlNode node : selected) {
-                XmlNode description = node.findChild("description");
-                String descText = description != null && description.getTextContent() != null
-                        ? description.getTextContent() : "";
-                String xml = TcdDocument.nodeToXmlString(node);
-                rows.add(List.of(categoryName, node.getTagName(), node.getName(), descText, xml));
+                XmlNode copy = node.deepCopy();
+                // Der direkt ausgewählte Eintrag selbst behält seinen Namen -
+                // nur Referenzen DARIN auf verknüpfte Einträge werden angepasst.
+                renameReferencedChildren(copy, renameMap);
+                rows.add(toExportRow(categoryName, copy));
+            }
+            // Verknüpfte Einträge mit ihrer JEWEILS EIGENEN Kategorie anhängen
+            // (nicht der Kategorie dieses Reiters), inklusive umbenannter
+            // eigener Definition und ggf. umbenannter eigener Referenzen.
+            for (Map.Entry<XmlNode, String> linked : linkedEntries.entrySet()) {
+                XmlNode copy = linked.getKey().deepCopy();
+                String renamedName = renameMap.get(copy.getName());
+                if (renamedName != null) {
+                    copy.setAttribute("name", renamedName);
+                }
+                renameReferencedChildren(copy, renameMap);
+                rows.add(toExportRow(linked.getValue(), copy));
             }
             CsvUtil.write(target, header, rows);
             new Alert(Alert.AlertType.INFORMATION,
-                    i18n.t("editor.exportSuccess", selected.size(), target.getAbsolutePath()))
+                    i18n.t("editor.exportSuccess", rows.size(), target.getAbsolutePath()))
                     .showAndWait();
         } catch (Exception ex) {
             Alert alert = new Alert(Alert.AlertType.ERROR, String.valueOf(ex.getMessage()));
             alert.setHeaderText(i18n.t("editor.exportErrorTitle"));
             alert.showAndWait();
+        }
+    }
+
+    /** Baut eine CSV-Export-Zeile (Kategorie/Typ/Name/Beschreibung/XML) für einen Eintrag. */
+    private static List<String> toExportRow(String category, XmlNode node) throws Exception {
+        XmlNode description = node.findChild("description");
+        String descText = description != null && description.getTextContent() != null
+                ? description.getTextContent() : "";
+        String xml = TcdDocument.nodeToXmlString(node);
+        return List.of(category, node.getTagName(), node.getName(), descText, xml);
+    }
+
+    /**
+     * Benennt in ALLEN Nachfahren (nicht im übergebenen Knoten selbst) jedes
+     * "name"-Attribut um, das ein Schlüssel in renameMap ist - für
+     * Referenzen auf verknüpfte Einträge innerhalb eines exportierten
+     * Eintrags (z.B. {@code <feedback name="RM1"/>} in einer Aktion wird zu
+     * {@code <feedback name="~RM1"/>}, wenn RM1 verknüpft und daher
+     * umbenannt wird). Wird sowohl auf direkt ausgewählte als auch auf
+     * verknüpfte Einträge angewendet, damit auch verknüpfte Einträge, die
+     * ihrerseits weitere verknüpfte Einträge referenzieren, konsistent
+     * bleiben.
+     */
+    private static void renameReferencedChildren(XmlNode node, Map<String, String> renameMap) {
+        for (XmlNode child : node.getChildren()) {
+            String currentName = child.getAttribute("name");
+            if (currentName != null) {
+                String renamed = renameMap.get(currentName);
+                if (renamed != null) {
+                    child.setAttribute("name", renamed);
+                }
+            }
+            renameReferencedChildren(child, renameMap);
         }
     }
 
@@ -454,25 +726,57 @@ public class CategoryEditor {
                     throw new IllegalStateException(i18n.t("editor.importInvalidFormat"));
                 }
             }
+
+            // Eine Export-Datei kann (seit der Verknüpfung verwandter
+            // Einträge, siehe resolveLinkedEntries) Zeilen aus MEHREREN
+            // Kategorien enthalten - jede Zeile wird daher anhand ihrer
+            // eigenen Kategorie-Spalte einsortiert, statt (wie früher) eine
+            // einheitliche Kategorie über die ganze Datei zu verlangen. Der
+            // aktuell geöffnete Reiter spielt für das Ziel keine Rolle mehr.
+            if (!dataRows.isEmpty()) {
+                // Ein Import gilt als EIN Rückgängig-Schritt, nicht einer je
+                // Zeile - der Nutzer will einen kompletten Import mit einem
+                // "Rückgängig" wieder loswerden können.
+                beforeChange.run();
+            }
+            boolean touchesOtherCategories = false;
+            int imported = 0;
+            int skippedDuplicates = 0;
             for (List<String> row : dataRows) {
                 String rowCategory = row.get(0);
-                if (!categoryName.equals(rowCategory)) {
-                    throw new IllegalStateException(
-                            i18n.t("editor.importCategoryMismatch", rowCategory, categoryDisplayName()));
+                XmlNode categoryTarget = rowCategory.equals(categoryName)
+                        ? ensureCategoryNode() : ensureCategoryNodeGeneric(rowCategory);
+                if (!rowCategory.equals(categoryName)) {
+                    touchesOtherCategories = true;
                 }
-            }
-
-            XmlNode target = ensureCategoryNode();
-            int imported = 0;
-            for (List<String> row : dataRows) {
                 XmlNode node = TcdDocument.xmlStringToNode(row.get(4));
-                target.getChildren().add(node);
+                // iTrain verlangt pro Kategorie eindeutige Namen (siehe
+                // "Duplicate ... elements"-Fehler) - ein per Verknüpfung
+                // mit-exportierter Eintrag, der im Ziel bereits existiert
+                // (z.B. weil er dort schon vorhanden war), wird daher nicht
+                // ein zweites Mal eingefügt. Einträge ohne name-Attribut
+                // werden davon nicht betroffen (kein eindeutiger Schlüssel).
+                String nodeName = node.getName();
+                if (!nodeName.isBlank() && categoryHasEntry(categoryTarget, node.getTagName(), nodeName)) {
+                    skippedDuplicates++;
+                    continue;
+                }
+                categoryTarget.getChildren().add(node);
                 imported++;
             }
             if (imported > 0) {
                 onModified.run();
             }
-            new Alert(Alert.AlertType.INFORMATION, i18n.t("editor.importSuccess", imported)).showAndWait();
+            if (touchesOtherCategories) {
+                // Andere Reiter sind bereits (evtl. leer) an ihren alten
+                // XML-Stand gebunden - komplett neu aufbauen, damit sie die
+                // gerade importierten Einträge auch anzeigen.
+                onStructuralChange.run();
+            }
+            String successMessage = skippedDuplicates > 0
+                    ? i18n.t("editor.importSuccessWithSkipped", imported, skippedDuplicates)
+                    : i18n.t("editor.importSuccess", imported);
+            new Alert(Alert.AlertType.INFORMATION, successMessage).showAndWait();
         } catch (Exception ex) {
             Alert alert = new Alert(Alert.AlertType.ERROR, String.valueOf(ex.getMessage()));
             alert.setHeaderText(i18n.t("editor.importErrorTitle"));
@@ -524,6 +828,7 @@ public class CategoryEditor {
         }
         newNode.setAttribute("name", name.get().trim());
 
+        beforeChange.run();
         ensureCategoryNode().getChildren().add(newNode);
         onModified.run();
         entryTable.getSelectionModel().select(newNode);
@@ -538,6 +843,7 @@ public class CategoryEditor {
         confirm.setHeaderText(null);
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.YES) {
+            beforeChange.run();
             categoryNode.getChildren().remove(node);
             onModified.run();
             if (node == selectedTreeNode) {
@@ -571,6 +877,7 @@ public class CategoryEditor {
                 // gezählt (relevant für das Backup-Aufräumen beim Öffnen).
                 String newContent = newV.isEmpty() ? null : newV;
                 if (!java.util.Objects.equals(selectedTreeNode.getTextContent(), newContent)) {
+                    beforeChange.run();
                     selectedTreeNode.setTextContent(newContent);
                     onModified.run();
                 }
@@ -600,8 +907,17 @@ public class CategoryEditor {
 
         SplitPane detailSplit = new SplitPane();
         detailSplit.setOrientation(Orientation.HORIZONTAL);
-        detailSplit.getItems().addAll(treeBox, detailBox);
-        detailSplit.setDividerPositions(0.55);
+        detailSplit.getItems().add(treeBox);
+        // "Daten ändern"-Bereich standardmäßig ausgeblendet (siehe
+        // Einstellungen -> Ansicht -> "Daten ändern") - die Ansicht ist dann
+        // nur noch zweigeteilt (Liste + Daten-Explorer) statt dreigeteilt.
+        // Da SplitPane unsichtbare Kinder nicht wie andere Layouts einfach
+        // wegblendet, wird der Bereich hier nur bei Bedarf überhaupt erst
+        // hinzugefügt statt nur ausgeblendet.
+        if (AppSettings.getInstance().getShowDataEditor()) {
+            detailSplit.getItems().add(detailBox);
+            detailSplit.setDividerPositions(0.55);
+        }
 
         BorderPane pane = new BorderPane(detailSplit);
         pane.setPadding(new Insets(0, 0, 0, 8));
@@ -661,6 +977,7 @@ public class CategoryEditor {
             // (siehe textContentField-Listener oben) - sonst würde z.B. das
             // reine Verlassen des Feldes per Tab schon als Änderung gelten.
             if (!newTag.equals(selectedTreeNode.getTagName())) {
+                beforeChange.run();
                 selectedTreeNode.setTagName(newTag);
                 onModified.run();
             }
@@ -771,6 +1088,7 @@ public class CategoryEditor {
         if (oldValue.equals(trimmed)) {
             return;
         }
+        beforeChange.run();
         if (trimmed.isEmpty()) {
             param.removeAttribute(attributeName);
         } else {
@@ -788,6 +1106,7 @@ public class CategoryEditor {
         if (oldValue.equals(trimmed)) {
             return;
         }
+        beforeChange.run();
         if (trimmed.isBlank()) {
             if (desc != null) {
                 param.getChildren().remove(desc);
@@ -817,6 +1136,7 @@ public class CategoryEditor {
         }
         XmlNode newParam = new XmlNode("parameter");
         newParam.setAttribute("nr", nr.get().trim());
+        beforeChange.run();
         currentConfigNode.getChildren().add(newParam);
         onModified.run();
         configTable.getSelectionModel().select(newParam);
@@ -831,6 +1151,7 @@ public class CategoryEditor {
         confirm.setHeaderText(null);
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.YES && currentConfigNode != null) {
+            beforeChange.run();
             currentConfigNode.getChildren().remove(param);
             onModified.run();
         }

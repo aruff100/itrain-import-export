@@ -18,6 +18,7 @@ public final class AppSettings {
     private static final String KEY_THEME = "theme";
     private static final String KEY_SHOW_TYPE_COLUMN = "showTypeColumn";
     private static final String KEY_SHOW_SELECTION_CHECKBOX = "showSelectionCheckbox";
+    private static final String KEY_SHOW_DATA_EDITOR = "showDataEditor";
 
     public static final String THEME_LIGHT = "light";
     public static final String THEME_DARK = "dark";
@@ -92,5 +93,19 @@ public final class AppSettings {
 
     public void setShowSelectionCheckbox(boolean show) {
         prefs.putBoolean(KEY_SHOW_SELECTION_CHECKBOX, show);
+    }
+
+    /**
+     * Ob der "Daten ändern"-Bereich (rechter Bereich, in dem Daten eines
+     * ausgewählten Eintrags bearbeitet werden können) angezeigt wird.
+     * Standard: ausgeblendet, damit die Ansicht beim Start nicht
+     * dreigeteilt, sondern nur zweigeteilt erscheint.
+     */
+    public boolean getShowDataEditor() {
+        return prefs.getBoolean(KEY_SHOW_DATA_EDITOR, false);
+    }
+
+    public void setShowDataEditor(boolean show) {
+        prefs.putBoolean(KEY_SHOW_DATA_EDITOR, show);
     }
 }
