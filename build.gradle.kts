@@ -85,7 +85,7 @@ jlink {
         // project.version ("1.0-SNAPSHOT") funktioniert nicht als
         // App-Version für jpackage - Windows/macOS verlangen ein reines
         // Zahlen-/Punkt-Format ohne Suffix - deshalb hier fest vergeben.
-        appVersion = "1.0.0"
+        appVersion = "1.1.0"
         vendor = "Andre Ruff"
 
         val os = OperatingSystem.current()

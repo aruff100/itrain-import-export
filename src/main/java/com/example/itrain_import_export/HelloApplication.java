@@ -28,6 +28,12 @@ public class HelloApplication extends Application {
         // aufräumen, falls seither weder geändert noch gespeichert wurde.
         stage.setOnCloseRequest(event -> controller.onAppClosing());
         stage.show();
+
+        // Nur beim allerersten Start (solange noch keiner der drei Pfade
+        // gesetzt ist) - schlägt OS-abhängige Standardordner vor, siehe
+        // FirstRunDialog. Bewusst NACH stage.show(), damit der Dialog als
+        // modales Fenster über dem bereits sichtbaren Hauptfenster erscheint.
+        FirstRunDialog.showIfNeeded(stage);
     }
 
     /**
