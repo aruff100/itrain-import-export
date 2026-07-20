@@ -65,6 +65,11 @@ jobs:
     needs: build
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
+    # Der von Actions automatisch bereitgestellte GITHUB_TOKEN hat standardmäßig
+    # nur Lesezugriff - ohne diese Zeile schlägt das Erstellen des Releases mit
+    # "403 Resource not accessible by integration" fehl.
+    permissions:
+      contents: write
     steps:
       - name: Alle Installer-Artefakte herunterladen
         uses: actions/download-artifact@v4
