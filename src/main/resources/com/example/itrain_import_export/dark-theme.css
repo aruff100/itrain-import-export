@@ -1,0 +1,76 @@
+/*
+ * Einfaches dunkles Farbschema. Wird nur zusätzlich zum JavaFX-Standard-
+ * Stylesheet geladen (siehe ThemeManager), daher genügen ein paar zentrale
+ * Farb-Überschreibungen statt jeden Control-Typ einzeln zu gestalten.
+ */
+
+.root {
+    -fx-base: #2b2b2b;
+    -fx-background: #2b2b2b;
+    -fx-control-inner-background: #3c3f41;
+    -fx-control-inner-background-alt: #3c3f41;
+    -fx-text-fill: #e0e0e0;
+    -fx-accent: #3574c9;
+    -fx-focus-color: #3574c9;
+    -fx-faint-focus-color: #3574c922;
+}
+
+.label, .text, .check-box, .radio-button, .menu-item .label, .tab .tab-label {
+    -fx-text-fill: #e0e0e0;
+}
+
+.menu-bar {
+    -fx-background-color: #313335;
+}
+
+.menu-bar .label {
+    -fx-text-fill: #e0e0e0;
+}
+
+.tab-pane .tab-header-area .tab {
+    -fx-background-color: #3c3f41;
+}
+
+.tab-pane .tab-header-area .tab:selected {
+    -fx-background-color: #4a4d4f;
+}
+
+.table-view, .tree-view, .list-view {
+    -fx-background-color: #3c3f41;
+    -fx-control-inner-background: #3c3f41;
+}
+
+.table-view .column-header, .table-view .filler {
+    -fx-background-color: #313335;
+}
+
+.table-row-cell, .tree-cell, .list-cell {
+    -fx-background-color: #3c3f41;
+    -fx-text-fill: #e0e0e0;
+}
+
+.table-row-cell:selected, .tree-cell:selected, .list-cell:selected {
+    -fx-background-color: #3574c9;
+}
+
+.text-field, .text-area, .combo-box, .choice-box {
+    -fx-background-color: #45494a;
+    -fx-text-fill: #e0e0e0;
+}
+
+.button {
+    -fx-background-color: #45494a;
+    -fx-text-fill: #e0e0e0;
+}
+
+.button:hover {
+    -fx-background-color: #55595a;
+}
+
+.split-pane, .split-pane-divider {
+    -fx-background-color: #2b2b2b;
+}
+
+.dialog-pane {
+    -fx-background-color: #2b2b2b;
+}

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.itrain_import_export.HelloController">
+    <top>
+        <VBox>
+            <MenuBar>
+                <Menu fx:id="fileMenu" text="Datei">
+                    <MenuItem fx:id="openMenuItem" text="Öffnen..." onAction="#onOpenFile"/>
+                    <MenuItem fx:id="saveMenuItem" text="Speichern unter..." onAction="#onSaveAs"/>
+                </Menu>
+                <Menu fx:id="settingsMenu" text="Einstellungen">
+                    <MenuItem fx:id="pathsMenuItem" text="Pfade" onAction="#onSettingsPaths"/>
+                    <MenuItem fx:id="languageMenuItem" text="Sprache" onAction="#onSettingsLanguage"/>
+                    <MenuItem fx:id="viewMenuItem" text="Ansicht" onAction="#onSettingsView"/>
+                </Menu>
+            </MenuBar>
+            <Label fx:id="fileNameLabel" text="Keine Datei geladen.">
+                <VBox.margin>
+                    <Insets top="6" right="10" bottom="6" left="10"/>
+                </VBox.margin>
+            </Label>
+        </VBox>
+    </top>
+    <center>
+        <!-- Die Reiter je control-items-Kategorie werden zur Laufzeit vom
+             Controller erzeugt, sobald eine Datei geöffnet wurde. -->
+        <TabPane fx:id="tabPane"/>
+    </center>
+    <bottom>
+        <Label fx:id="statusLabel" text="" BorderPane.alignment="CENTER_LEFT">
+            <padding>
+                <Insets top="4" right="10" bottom="4" left="10"/>
+            </padding>
+        </Label>
+    </bottom>
+</BorderPane>
