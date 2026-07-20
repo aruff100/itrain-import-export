@@ -713,6 +713,57 @@ Plattformen. Bestätigt: beides gewünscht, Repository liegt bisher nur lokal vo
 - Geänderte/neue Dateien: `build.gradle.kts`, `.github/workflows/release.yml`
   (neu), `packaging/icons/app-icon.ico`/`.icns`/`app-icon-256.png` (neu).
 
+## Nachtrag 20.07.2026 - Ersteinrichtung mit OS-abhängigen Pfadvorschlägen
+
+Nutzerwunsch: solange keiner der drei Pfade (iTrain-Ordner/Export-Ordner/
+Backup-Ordner) gesetzt ist, soll das Programm beim Start danach fragen - mit
+einem plattformabhängigen Vorschlag (Windows: `<Benutzerverzeichnis>\iTrain\
+layouts`, Linux: `/home/<Name>/iTrain/layouts`, macOS: `/Users/<Name>/iTrain/
+layouts`, analog `\backup`/`\export` statt `\layouts`), und der Möglichkeit,
+fehlende Ordner anzulegen oder stattdessen über "Durchsuchen" einen anderen,
+bereits vorhandenen Ordner zu wählen. Die getroffene Wahl soll wie gewohnt
+dauerhaft gespeichert bleiben.
+
+- **Neue Klasse `FirstRunDialog.java`**: `showIfNeeded(Stage owner)` prüft,
+  ob `AppSettings.getTcdDirectory()/getExportDirectory()/getBackupDirectory()`
+  alle `null` sind (typischerweise nur beim allerersten Start) - ist auch nur
+  einer davon bereits gesetzt, erscheint der Dialog nicht mehr. Die
+  Standardpfade werden plattformunabhängig über
+  `System.getProperty("user.home")` ermittelt (liefert unter Windows
+  `C:\Users\<Name>` - das ist der reale Dateisystem-Pfad; "C:\Benutzer" ist
+  unter deutschem Windows nur der angezeigte, über eine Junction auf denselben
+  Ordner verweisende Name, technisch identisch) und per `Paths.get(home,
+  "iTrain", "layouts"/"export"/"backup")` zusammengesetzt - kein manuelles
+  Betriebssystem-Erkennen nötig, `user.home` liefert auf jeder Plattform
+  bereits den korrekten Pfad.
+- Für jeden der drei Pfade eine Zeile mit vorbelegtem Label (Vorschlag) +
+  "Durchsuchen"-Button (identisches Bedienmuster wie im bestehenden
+  Voreinstellungen-Reiter "Pfade", siehe `SettingsDialog.buildPathsContent`).
+  Zwei Buttons unten: "Fertig einrichten" und "Später einrichten" (Abbruch -
+  Pfade bleiben leer, der Dialog erscheint dann beim nächsten Start erneut).
+- Beim Bestätigen wird je Pfad geprüft, ob der Ordner (Vorschlag oder über
+  Durchsuchen gewählter Pfad) bereits existiert - wenn nicht, fragt ein
+  Bestätigungsdialog "Ordner anlegen?"; bei "Yes" wird er per
+  `Files.createDirectories` angelegt und übernommen, bei "No" bleibt dieser
+  eine Pfad ungesetzt (nachholbar über Voreinstellungen → Pfade). Jeder der
+  drei Pfade wird unabhängig von den anderen behandelt.
+- **`HelloApplication.start()`**: `FirstRunDialog.showIfNeeded(stage)` wird
+  direkt nach `stage.show()` aufgerufen, damit der (modale) Dialog über dem
+  bereits sichtbaren Hauptfenster erscheint.
+- Neue Übersetzungsschlüssel (alle 6 Sprachen, beide `translations.properties`,
+  weiterhin identisch, per `diff` geprüft): `firstRun.title`, `firstRun.intro`,
+  `firstRun.finish`, `firstRun.skip`, `firstRun.createFolderTitle`,
+  `firstRun.createFolderMessage`, `firstRun.createFolderFailed`.
+- Wie immer kein echter Compile-Check möglich (kein JDK 21 in der Sandbox) -
+  Klammer-/Klammern-Balance von `FirstRunDialog.java` und der geänderten
+  `HelloApplication.java` per Python-Skript geprüft (beide ausgeglichen), alle
+  42 neuen Übersetzungsschlüssel (7 Basis-Schlüssel × 6 Sprachen) auf
+  Vollständigkeit geprüft. **Empfehlung wie immer:** einmal `gradlew.bat run`
+  lokal ausführen und dafür testweise die drei Pfad-Einträge in den
+  Voreinstellungen leeren (oder den Registry-Zweig
+  `HKCU\Software\JavaSoft\Prefs\com\example\itrain_import_export` löschen) -
+  danach sollte der Ersteinrichtungs-Dialog beim nächsten Start erscheinen.
+
 ## Bekannte Einschränkungen
 
 - Die Sandbox hat kein JDK 21 (das Projekt verlangt es per Gradle-Toolchain)
