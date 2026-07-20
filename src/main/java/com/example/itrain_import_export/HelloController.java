@@ -2,11 +2,14 @@ package com.example.itrain_import_export;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.ToolBar;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
@@ -17,19 +20,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Verdrahtet das Hauptfenster: Datei öffnen/Speichern, Einstellungen
- * (Sprache, Pfade, Farbschema) sowie den Aufbau je eines Reiters pro
- * control-items-Kategorie (siehe {@link CategoryEditor}). Alle sichtbaren
- * Texte kommen aus {@link I18n}; bei Sprachwechsel wird die komplette
- * Oberfläche neu aufgebaut ({@link #applyLanguage()}).
+ * Verdrahtet das Hauptfenster: Menüzeile, Ribbon-Werkzeugleiste (Symbole für
+ * Öffnen/Speichern/Voreinstellungen), Dateiname-Zeile sowie den Aufbau je
+ * eines Reiters pro control-items-Kategorie (siehe {@link CategoryEditor}).
+ * Alle sichtbaren Texte kommen aus {@link I18n}; bei Sprachwechsel wird die
+ * komplette Oberfläche neu aufgebaut ({@link #applyLanguage()}).
  * <p>
  * Es werden immer alle bekannten Kategorien als Reiter angezeigt (siehe
  * {@link TcdDocument#TAB_DISPLAY_ORDER}), auch wenn die geladene Datei sie
@@ -60,41 +67,99 @@ public class HelloController {
     private MenuItem saveMenuItem;
 
     @FXML
+    private Menu editMenu;
+
+    @FXML
+    private MenuItem undoMenuItem;
+
+    @FXML
+    private MenuItem redoMenuItem;
+
+    @FXML
     private Menu settingsMenu;
 
     @FXML
-    private MenuItem pathsMenuItem;
+    private MenuItem preferencesMenuItem;
 
     @FXML
-    private MenuItem languageMenuItem;
+    private Menu helpMenu;
 
     @FXML
-    private MenuItem viewMenuItem;
+    private MenuItem helpMenuItem;
+
+    @FXML
+    private MenuItem updateMenuItem;
+
+    @FXML
+    private MenuItem aboutMenuItem;
+
+    @FXML
+    private ToolBar ribbonToolBar;
+
+    @FXML
+    private Button openToolButton;
+
+    @FXML
+    private Button saveToolButton;
+
+    @FXML
+    private Button undoToolButton;
+
+    @FXML
+    private Button redoToolButton;
+
+    @FXML
+    private Button preferencesToolButton;
 
     private final I18n i18n = I18n.getInstance();
     private TcdDocument document;
     private final Map<Tab, CategoryEditor> editorsByTab = new HashMap<>();
 
+    /** Maximale Anzahl gespeicherter Rückgängig-Schritte (siehe {@link #recordUndoSnapshot()}). */
+    private static final int MAX_UNDO_STEPS = 50;
+    /**
+     * Rückgängig-/Wiederholen-Verlauf: jeder Eintrag ist eine tiefe Kopie
+     * aller Kategorie-Knoten unter control-items zu einem bestimmten
+     * Zeitpunkt. {@link #recordUndoSnapshot()} wird von jedem
+     * {@link CategoryEditor} VOR jeder tatsächlichen Änderung aufgerufen
+     * (Konstruktor-Parameter {@code beforeChange}) und sichert damit den
+     * Stand unmittelbar davor.
+     */
+    private final Deque<List<XmlNode>> undoStack = new ArrayDeque<>();
+    private final Deque<List<XmlNode>> redoStack = new ArrayDeque<>();
+
     @FXML
     private void initialize() {
-        openMenuItem.setGraphic(loadIcon("icons/open-icon.png"));
-        saveMenuItem.setGraphic(loadIcon("icons/save-icon.png"));
+        openMenuItem.setGraphic(loadIcon("icons/open-icon.png", 16));
+        saveMenuItem.setGraphic(loadIcon("icons/save-icon.png", 16));
+
+        // Ribbon: dieselben Aktionen wie im Datei-/Einstellungen-Menü, nur
+        // als Symbol-Buttons für schnellen Zugriff. Aussagekräftig durch
+        // Icon + Tooltip statt zusätzlichem Text, damit die Leiste kompakt
+        // bleibt.
+        openToolButton.setGraphic(loadIcon("icons/open-icon.png", 22));
+        saveToolButton.setGraphic(loadIcon("icons/save-icon.png", 22));
+        undoToolButton.setGraphic(loadIcon("icons/undo-icon.png", 22));
+        redoToolButton.setGraphic(loadIcon("icons/redo-icon.png", 22));
+        preferencesToolButton.setGraphic(loadIcon("icons/settings-icon.png", 22));
+
         // Nur einmal registrieren (nicht in rebuildTabs(), das bei jedem
         // Dateiöffnen/Sprachwechsel erneut läuft) - sonst würde sich bei
         // jedem Aufruf ein weiterer Listener anhäufen.
         tabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> updateStatusForSelectedTab());
         i18n.addLanguageChangeListener(this::applyLanguage);
         applyLanguage();
+        updateUndoRedoState();
     }
 
-    private static ImageView loadIcon(String resourcePath) {
+    private static ImageView loadIcon(String resourcePath, int size) {
         try (InputStream in = HelloController.class.getResourceAsStream(resourcePath)) {
             if (in == null) {
                 return null;
             }
             ImageView view = new ImageView(new Image(in));
-            view.setFitWidth(16);
-            view.setFitHeight(16);
+            view.setFitWidth(size);
+            view.setFitHeight(size);
             view.setPreserveRatio(true);
             return view;
         } catch (Exception ex) {
@@ -106,10 +171,22 @@ public class HelloController {
         fileMenu.setText(i18n.t("menu.file"));
         openMenuItem.setText(i18n.t("menu.open"));
         saveMenuItem.setText(i18n.t("menu.saveAs"));
+        editMenu.setText(i18n.t("menu.edit"));
+        undoMenuItem.setText(i18n.t("menu.undo"));
+        redoMenuItem.setText(i18n.t("menu.redo"));
         settingsMenu.setText(i18n.t("menu.settingsMenu"));
-        pathsMenuItem.setText(i18n.t("menu.settingsPaths"));
-        languageMenuItem.setText(i18n.t("menu.settingsLanguage"));
-        viewMenuItem.setText(i18n.t("menu.settingsView"));
+        preferencesMenuItem.setText(i18n.t("menu.preferences"));
+        helpMenu.setText(i18n.t("menu.help"));
+        helpMenuItem.setText(i18n.t("menu.helpItem"));
+        updateMenuItem.setText(i18n.t("menu.updateItem"));
+        aboutMenuItem.setText(i18n.t("menu.aboutItem"));
+
+        openToolButton.setTooltip(new Tooltip(i18n.t("menu.open")));
+        saveToolButton.setTooltip(new Tooltip(i18n.t("menu.saveAs")));
+        undoToolButton.setTooltip(new Tooltip(i18n.t("menu.undo")));
+        redoToolButton.setTooltip(new Tooltip(i18n.t("menu.redo")));
+        preferencesToolButton.setTooltip(new Tooltip(i18n.t("menu.preferences")));
+
         if (document == null) {
             fileNameLabel.setText(i18n.t("status.noFileLoaded"));
             statusLabel.setText("");
@@ -145,9 +222,14 @@ public class HelloController {
             // inkl. ihres Backups unangetastet geöffnet.
             cleanupUnusedBackup(document);
             document = newDocument;
+            // Rückgängig-Verlauf gehört zum bisherigen Dokument - mit einer
+            // neuen Datei ergibt er keinen Sinn mehr.
+            undoStack.clear();
+            redoStack.clear();
             rebuildTabs();
             fileNameLabel.setText(file.getName());
             statusLabel.setText(i18n.t("status.fileLoaded", file.getName()));
+            updateUndoRedoState();
         } catch (Exception ex) {
             deleteQuietly(backup);
             showError(i18n.t("error.loadTitle"), ex);
@@ -302,26 +384,101 @@ public class HelloController {
     }
 
     @FXML
-    private void onSettingsPaths() {
+    private void onPreferences() {
         Stage stage = (Stage) tabPane.getScene().getWindow();
-        SettingsDialog.showPaths(stage);
-    }
-
-    @FXML
-    private void onSettingsLanguage() {
-        Stage stage = (Stage) tabPane.getScene().getWindow();
-        SettingsDialog.showLanguage(stage);
-    }
-
-    @FXML
-    private void onSettingsView() {
-        Stage stage = (Stage) tabPane.getScene().getWindow();
-        SettingsDialog.showView(stage);
-        // Spaltensichtbarkeit (Typ / Auswahlbox) wird erst beim Aufbau eines
-        // CategoryEditor gelesen - nach Schließen des Dialogs alle Reiter neu
-        // aufbauen, damit eine Änderung sofort sichtbar wird (wie beim
-        // Sprachwechsel).
+        SettingsDialog.showPreferences(stage);
+        // Spaltensichtbarkeit, "Daten ändern"-Bereich usw. werden erst beim
+        // Aufbau eines CategoryEditor gelesen - nach Schließen des Dialogs
+        // alle Reiter neu aufbauen, damit Änderungen sofort sichtbar werden
+        // (wie beim Sprachwechsel).
         rebuildTabs();
+    }
+
+    /**
+     * Wird von jedem {@link CategoryEditor} VOR jeder tatsächlichen
+     * inhaltlichen Änderung aufgerufen (Konstruktor-Parameter
+     * {@code beforeChange}) - sichert den aktuellen Stand aller
+     * Kategorie-Knoten für "Rückgängig", bevor die Änderung passiert. Ein
+     * neuer Änderungs-Vorgang macht den bisherigen Wiederholen-Verlauf
+     * ungültig, daher wird {@code redoStack} geleert.
+     */
+    private void recordUndoSnapshot() {
+        if (document == null) {
+            return;
+        }
+        undoStack.push(snapshotCurrentState());
+        while (undoStack.size() > MAX_UNDO_STEPS) {
+            undoStack.removeLast();
+        }
+        redoStack.clear();
+        updateUndoRedoState();
+    }
+
+    /** Tiefe Kopie aller aktuellen Kategorie-Knoten unter control-items. */
+    private List<XmlNode> snapshotCurrentState() {
+        XmlNode controlItems = document.getRoot().findChild("control-items");
+        List<XmlNode> snapshot = new ArrayList<>();
+        for (XmlNode category : controlItems.getChildren()) {
+            snapshot.add(category.deepCopy());
+        }
+        return snapshot;
+    }
+
+    /**
+     * Ersetzt den Inhalt von control-items durch eine (erneut tief kopierte)
+     * Momentaufnahme - so bleiben die im Undo-/Redo-Stack gespeicherten
+     * Zustände von der live bearbeiteten Baumstruktur unabhängig. Da alle
+     * Reiter über {@code CategoryEditor} an die bisherigen XmlNode-Objekte
+     * gebunden sind, müssen sie danach komplett neu aufgebaut werden.
+     */
+    private void restoreState(List<XmlNode> snapshot) {
+        XmlNode controlItems = document.getRoot().findChild("control-items");
+        controlItems.getChildren().clear();
+        for (XmlNode category : snapshot) {
+            controlItems.getChildren().add(category.deepCopy());
+        }
+        document.markDirty();
+        rebuildTabs();
+        updateUndoRedoState();
+    }
+
+    @FXML
+    private void onUndo() {
+        if (document == null || undoStack.isEmpty()) {
+            return;
+        }
+        redoStack.push(snapshotCurrentState());
+        restoreState(undoStack.pop());
+    }
+
+    @FXML
+    private void onRedo() {
+        if (document == null || redoStack.isEmpty()) {
+            return;
+        }
+        undoStack.push(snapshotCurrentState());
+        restoreState(redoStack.pop());
+    }
+
+    private void updateUndoRedoState() {
+        boolean canUndo = !undoStack.isEmpty();
+        boolean canRedo = !redoStack.isEmpty();
+        undoMenuItem.setDisable(!canUndo);
+        redoMenuItem.setDisable(!canRedo);
+        undoToolButton.setDisable(!canUndo);
+        redoToolButton.setDisable(!canRedo);
+    }
+
+    @FXML
+    private void onHelp() {
+        Stage stage = (Stage) tabPane.getScene().getWindow();
+        HelpDialog.show(stage);
+    }
+
+    @FXML
+    private void onAbout() {
+        Stage stage = (Stage) tabPane.getScene().getWindow();
+        AboutDialog.show(stage);
     }
 
     private void rebuildTabs() {
@@ -365,10 +522,16 @@ public class HelloController {
     }
 
     private void addCategoryTab(XmlNode controlItems, String categoryName) {
-        CategoryEditor editor = new CategoryEditor(categoryName, controlItems, document::markDirty);
+        CategoryEditor editor = new CategoryEditor(categoryName, controlItems, document::markDirty,
+                this::rebuildTabs, this::recordUndoSnapshot);
         Tab tab = editor.createTab();
         editorsByTab.put(tab, editor);
         editor.entryCountProperty().addListener((obs, oldV, newV) -> {
+            if (tabPane.getSelectionModel().getSelectedItem() == tab) {
+                updateStatusForSelectedTab();
+            }
+        });
+        editor.selectedCountProperty().addListener((obs, oldV, newV) -> {
             if (tabPane.getSelectionModel().getSelectedItem() == tab) {
                 updateStatusForSelectedTab();
             }
@@ -380,7 +543,9 @@ public class HelloController {
         Tab selected = tabPane.getSelectionModel().getSelectedItem();
         CategoryEditor editor = editorsByTab.get(selected);
         if (editor != null) {
-            statusLabel.setText(i18n.t("status.entryCount", editor.getDisplayName(), editor.entryCountProperty().get()));
+            String entryCountText = i18n.t("status.entryCount", editor.getDisplayName(), editor.entryCountProperty().get());
+            String selectedCountText = i18n.t("status.selectedCount", editor.selectedCountProperty().get());
+            statusLabel.setText(entryCountText + "   " + selectedCountText);
         } else {
             statusLabel.setText("");
         }
