@@ -145,6 +145,16 @@ public final class I18n {
         languageChangeListeners.add(listener);
     }
 
+    /**
+     * Meldet einen zuvor über {@link #addLanguageChangeListener} registrierten
+     * Listener wieder ab - z.B. wenn ein einzelner, kurzlebiger Dialog (wie
+     * {@link FirstRunDialog}) geschlossen wird und nicht dauerhaft auf
+     * Sprachwechsel reagieren soll.
+     */
+    public void removeLanguageChangeListener(Runnable listener) {
+        languageChangeListeners.remove(listener);
+    }
+
     public String getNativeName(String code) {
         return NATIVE_NAMES.getOrDefault(code, code);
     }

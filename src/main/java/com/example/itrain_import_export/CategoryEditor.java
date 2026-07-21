@@ -697,6 +697,19 @@ public class CategoryEditor {
         }
     }
 
+    /**
+     * Öffentlicher Zugriff auf den CSV-Import von außerhalb dieses Editors -
+     * genutzt vom Menüpunkt "Export Dateien" in {@link HelloController}, der
+     * so denselben Import auslösen kann, ohne dass zuvor zu diesem
+     * bestimmten Kategorie-Reiter gewechselt werden muss (die CSV-Zeilen
+     * sortieren sich beim Import ohnehin anhand ihrer eigenen
+     * Kategorie-Spalte selbst ein, unabhängig davon, welcher Editor den
+     * Import ausgelöst hat).
+     */
+    public void triggerImport() {
+        onImport();
+    }
+
     private void onImport() {
         FileChooser chooser = new FileChooser();
         chooser.setTitle(i18n.t("editor.import"));

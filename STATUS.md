@@ -764,6 +764,220 @@ dauerhaft gespeichert bleiben.
   `HKCU\Software\JavaSoft\Prefs\com\example\itrain_import_export` löschen) -
   danach sollte der Ersteinrichtungs-Dialog beim nächsten Start erscheinen.
 
+## Nachtrag 20.07.2026 - Sprachauswahl bei Ersteinrichtung + Menü "Zuletzt verwendet..."
+
+### Ersteinrichtung: jetzt auch mit Sprachauswahl
+
+Nutzerwunsch: der `FirstRunDialog` (siehe vorheriger Nachtrag) soll zusätzlich
+eine Sprachauswahl anbieten (Flagge, wie im Voreinstellungen-Reiter
+"Sprache"), nur beim ersten Start; wählt der Nutzer dort eine andere Sprache,
+soll der Dialog selbst sofort in dieser Sprache erscheinen.
+
+- Die bisher in `SettingsDialog` private Zellen-Darstellung für die
+  Sprachauswahl (Flagge + nativer Name) wurde in eine eigene, gemeinsam
+  genutzte Klasse `LanguageListCell.java` ausgelagert - sowohl
+  `SettingsDialog` als auch `FirstRunDialog` verwenden jetzt dieselbe Klasse,
+  keine Code-Duplizierung.
+- `FirstRunDialog` bekommt eine zusätzliche erste Zeile mit `ComboBox`
+  (Sprachcode → `I18n.setLanguage(...)`). Da `I18n.setLanguage` einen
+  globalen Sprachwechsel-Mechanismus auslöst (an den u.a. das Hauptfenster
+  gebunden ist), der `FirstRunDialog` selbst aber kein Teil davon ist, meldet
+  er beim Öffnen einen eigenen Listener an (`i18n.addLanguageChangeListener`),
+  der Titel, alle Beschriftungen und Button-Texte des Dialogs neu übersetzt
+  - und meldet ihn beim Schließen wieder ab (`dialog.setOnHidden(...)`).
+  Dafür wurde `I18n` um `removeLanguageChangeListener(Runnable)` ergänzt
+  (gab es bisher nicht, nur `add...`).
+- Die Pfad-Vorschläge selbst (OS-abhängig) werden dabei NICHT neu berechnet -
+  nur die Beschriftungen/Buttons sind sprachabhängig, die vorgeschlagenen
+  Ordnerpfade sind es naturgemäß nicht.
+- Geänderte/neue Dateien: `LanguageListCell.java` (neu), `SettingsDialog.java`
+  (private `LanguageCell` entfernt, nutzt jetzt `LanguageListCell`;
+  ungenutzte Imports `Image`/`ImageView`/`InputStream` entfernt),
+  `FirstRunDialog.java`, `I18n.java` (neue Methode
+  `removeLanguageChangeListener`).
+
+### Menü "Zuletzt verwendet..." (Trennlinie unter Öffnen/Speichern)
+
+Nutzerwunsch: unter "Öffnen"/"Speichern unter" im Datei-Menü eine Trennlinie,
+darunter ein Untermenü "Zuletzt verwendet...", das die letzten 5 geöffneten
+Dateien merkt (6. Datei verdrängt die älteste), darin zusätzlich - nach einer
+weiteren Trennlinie - "Backup laden..." (öffnet direkt im Backup-Ordner) und -
+nach noch einer Trennlinie - "Export Dateien" (öffnet direkt im
+Export-Ordner); beide gewählten Dateien sollen sich exakt wie normal
+geöffnete Dateien verhalten (inkl. "Speichern unter...").
+
+- **`AppSettings`**: neue Methoden `getRecentFiles()`/`addRecentFile(path)`/
+  `removeRecentFile(path)` - Liste (max. 5, neuester zuerst, kein Duplikat)
+  als ein einzelner, zeilenweise (`\n`-getrennter) Preferences-Wert abgelegt
+  (die Preferences-API kennt keine echten Listen).
+- **`hello-view.fxml`**: neue `SeparatorMenuItem` + leeres `Menu
+  fx:id="recentFilesMenu"` nach `saveMenuItem` - der komplette Inhalt wird
+  zur Laufzeit von `HelloController.refreshRecentFilesMenu()` aufgebaut
+  (dynamische Liste, lässt sich nicht statisch in FXML deklarieren).
+- **`HelloController`**: `onOpenFile()` wurde auf eine gemeinsame Methode
+  `openFile(File file, boolean addToRecent)` umgestellt (bisherige
+  Lade-Logik unverändert, nur extrahiert), die jetzt von vier Stellen aus
+  aufgerufen wird: `onOpenFile()` (Menü "Öffnen...", `addToRecent=true`),
+  `openRecentFile(path)` (Klick auf einen Eintrag in "Zuletzt verwendet...",
+  `addToRecent=true` - rückt den Eintrag wieder nach vorne), `onLoadBackup()`
+  (neuer Menüpunkt, `FileChooser` startet im Backup-Ordner,
+  `addToRecent=false` - Backup-Dateinamen sind wenig aussagekräftig und
+  würden die Liste nur zumüllen) und `onOpenExportFiles()` (neuer Menüpunkt,
+  `FileChooser` startet im Export-Ordner, ebenfalls `addToRecent=false`).
+  `refreshRecentFilesMenu()` baut das Untermenü komplett neu auf (Liste der
+  zuletzt verwendeten Dateien oder ein deaktivierter Platzhalter-Eintrag
+  "(noch keine Datei geöffnet)", Trennlinie, "Backup laden...", Trennlinie,
+  "Export Dateien") - wird bei Sprachwechsel sowie nach jeder Änderung der
+  Liste neu aufgerufen. Existiert eine per "Zuletzt verwendet..." gewählte
+  Datei nicht mehr (verschoben/gelöscht), wird gewarnt und der Eintrag
+  automatisch aus der Liste entfernt (`openRecentFile`).
+- **Wichtiger Bugfix für "Backup laden..."**: Backup-Dateien heißen immer
+  `<original>.<N>.bak` (z.B. `layout.tcdz.3.bak`), unabhängig davon, ob das
+  Original ein `.tcd` (reines XML) oder `.tcdz` (ZIP) war. Die bisherige
+  `TcdDocument.isZipFile()` hat rein anhand der Dateiendung entschieden
+  (`.tcdz` → ZIP) - eine `.bak`-Datei hätte also IMMER als reines XML
+  behandelt werden, was bei einem `.tcdz`-Original zum Absturz beim Parsen
+  geführt hätte (Versuch, ZIP-Binärdaten als XML zu lesen). Behoben: bei
+  bekannten Endungen (`.tcd`/`.tcdz`) bleibt die schnelle Endungs-Prüfung,
+  bei jeder anderen Endung (insbesondere `.bak`) werden stattdessen die
+  ersten beiden Bytes der Datei auf die ZIP-Signatur "PK" geprüft
+  (`looksLikeZip`). Per Python-Simulation gegen vier Fälle verifiziert: XML
+  mit `.bak`-Endung, ZIP mit `.bak`-Endung, normales `.tcd`, normales
+  `.tcdz` - alle vier korrekt erkannt.
+- Neue Übersetzungsschlüssel (alle 6 Sprachen, beide `translations.properties`,
+  weiterhin identisch): `menu.recentFiles`, `menu.recentFilesEmpty`,
+  `menu.loadBackup`, `menu.exportFiles`, `error.recentFileMissing`.
+- Geänderte/neue Dateien: `AppSettings.java`, `hello-view.fxml`,
+  `HelloController.java`, `TcdDocument.java`, beide `translations.properties`.
+
+### Verifikation
+
+Wie immer kein echter Compile-Check möglich (kein JDK 21 in der Sandbox).
+Diesmal zusätzlich zur reinen Klammer-Zählung (die bei `TcdDocument.java`
+einen falsch-positiven Treffer lieferte, siehe unten) ein Stack-basierter
+Python-Parser verwendet, der Kommentare/String-/Zeichen-Literale korrekt
+überspringt statt sie nur grob per Regex zu entfernen - damit alle
+geänderten Dateien nachweislich ausgeglichen: `FirstRunDialog.java`,
+`SettingsDialog.java`, `LanguageListCell.java`, `I18n.java`,
+`AppSettings.java`, `TcdDocument.java`, `HelloController.java`,
+`HelloApplication.java`. `hello-view.fxml` zusätzlich per
+`xml.etree.ElementTree` auf Wohlgeformtheit geprüft. Alle 30 neuen
+Übersetzungsschlüssel (5 Basis-Schlüssel × 6 Sprachen) auf Vollständigkeit
+geprüft, `diff` zwischen beiden `translations.properties`-Kopien weiterhin
+identisch. Die neue ZIP-Erkennung (`isZipFile`/`looksLikeZip`) wurde separat
+gegen vier synthetische Testdateien simuliert (siehe oben).
+
+**Empfehlung wie immer:** einmal `gradlew.bat run` lokal ausführen und
+gezielt testen: Sprachwechsel innerhalb des Ersteinrichtungs-Dialogs (Texte
+sollten sich sofort ändern), "Zuletzt verwendet..." nach mehreren
+Dateiöffnungen (Liste, Reihenfolge, Kappung bei 6 Dateien), "Backup laden..."
+mit einer echten `.bak`-Datei eines zuvor als `.tcdz` gespeicherten Layouts
+(genau der Fall, den der ZIP-Erkennungs-Fix behebt), sowie "Export Dateien"
+mit einer Datei aus dem Export-Ordner.
+
+## Nachtrag 20.07.2026 - Bugfix "Export Dateien": CSV statt normalem Öffnen
+
+Nutzer meldete: beim Laden einer Datei über "Zuletzt verwendet..." → "Export
+Dateien" erschien `[Fatal Error] locomotives-export.csv:1:1: Content ist
+nicht zulässig in Prolog.` - ein klassischer XML-Parser-Fehler beim Versuch,
+eine Nicht-XML-Datei als XML zu lesen.
+
+Ursache: Fehleinschätzung bei der vorherigen Umsetzung. Der Export-Ordner
+enthält KEINE vollständigen `.tcd`/`.tcdz`-Dateien, sondern CSV-Exporte
+einzelner Einträge (siehe "Markierte exportieren" je Kategorie-Reiter,
+`CsvUtil`) - "Export Dateien" hatte ich fälschlich wie "Backup laden..." als
+normales Öffnen behandelt (`TcdDocument.load`, das reines XML/ZIP erwartet).
+Eine CSV-Datei lässt sich so grundsätzlich nicht laden, sie muss in ein
+bereits geöffnetes Dokument IMPORTIERT werden - genau das leistet bereits der
+Button "Importieren" je Kategorie-Reiter (inkl. Start im Export-Ordner).
+
+Behoben: `HelloController.onOpenExportFiles()` löst jetzt stattdessen genau
+diesen bereits vorhandenen, korrekt funktionierenden CSV-Import aus - ohne
+eigene Datei-Dialog-Logik. `CategoryEditor` bekommt dafür eine neue
+öffentliche Methode `triggerImport()` (dünner Wrapper um das bisher private
+`onImport()`), damit der Import auch ausgelöst werden kann, ohne zuvor zu
+einem bestimmten Reiter zu wechseln - jede CSV-Zeile sortiert sich beim
+Import ohnehin anhand ihrer eigenen Kategorie-Spalte selbst ein
+(`ensureCategoryNodeGeneric`), unabhängig davon, welcher Editor den Import
+ausgelöst hat. Ist noch kein Dokument geöffnet, erscheint jetzt stattdessen
+ein Hinweis, zuerst eine Datei zu öffnen (bestehender Schlüssel
+`error.pleaseOpenFirst`, keine neue Übersetzung nötig).
+
+"Backup laden..." ist von diesem Fix nicht betroffen und bleibt unverändert
+(Backup-Dateien SIND vollständige .tcd/.tcdz-Kopien, nur mit `.bak`-Endung -
+dafür wurde bereits im vorherigen Nachtrag die ZIP-Erkennung robuster
+gemacht).
+
+Geänderte Dateien: `HelloController.java`, `CategoryEditor.java`. Klammer-
+Balance beider Dateien per Stack-basiertem Python-Parser geprüft (0/0,
+ausgeglichen).
+
+## Nachtrag 20.07.2026 - Menü-Struktur korrigiert: "Backup laden.../Export Dateien" nicht mehr verschachtelt
+
+Nutzerwunsch: "Zuletzt verwendet..." soll ein eigenständiges Untermenü sein
+(nur die Liste der zuletzt geöffneten Dateien), "Backup laden..." und
+"Export Dateien" sollen stattdessen eigene, gleichrangige Menüpunkte direkt
+im Datei-Menü sein statt darin verschachtelt zu sein.
+
+Neue Reihenfolge im Datei-Menü: Öffnen..., Speichern unter..., Trennlinie,
+Zuletzt verwendet... (Untermenü, nur Dateiliste/Platzhalter), Backup laden...,
+Export Dateien.
+
+- **`hello-view.fxml`**: `loadBackupMenuItem`/`exportFilesMenuItem` als
+  eigene `MenuItem`s direkt im `fileMenu` ergänzt (mit `onAction`), nicht
+  mehr Kinder von `recentFilesMenu`.
+- **`HelloController.refreshRecentFilesMenu()`**: baut jetzt nur noch die
+  Dateiliste (oder den Platzhalter "(noch keine Datei geöffnet)") auf - der
+  bisherige Code, der zusätzlich Trennlinien + "Backup laden..." +
+  "Export Dateien" programmatisch anhängte, wurde entfernt (diese beiden
+  Menüpunkte übersetzen sich jetzt regulär in `applyLanguage()`, wie alle
+  anderen statischen Menüpunkte auch).
+- Keine neuen Übersetzungsschlüssel nötig (dieselben wie zuvor,
+  `menu.loadBackup`/`menu.exportFiles`, jetzt nur an anderer Stelle im Menü
+  verwendet).
+- Geänderte Dateien: `hello-view.fxml`, `HelloController.java`. Klammer-
+  Balance geprüft (0/0), FXML auf Wohlgeformtheit geprüft.
+
+## Nachtrag 20.07.2026 - Hilfetext erweitert + Version auf 1.11 gesetzt
+
+Nutzerwunsch: in der Hilfe-Box die neuen Funktionen unter "Datei" erklären,
+die Einstellungen genauer erklären, die Statusleiste erklären; im
+"Über"-Dialog die Version auf 1.11 setzen und "-SNAPSHOT" entfernen.
+
+- **`help.fileMenuText`** (alle 6 Sprachen) um Erklärungen zu "Zuletzt
+  verwendet..." (merkt die letzten 5 geöffneten Dateien), "Backup laden..."
+  (Datei-Dialog startet im Backup-Ordner) und "Export Dateien" (löst den
+  CSV-Import aus dem Export-Ordner aus, entspricht dem Button "Importieren")
+  ergänzt.
+- **`help.settingsMenuText`** (alle 6 Sprachen) deutlich ausführlicher: statt
+  der bisherigen Kurzfassung jetzt je Reiter im Detail - Pfade (Zweck jedes
+  der drei Pfade einzeln erklärt, inkl. Backup-Rotation "bis zu 10
+  Generationen" und automatisches Aufräumen ungenutzter Backups, sowie
+  Hinweis auf die einmalige Abfrage beim allerersten Programmstart), Sprache
+  (6 Sprachen, wirkt sofort), Ansicht (Farbschema sowie die drei
+  Sichtbarkeits-Kontrollkästchen Typ-Spalte/Auswahlbox-Spalte/"Daten
+  ändern"-Bereich, alle standardmäßig aus).
+- **Neuer Abschnitt "Statusleiste"** (`help.statusBarTitle`/`help.statusBarText`,
+  alle 6 Sprachen, neu in `HelpDialog.show()` eingefügt nach dem Abschnitt
+  zur "~"-Umbenennung): erklärt die beiden Angaben unten im Fenster
+  (Anzahl gelesener Einträge je Kategorie, Anzahl aktuell markierter
+  Einträge) inkl. Beispieltext, passend zum tatsächlichen Format der
+  Schlüssel `status.entryCount`/`status.selectedCount`.
+- **Version auf 1.11**: `build.gradle.kts` - `version = "1.11"` (vorher
+  `"1.0-SNAPSHOT"`), `jpackage { appVersion = "1.11" }` (vorher `"1.1.0"`,
+  jetzt bewusst identisch zur Projekt-Version). `AppInfo.FALLBACK_VERSION`
+  (nur relevant, falls die generierte `build-info.properties` beim Start
+  ausnahmsweise fehlen sollte) ebenfalls von `"1.0-SNAPSHOT"` auf `"1.11"`
+  angepasst. Der Über-Dialog zeigt die Version weiterhin zusammen mit der
+  Build-Zeitstempel-Nummer an (z.B. "1.11 (Build 20260720-1650)") - nur der
+  "-SNAPSHOT"-Zusatz wurde entfernt, nicht die Build-Nummer selbst (die
+  wurde nicht als "Snapshot o.ä." verstanden, sondern als nützliche
+  Zusatzinfo beibehalten).
+- Geänderte Dateien: `translations.properties` (beide Kopien, weiterhin
+  identisch), `HelpDialog.java`, `build.gradle.kts`, `AppInfo.java`.
+  Klammer-Balance aller geänderten Java-Dateien geprüft (0/0), alle neuen
+  Übersetzungsschlüssel auf Vollständigkeit geprüft.
+
 ## Bekannte Einschränkungen
 
 - Die Sandbox hat kein JDK 21 (das Projekt verlangt es per Gradle-Toolchain)

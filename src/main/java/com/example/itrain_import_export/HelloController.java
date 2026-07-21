@@ -66,6 +66,22 @@ public class HelloController {
     @FXML
     private MenuItem saveMenuItem;
 
+    /**
+     * Eigenständiges Untermenü "Zuletzt verwendet..." - Inhalt (bis zu 5
+     * zuletzt geöffnete Dateien, oder ein deaktivierter Platzhalter) wird
+     * zur Laufzeit aufgebaut, siehe {@link #refreshRecentFilesMenu()}.
+     * "Backup laden..." und "Export Dateien" sind eigene, gleichrangige
+     * Menüpunkte direkt danach (nicht mehr darin verschachtelt).
+     */
+    @FXML
+    private Menu recentFilesMenu;
+
+    @FXML
+    private MenuItem loadBackupMenuItem;
+
+    @FXML
+    private MenuItem exportFilesMenuItem;
+
     @FXML
     private Menu editMenu;
 
@@ -171,6 +187,10 @@ public class HelloController {
         fileMenu.setText(i18n.t("menu.file"));
         openMenuItem.setText(i18n.t("menu.open"));
         saveMenuItem.setText(i18n.t("menu.saveAs"));
+        recentFilesMenu.setText(i18n.t("menu.recentFiles"));
+        loadBackupMenuItem.setText(i18n.t("menu.loadBackup"));
+        exportFilesMenuItem.setText(i18n.t("menu.exportFiles"));
+        refreshRecentFilesMenu();
         editMenu.setText(i18n.t("menu.edit"));
         undoMenuItem.setText(i18n.t("menu.undo"));
         redoMenuItem.setText(i18n.t("menu.redo"));
@@ -210,7 +230,97 @@ public class HelloController {
         if (file == null) {
             return;
         }
+        openFile(file, true);
+    }
 
+    /**
+     * Menüpunkt "Backup laden...": öffnet einen normalen Datei-Dialog, der
+     * aber im Backup-Ordner (Einstellungen → Pfade) startet - Backup-Dateien
+     * heißen {@code <original>.<N>.bak} und tragen
+     * deshalb nie die Endung .tcd/.tcdz, tauchen im normalen
+     * "Öffnen"-Dialog also nicht auf. Die gewählte Datei wird danach ganz
+     * normal in die Ansicht geladen (siehe {@link #openFile}); ob es sich
+     * dabei um ein ursprüngliches .tcd oder .tcdz handelte, wird beim Laden
+     * anhand der Datei selbst erkannt (siehe {@link TcdDocument}), nicht
+     * anhand der .bak-Endung.
+     */
+    @FXML
+    private void onLoadBackup() {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle(i18n.t("menu.loadBackup"));
+        chooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Backup (*.bak)", "*.bak"),
+                new FileChooser.ExtensionFilter("*.*", "*.*"));
+        String backupDir = AppSettings.getInstance().getBackupDirectory();
+        if (backupDir != null && new File(backupDir).isDirectory()) {
+            chooser.setInitialDirectory(new File(backupDir));
+        }
+
+        Stage stage = (Stage) tabPane.getScene().getWindow();
+        File file = chooser.showOpenDialog(stage);
+        if (file == null) {
+            return;
+        }
+        // Bewusst NICHT zu "Zuletzt verwendet" hinzufügen - Backup-Dateinamen
+        // sind wenig aussagekräftig und würden die Liste nur unnötig
+        // zumüllen; für Backups gibt es ja bereits diesen eigenen Eintrag.
+        openFile(file, false);
+    }
+
+    /**
+     * Menüpunkt "Export Dateien": der Export-Ordner enthält
+     * KEINE vollständigen .tcd/.tcdz-Dateien, sondern CSV-Exporte einzelner
+     * Einträge (siehe "Markierte exportieren"/"Importieren" je Kategorie-
+     * Reiter) - eine CSV-Datei lässt sich nicht wie ein normales Dokument
+     * laden (kein XML), sondern muss in ein bereits geöffnetes Dokument
+     * IMPORTIERT werden. Dieser Menüpunkt ist deshalb nur eine schnellere
+     * Zugriffsmöglichkeit auf genau denselben Import, den es je Reiter über
+     * den Button "Importieren" schon gibt (inkl. Start im Export-Ordner) -
+     * ohne dass man erst zu einem bestimmten Reiter wechseln muss, da jede
+     * CSV-Zeile ohnehin anhand ihrer eigenen Kategorie-Spalte einsortiert
+     * wird (siehe {@link CategoryEditor#triggerImport()}).
+     */
+    @FXML
+    private void onOpenExportFiles() {
+        if (document == null) {
+            new Alert(Alert.AlertType.INFORMATION, i18n.t("error.pleaseOpenFirst")).showAndWait();
+            return;
+        }
+        CategoryEditor editor = editorsByTab.get(tabPane.getSelectionModel().getSelectedItem());
+        if (editor == null) {
+            editor = editorsByTab.values().stream().findFirst().orElse(null);
+        }
+        if (editor != null) {
+            editor.triggerImport();
+        }
+    }
+
+    /**
+     * Wird von einem Eintrag in "Zuletzt verwendet..." aufgerufen. Existiert
+     * die Datei nicht mehr (verschoben/gelöscht), wird gewarnt und der
+     * Eintrag aus der Liste entfernt, statt einen unklaren Ladefehler zu
+     * zeigen.
+     */
+    private void openRecentFile(String path) {
+        File file = new File(path);
+        if (!file.isFile()) {
+            new Alert(Alert.AlertType.WARNING, i18n.t("error.recentFileMissing", path)).showAndWait();
+            AppSettings.getInstance().removeRecentFile(path);
+            refreshRecentFilesMenu();
+            return;
+        }
+        openFile(file, true);
+    }
+
+    /**
+     * Gemeinsame Lade-Logik für "Öffnen...", "Zuletzt verwendet...",
+     * "Backup laden..." und "Export Dateien" - lädt {@code file} exakt
+     * gleich in die Ansicht, unabhängig davon, über welchen Menüpunkt die
+     * Datei gewählt wurde. {@code addToRecent} steuert, ob die Datei danach
+     * in "Zuletzt verwendet..." aufgenommen wird (bei Backup/Export-Dateien
+     * bewusst nicht, siehe {@link #onLoadBackup()}/{@link #onOpenExportFiles()}).
+     */
+    private void openFile(File file, boolean addToRecent) {
         File backup = createBackup(file);
 
         try {
@@ -230,9 +340,40 @@ public class HelloController {
             fileNameLabel.setText(file.getName());
             statusLabel.setText(i18n.t("status.fileLoaded", file.getName()));
             updateUndoRedoState();
+            if (addToRecent) {
+                AppSettings.getInstance().addRecentFile(file.getAbsolutePath());
+                refreshRecentFilesMenu();
+            }
         } catch (Exception ex) {
             deleteQuietly(backup);
             showError(i18n.t("error.loadTitle"), ex);
+        }
+    }
+
+    /**
+     * Baut den Inhalt des eigenständigen Untermenüs "Zuletzt verwendet..."
+     * komplett neu auf: bis zu 5 zuletzt geöffnete Dateien, oder ein
+     * deaktivierter Platzhalter-Eintrag, falls die Liste leer ist. "Backup
+     * laden..." und "Export Dateien" sind eigene Menüpunkte direkt im
+     * Datei-Menü (siehe {@code loadBackupMenuItem}/{@code exportFilesMenuItem})
+     * und nicht mehr Teil dieses Untermenüs. Wird bei Sprachwechsel (für die
+     * übersetzten Texte) sowie nach jeder Änderung der Liste (neue/entfernte
+     * Datei) neu aufgerufen.
+     */
+    private void refreshRecentFilesMenu() {
+        recentFilesMenu.getItems().clear();
+
+        List<String> recentFiles = AppSettings.getInstance().getRecentFiles();
+        if (recentFiles.isEmpty()) {
+            MenuItem placeholder = new MenuItem(i18n.t("menu.recentFilesEmpty"));
+            placeholder.setDisable(true);
+            recentFilesMenu.getItems().add(placeholder);
+        } else {
+            for (String path : recentFiles) {
+                MenuItem item = new MenuItem(path);
+                item.setOnAction(e -> openRecentFile(path));
+                recentFilesMenu.getItems().add(item);
+            }
         }
     }
 
