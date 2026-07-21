@@ -11,15 +11,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
-import java.io.InputStream;
 
 /**
  * Ein einziges "Voreinstellungen"-Fenster mit drei Reitern - Pfade, Sprache,
@@ -124,8 +121,8 @@ public final class SettingsDialog {
     private static javafx.scene.Node buildLanguageContent(I18n i18n) {
         ComboBox<String> languageCombo = new ComboBox<>(FXCollections.observableArrayList(I18n.LANGUAGE_CODES));
         languageCombo.setValue(i18n.getCurrentLanguage());
-        languageCombo.setCellFactory(list -> new LanguageCell());
-        languageCombo.setButtonCell(new LanguageCell());
+        languageCombo.setCellFactory(list -> new LanguageListCell());
+        languageCombo.setButtonCell(new LanguageListCell());
         languageCombo.valueProperty().addListener((obs, oldCode, newCode) -> {
             if (newCode != null) {
                 i18n.setLanguage(newCode);
@@ -206,35 +203,5 @@ public final class SettingsDialog {
 
     private static String pathOrPlaceholder(String path, I18n i18n) {
         return (path == null || path.isBlank()) ? i18n.t("settings.notSet") : path;
-    }
-
-    /** Zeigt Flagge + nativen Sprachnamen in der ComboBox/Dropdown-Liste. */
-    private static class LanguageCell extends ListCell<String> {
-        @Override
-        protected void updateItem(String code, boolean empty) {
-            super.updateItem(code, empty);
-            if (empty || code == null) {
-                setText(null);
-                setGraphic(null);
-                return;
-            }
-            I18n i18n = I18n.getInstance();
-            setText(i18n.getNativeName(code));
-
-            String flagPath = i18n.getFlagResourcePath(code);
-            try (InputStream flagStream = I18n.class.getResourceAsStream(flagPath)) {
-                if (flagStream != null) {
-                    ImageView flagView = new ImageView(new Image(flagStream));
-                    flagView.setFitWidth(24);
-                    flagView.setFitHeight(16);
-                    flagView.setPreserveRatio(false);
-                    setGraphic(flagView);
-                } else {
-                    setGraphic(null);
-                }
-            } catch (Exception ex) {
-                setGraphic(null);
-            }
-        }
     }
 }

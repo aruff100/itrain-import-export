@@ -1,5 +1,8 @@
 package com.example.itrain_import_export;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.prefs.Preferences;
 
 /**
@@ -19,6 +22,10 @@ public final class AppSettings {
     private static final String KEY_SHOW_TYPE_COLUMN = "showTypeColumn";
     private static final String KEY_SHOW_SELECTION_CHECKBOX = "showSelectionCheckbox";
     private static final String KEY_SHOW_DATA_EDITOR = "showDataEditor";
+    private static final String KEY_RECENT_FILES = "recentFiles";
+
+    /** Maximale Anzahl gemerkter zuletzt geöffneter Dateien (Menü "Zuletzt verwendet..."). */
+    private static final int MAX_RECENT_FILES = 5;
 
     public static final String THEME_LIGHT = "light";
     public static final String THEME_DARK = "dark";
@@ -107,5 +114,46 @@ public final class AppSettings {
 
     public void setShowDataEditor(boolean show) {
         prefs.putBoolean(KEY_SHOW_DATA_EDITOR, show);
+    }
+
+    /**
+     * Bis zu {@value #MAX_RECENT_FILES} zuletzt geöffnete Dateipfade, neuester
+     * zuerst - für das Menü "Zuletzt verwendet..." (siehe HelloController).
+     * Intern als ein einzelner, zeilenweise getrennter Preferences-Wert
+     * abgelegt (die Preferences-API kennt keine echten Listen); Dateipfade
+     * enthalten keine Zeilenumbrüche, daher ist "\n" als Trenner sicher.
+     */
+    public List<String> getRecentFiles() {
+        String joined = prefs.get(KEY_RECENT_FILES, "");
+        if (joined.isBlank()) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(Arrays.asList(joined.split("\n")));
+    }
+
+    /**
+     * Trägt {@code path} ganz vorne ein (neuester Eintrag). War der Pfad
+     * bereits in der Liste, wird er zunächst entfernt und dann wieder vorne
+     * eingefügt (kein doppelter Eintrag, "zuletzt benutzt" rückt er trotzdem
+     * an die erste Stelle). Ist die Liste danach länger als
+     * {@value #MAX_RECENT_FILES}, wird der/die älteste(n) Eintrag/Einträge
+     * am Ende verworfen.
+     */
+    public void addRecentFile(String path) {
+        List<String> current = getRecentFiles();
+        current.remove(path);
+        current.add(0, path);
+        while (current.size() > MAX_RECENT_FILES) {
+            current.remove(current.size() - 1);
+        }
+        prefs.put(KEY_RECENT_FILES, String.join("\n", current));
+    }
+
+    /** Entfernt einen Pfad aus der Liste (z.B. weil die Datei nicht mehr existiert). */
+    public void removeRecentFile(String path) {
+        List<String> current = getRecentFiles();
+        if (current.remove(path)) {
+            prefs.put(KEY_RECENT_FILES, String.join("\n", current));
+        }
     }
 }

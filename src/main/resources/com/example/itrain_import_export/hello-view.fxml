@@ -21,6 +21,14 @@
                 <Menu fx:id="fileMenu" text="Datei">
                     <MenuItem fx:id="openMenuItem" text="Öffnen..." onAction="#onOpenFile"/>
                     <MenuItem fx:id="saveMenuItem" text="Speichern unter..." onAction="#onSaveAs"/>
+                    <SeparatorMenuItem/>
+                    <!-- Inhalt (bis zu 5 zuletzt geöffnete Dateien, oder ein
+                         deaktivierter Platzhalter) wird zur Laufzeit vom
+                         Controller aufgebaut, siehe
+                         HelloController.refreshRecentFilesMenu(). -->
+                    <Menu fx:id="recentFilesMenu" text="Zuletzt verwendet..."/>
+                    <MenuItem fx:id="loadBackupMenuItem" text="Backup laden..." onAction="#onLoadBackup"/>
+                    <MenuItem fx:id="exportFilesMenuItem" text="Export Dateien" onAction="#onOpenExportFiles"/>
                 </Menu>
                 <Menu fx:id="editMenu" text="Bearbeiten">
                     <MenuItem fx:id="undoMenuItem" text="Rückgängig" onAction="#onUndo"/>

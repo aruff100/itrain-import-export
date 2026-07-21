@@ -168,9 +168,39 @@ public class TcdDocument {
         return tcd;
     }
 
-    /** .tcdz-Dateien sind normale ZIP-Archive mit einer .tcd-Datei darin. */
+    /**
+     * .tcdz-Dateien sind normale ZIP-Archive mit einer .tcd-Datei darin.
+     * Für die bekannten Endungen wird weiterhin einfach anhand des
+     * Dateinamens entschieden (schnell, keine Datei-I/O nötig). Bei jeder
+     * anderen Endung - insbesondere Backup-Dateien, die immer auf
+     * {@code .bak} enden (z.B. {@code layout.tcdz.3.bak}), unabhängig davon,
+     * ob das Original ein .tcd oder .tcdz war (siehe "Backup laden" in
+     * HelloController) - wird stattdessen anhand der ersten Bytes erkannt,
+     * ob es sich tatsächlich um ein ZIP-Archiv handelt (ZIP-Signatur "PK"),
+     * statt uns auf den Dateinamen zu verlassen.
+     */
     private static boolean isZipFile(File file) {
-        return file.getName().toLowerCase().endsWith(".tcdz");
+        String lowerName = file.getName().toLowerCase();
+        if (lowerName.endsWith(".tcdz")) {
+            return true;
+        }
+        if (lowerName.endsWith(".tcd")) {
+            return false;
+        }
+        return looksLikeZip(file);
+    }
+
+    /** Prüft die ersten beiden Bytes auf die ZIP-Signatur "PK" (0x50 0x4B). */
+    private static boolean looksLikeZip(File file) {
+        byte[] header = new byte[2];
+        try (InputStream in = new java.io.FileInputStream(file)) {
+            if (in.read(header) < 2) {
+                return false;
+            }
+        } catch (IOException ex) {
+            return false;
+        }
+        return header[0] == 0x50 && header[1] == 0x4B;
     }
 
     private static XmlNode toXmlNode(Element element) {

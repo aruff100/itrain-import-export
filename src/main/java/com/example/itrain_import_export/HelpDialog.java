@@ -33,6 +33,7 @@ public final class HelpDialog {
         addParagraph(content, i18n.t("help.helpMenuTitle"), i18n.t("help.helpMenuText"));
         addParagraph(content, i18n.t("help.categoryViewTitle"), i18n.t("help.categoryViewText"));
         addParagraph(content, i18n.t("help.referenceRenameTitle"), i18n.t("help.referenceRenameText"));
+        addParagraph(content, i18n.t("help.statusBarTitle"), i18n.t("help.statusBarText"));
 
         ScrollPane scrollPane = new ScrollPane(content);
         scrollPane.setFitToWidth(true);
