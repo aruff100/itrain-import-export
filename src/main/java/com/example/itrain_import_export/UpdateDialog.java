@@ -72,20 +72,18 @@ public final class UpdateDialog {
 
     /**
      * Manuelle Prüfung über Hilfe → Update: Prüfung fehlgeschlagen (z.B.
-     * offline, Server nicht erreichbar, Manifest-URL noch nicht eingetragen/
-     * 404). Bewusst KEIN Fehler-Dialog mit technischem Detail (HTTP-Code,
-     * Zeitüberschreitung...) - der Anwender kann damit ohnehin nichts
-     * anfangen, und ein rotes Fehlersymbol suggeriert einen Programmfehler,
-     * wo eigentlich nur "aktuell nichts Neues gefunden" gemeint ist. Die
-     * Anzeige sieht deshalb genauso aus wie {@link #showUpToDate}; das
-     * technische Detail landet stattdessen nur in der Konsole (nützlich beim
-     * Testen, z.B. solange die Manifest-URL in {@link UpdateChecker} noch
-     * der Platzhalter ist).
+     * offline, Server nicht erreichbar, HTTPS-/Zertifikatsproblem). Da der
+     * Nutzer diese Prüfung bewusst selbst ausgelöst hat, wird hier - anders
+     * als beim stillen Start-Check, der bei Fehlern komplett unauffällig
+     * bleibt - der tatsächliche technische Grund mit angezeigt (und
+     * zusätzlich auf der Konsole ausgegeben). Das ist beim Einrichten/Testen
+     * nützlich; sobald alles läuft, kann diese Meldung bei Bedarf wieder
+     * knapper gehalten werden.
      */
     public static void showError(Stage owner, String errorMessage) {
         I18n i18n = I18n.getInstance();
         System.err.println("Update-Prüfung fehlgeschlagen: " + errorMessage);
-        Alert dialog = new Alert(Alert.AlertType.INFORMATION, i18n.t("update.errorMessage"));
+        Alert dialog = new Alert(Alert.AlertType.ERROR, i18n.t("update.errorMessage", errorMessage));
         dialog.initOwner(owner);
         dialog.setTitle(i18n.t("update.errorTitle"));
         dialog.setHeaderText(null);

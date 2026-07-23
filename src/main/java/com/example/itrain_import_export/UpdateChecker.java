@@ -107,6 +107,11 @@ public final class UpdateChecker {
         try {
             HttpClient client = HttpClient.newBuilder()
                     .connectTimeout(TIMEOUT)
+                    // GitHub kann die kurze Gist-"/raw"-URL per HTTP-Weiterleitung
+                    // auf die commit-feste Adresse umlenken - der Java-HttpClient
+                    // folgt Weiterleitungen standardmäßig NICHT (Redirect.NEVER)
+                    // und würde sonst einen 302 als Fehler werten.
+                    .followRedirects(HttpClient.Redirect.NORMAL)
                     .build();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(MANIFEST_URL))

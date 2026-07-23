@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "com.example"
-version = "1.13"
+version = "1.14"
 
 repositories {
     mavenCentral()
@@ -67,7 +67,14 @@ tasks.withType<Test> {
 
 jlink {
     imageZip.set(layout.buildDirectory.file("/distributions/app-${javafx.platform.classifier}.zip"))
-    options.set(listOf("--strip-debug", "--compress", "2", "--no-header-files", "--no-man-pages"))
+    // "--bind-services" nimmt die per ServiceLoader gefundenen Anbieter mit
+    // ins Laufzeitabbild auf - insbesondere die TLS-/Krypto-Sicherheits-
+    // anbieter (SunEC u.a.), die von jlink/jpackage sonst NICHT automatisch
+    // erkannt werden (jdeps sieht nur statisch referenzierte Module). Ohne
+    // sie schlägt jede HTTPS-Verbindung im fertigen Installer fehl, während
+    // sie unter "gradle run" (volle JDK) funktioniert - genau der Fall bei der
+    // Update-Prüfung (UpdateChecker ruft die Gist-URL per HTTPS ab).
+    options.set(listOf("--strip-debug", "--compress", "2", "--no-header-files", "--no-man-pages", "--bind-services"))
     launcher {
         name = "app"
     }
@@ -83,11 +90,11 @@ jlink {
         imageName = "iTrain-Import-Export"
         installerName = "iTrain-Import-Export"
         // Bewusst identisch zu "version" oben (project.version ist jetzt
-        // schon suffixfrei, "1.13") - eigenes Feld bleibt trotzdem
+        // schon suffixfrei, "1.14") - eigenes Feld bleibt trotzdem
         // bestehen, falls App- und Projekt-Version sich künftig einmal
         // unterscheiden sollen; jpackage verlangt ohnehin ein reines
         // Zahlen-/Punkt-Format ohne Suffix wie "-SNAPSHOT".
-        appVersion = "1.13"
+        appVersion = "1.14"
         vendor = "Andre Ruff"
 
         val os = OperatingSystem.current()
