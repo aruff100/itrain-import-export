@@ -76,8 +76,8 @@ change.
 
 **Settings & i18n**: `AppSettings` persists via Java `Preferences` (Windows registry under
 `HKCU\Software\JavaSoft\Prefs\...`) — default TCD/export/backup directories, theme, column visibility.
-`I18n` loads `key.langcode=value` pairs from `translations.properties` for 6 languages
-(`de en nl fr es it`); `I18n.setLanguage` fires listeners that trigger a full UI rebuild rather than
+`I18n` loads `key.langcode=value` pairs from `translations.properties` for 10 languages
+(`de en nl fr es it pt pl da sv`); `I18n.setLanguage` fires listeners that trigger a full UI rebuild rather than
 live-patching labels. `ThemeManager` just toggles `dark-theme.css` on/off the `Scene`.
 
 ## Notes for making changes

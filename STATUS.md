@@ -1,6 +1,6 @@
 # iTrain Import/Export – Projektstatus
 
-Stand: 20.07.2026
+Stand: 23.07.2026
 
 ## Zweck
 
@@ -1018,3 +1018,294 @@ die Einstellungen genauer erklären, die Statusleiste erklären; im
   durchlaufen lassen, ggf. weitere Kategorien-Beispieldateien gegenprüfen
   (train-types, stations kamen in den bisher hochgeladenen Dateien kaum
   vor).
+
+## Nachtrag 23.07.2026 - Update-Funktion (Hilfe → Update)
+
+Nutzerwunsch: der bisherige Platzhalter-Menüpunkt "Update (kommt noch)" soll
+tatsächlich funktionieren. Ursprünglicher Ansatz war, direkt gegen Proton
+Drive zu prüfen (dort liegen die fertigen Installer über einen öffentlichen
+Freigabelink) - das scheidet aber aus: Proton Drive hat keine öffentliche
+API für Drittanbieter, und selbst ein "öffentlicher" Freigabelink lässt sich
+nicht per einfachem HTTP-GET abrufen (Ende-zu-Ende-Verschlüsselung, wird erst
+im Browser per JavaScript entschlüsselt). Der einzige noch gepflegte
+inoffizielle Weg (rclone-Backend) würde voraussetzen, dass Andres eigenes
+Proton-Passwort (ggf. + 2FA-Secret) im an alle Nutzer verteilten Programm
+eingebettet ist - das wäre ein echtes Sicherheitsrisiko für den Proton-
+Account, unabhängig von der Technik.
+
+**Umgesetzter Ansatz** (mit Andre abgestimmt): Proton Drive bleibt exakt wie
+bisher die Download-Quelle für den Anwender selbst (Klick auf den
+Freigabelink im Browser, unverändert). Die App selbst lädt dort nichts
+herunter und braucht keine Proton-Zugangsdaten - sie fragt stattdessen beim
+Start (und manuell über Hilfe → Update) eine winzige, öffentlich lesbare
+JSON-Datei ab, die nur die aktuelle Versionsnummer und den Proton-Drive-Link
+enthält:
+
+```json
+{
+  "version": "1.12",
+  "url": "https://drive.proton.me/urls/DEIN-FREIGABELINK",
+  "notes": "Kurze Beschreibung der Neuerungen (optional)"
+}
+```
+
+- **Neue Klasse `UpdateChecker.java`**: HTTP-GET (`java.net.http.HttpClient`,
+  6 Sekunden Timeout) auf die Manifest-URL, einfache Regex-Extraktion der
+  drei Felder (bewusst kein JSON-Library-Zusatz für dieses eine, selbst
+  kontrollierte, flache Format), Versionsvergleich punktgetrennter
+  Zahlensegmente (robust gegenüber führendem "v" und unterschiedlicher
+  Segmentanzahl). Läuft über `checkAsync(...)` immer in einem eigenen
+  Hintergrund-Thread, Ergebnis kommt per `Platform.runLater` zurück auf den
+  JavaFX-Thread.
+- **Neue Klasse `UpdateDialog.java`**: drei Varianten - Update verfügbar
+  (Knöpfe "Herunterladen"/"Später", öffnet den Proton-Link im
+  System-Standardbrowser über `java.awt.Desktop.browse`, mit Text-Fallback
+  falls das nicht klappt), bereits aktuell, Prüfung fehlgeschlagen.
+- **Stiller Start-Check**: `HelloApplication.start()` löst nach
+  `FirstRunDialog.showIfNeeded(...)` `UpdateChecker.checkAsync(...)` aus -
+  zeigt nur bei tatsächlich verfügbarem Update einen Dialog, bleibt bei
+  Offline-Betrieb/Fehler komplett unauffällig.
+- **Manueller Check**: Hilfe → Update (`updateMenuItem`, jetzt aktiviert
+  statt "kommt noch", `onAction="#onCheckForUpdate"`) zeigt IMMER ein
+  Ergebnis, auch "bereits aktuell" oder eine Fehlermeldung, da hier bewusst
+  vom Nutzer ausgelöst.
+- **Neue Einstellung**: `AppSettings.getAutoUpdateCheckEnabled()`/
+  `setAutoUpdateCheckEnabled(...)` (Standard: an), neue Checkbox im
+  Voreinstellungen-Reiter "Ansicht" ("Beim Start automatisch nach Updates
+  suchen").
+- **`AppInfo`** um `getVersion()` ergänzt (reine Versionsnummer ohne
+  Build-Zeitstempel-Zusatz, für den Versionsvergleich - `getBuildNumber()`
+  bleibt unverändert für den Über-Dialog).
+- **`module-info.java`**: `requires java.net.http;` und
+  `requires java.desktop;` ergänzt (für `HttpClient` bzw. `Desktop.browse`).
+- **Hilfe-Text**: neuer Abschnitt "Update" (`help.updateTitle`/
+  `help.updateText`) erklärt das Zusammenspiel; der Verweis in
+  `help.helpMenuText` auf "(sobald verfügbar)" wurde entsprechend angepasst.
+- Neue Übersetzungsschlüssel (alle 6 Sprachen, beide `translations.properties`,
+  weiterhin identisch, per `diff` geprüft): `update.availableTitle`,
+  `update.availableHeader`, `update.downloadButton`, `update.laterButton`,
+  `update.upToDateTitle`, `update.upToDateMessage`, `update.errorTitle`,
+  `update.errorMessage`, `update.openLinkManually`,
+  `settings.autoUpdateCheck`, `help.updateTitle`, `help.updateText`. Bestehender
+  Schlüssel `menu.updateItem` von "Update (kommt noch)" auf "Update"
+  geändert (alle 6 Sprachen).
+- Neue/geänderte Dateien: `UpdateChecker.java` (neu), `UpdateDialog.java`
+  (neu), `AppInfo.java`, `AppSettings.java`, `HelloApplication.java`,
+  `HelloController.java`, `SettingsDialog.java`, `HelpDialog.java`,
+  `hello-view.fxml`, `module-info.java`, beide `translations.properties`.
+
+### Wichtig - noch zu erledigen (nur Andre kann das)
+
+Diese Cowork-Sitzung hat keinen Zugriff auf GitHub/Proton-Konten - die
+folgenden zwei Schritte fehlen noch, damit die Funktion tatsächlich etwas
+findet:
+
+1. **Einen öffentlichen GitHub Gist anlegen** (auf gist.github.com, mit
+   GitHub-Account einloggen, "New gist"): eine Datei, z.B. `latest.json`,
+   mit exakt den drei Feldern `version`/`url`/`notes` wie oben gezeigt.
+   Wichtig: als **öffentlichen** Gist anlegen (nicht "secret"), sonst ist er
+   ohne Anmeldung nicht abrufbar.
+2. **Die "Raw"-URL dieses Gists in `UpdateChecker.java` eintragen**: auf der
+   Gist-Seite den Button "Raw" bei der Datei anklicken, die URL kopieren
+   (Format etwa
+   `https://gist.githubusercontent.com/<benutzername>/<gist-id>/raw/latest.json`)
+   und die Konstante `MANIFEST_URL` in `UpdateChecker.java` (aktuell ein
+   `REPLACE_ME`-Platzhalter) damit ersetzen.
+3. **Bei jedem neuen Release**: den Gist bearbeiten (Version/Notizen
+   anpassen, `url` auf den neuen Proton-Drive-Freigabelink setzen) und
+   speichern - fertig, kein neuer Build der App nötig, die Prüfung liest die
+   Datei ja bei jedem Start live ab.
+
+### Verifikation
+
+Wie immer kein echter Compile-Check möglich (kein JDK 21 in der Sandbox) -
+stattdessen: Klammer-Balance aller neuen/geänderten Java-Dateien per
+Stack-basiertem Python-Parser geprüft (alle ausgeglichen), `hello-view.fxml`
+per `xml.etree.ElementTree` auf Wohlgeformtheit geprüft, alle 78 neuen
+Übersetzungsschlüssel (13 Basis-Schlüssel × 6 Sprachen) auf Vollständigkeit
+geprüft, keine doppelten Property-Keys in `translations.properties`, `diff`
+zwischen beiden Kopien weiterhin identisch. Die Regex-basierte
+JSON-Extraktion und der Versionsvergleich wurden nicht gegen eine echte
+Gist-Antwort getestet (dafür fehlt noch die reale URL, siehe oben) - rein
+mechanisch gegen das oben gezeigte Beispiel-JSON nachvollzogen.
+
+**Empfehlung wie immer:** einmal `gradlew.bat run` lokal ausführen. Besonders
+wichtig diesmal: die beiden Schritte oben (Gist anlegen, URL eintragen)
+zuerst erledigen, dann gezielt testen - Hilfe → Update mit einer absichtlich
+höheren Versionsnummer im Gist (zeigt den "Update verfügbar"-Dialog inkl.
+Download-Knopf, der den Proton-Link im Browser öffnen sollte), danach mit
+gleicher/niedrigerer Versionsnummer ("bereits aktuell"), sowie einmal mit
+absichtlich falscher URL in `MANIFEST_URL` (Fehlermeldung). Der stille
+Start-Check lässt sich am einfachsten über die neue Checkbox in
+Voreinstellungen → Ansicht ein-/ausschalten.
+
+### Nachtrag: fehlgeschlagene Prüfung zeigt keinen technischen Fehler mehr
+
+Nutzer-Feedback nach erstem Test (404, weil `MANIFEST_URL` noch der
+`REPLACE_ME`-Platzhalter ist): die Fehlermeldung wirkte durch den HTTP-Code
+und das rote Fehlersymbol wie ein Programmfehler. Geändert: `UpdateDialog.
+showError` zeigt jetzt dieselbe Aufmachung wie "bereits aktuell" (Alert-Typ
+INFORMATION statt ERROR), Titel/Text ohne technisches Detail ("Keine neue
+Version vorhanden" / "Es wurde keine neue Version gefunden."). Die
+tatsächliche Ursache (HTTP-Code, Timeout, ...) wird stattdessen nur noch auf
+der Konsole ausgegeben (`System.err`) - nützlich beim eigenen Testen, ohne
+den Anwender zu verunsichern. Geänderte Übersetzungsschlüssel:
+`update.errorTitle`, `update.errorMessage` (alle 6 Sprachen, beide Kopien).
+
+### Versionssprung auf 1.12
+
+Auf Wunsch des Nutzers: da mit der Update-Funktion ein neues Feature
+hinzugekommen ist, wurde die Version von 1.11 auf **1.12** angehoben
+(`build.gradle.kts`: `version`, `jpackage.appVersion`; `AppInfo.
+FALLBACK_VERSION`). Vereinbart mit dem Nutzer: künftig schlägt Claude bei
+funktional relevanten Änderungen eine Versionserhöhung vor und hebt sie nach
+Bestätigung selbst an (statt den Nutzer daran erinnern zu müssen).
+
+## Nachtrag 23.07.2026 - Großes Paket: Import-Nummerierung, Ersteinrichtung, Hilfe, "Fahrwege", 4 neue Sprachen
+
+Mehrere unabhängige Nutzerwünsche in einer Sitzung umgesetzt (alle noch Teil
+der ungebauten Version 1.12, siehe "Versionssprung auf 1.12" oben - keine
+weitere Erhöhung, da lokal noch nichts gebaut/getestet wurde):
+
+### Import-Kollisionsschutz: nummerierte "~"-Präfixe je Sitzung
+
+Nutzerbeobachtung: importiert man innerhalb derselben Sitzung (dieselbe
+offene Datei) mehrere CSV-Exporte mit verknüpften, bereits "~"-umbenannten
+Einträgen (siehe Nachtrag vom 20.07. zur Referenz-Umbenennung), kann ein
+zweiter Import von z.B. "~RM1" mit einem "~RM1" aus einem früheren Import
+DIESER Sitzung kollidieren, obwohl es sich um einen ganz anderen Datensatz
+aus einer anderen Quelldatei handelt. Gewünscht: 1. Import bleibt "~", 2.
+Import wird "~1", 3. "~2" usw.
+
+- **`CategoryEditor.onImport()`** umgebaut auf zweistufiges Vorgehen: zuerst
+  werden ALLE CSV-Zeilen zu `XmlNode` geparst (statt sofort einzufügen), erst
+  danach greift die neue Methode `renameLinkedEntriesForThisImport(List<XmlNode>)`
+  - sie fragt über den neuen Konstruktor-Parameter `IntSupplier nextImportSuffix`
+  die aktuelle Import-Nummer der Sitzung ab (0 beim ersten Import → keine
+  Änderung; ab 1 wird jeder Name, der mit "~" beginnt, zusätzlich direkt nach
+  dem "~" durchnummeriert, z.B. "~RM1" → "~1RM1"). Referenzen INNERHALB des
+  Import-Batches (z.B. eine mit-importierte Aktion, die auf "~RM1" verweist)
+  werden dabei über die bestehende `renameReferencedChildren` konsistent
+  mitgeändert. Erst danach werden die (ggf. umbenannten) Knoten wie bisher
+  eingefügt/auf Duplikate geprüft.
+- **`HelloController`**: neues Feld `importCounter` (0-basiert, wird bei
+  jedem Import über `nextImportSuffix()` weitergezählt) - liegt bewusst in
+  `HelloController`, nicht in `CategoryEditor`, da Letzterer bei jedem
+  `rebuildTabs()` neu angelegt wird und ein dort liegender Zähler die
+  Sitzung nicht überleben würde. Wird beim Öffnen einer neuen Datei (wie
+  Undo/Redo-Verlauf) auf 0 zurückgesetzt = neue Sitzung.
+- Einzige Aufrufstelle von `new CategoryEditor(...)` (in `addCategoryTab`) um
+  den neuen fünften Parameter `this::nextImportSuffix` ergänzt.
+- Hilfetext (`help.referenceRenameText`, alle jetzt 10 Sprachen) um die
+  Erklärung der Nummerierung ergänzt.
+- Geänderte Dateien: `CategoryEditor.java`, `HelloController.java`, beide
+  `translations.properties`.
+
+### Ersteinrichtung: jetzt auch mit Farbschema-Auswahl
+
+Nutzerwunsch: `FirstRunDialog` soll beim allerersten Start zusätzlich zu
+Sprache und Pfaden auch das Farbschema (hell/dunkel) abfragen.
+
+- Die bisher in `SettingsDialog` private Zellen-Darstellung für "Hell"/
+  "Dunkel" wurde - nach demselben Muster wie zuvor bei `LanguageListCell` -
+  in eine eigene, gemeinsam genutzte Klasse `ThemeListCell.java` ausgelagert.
+  `SettingsDialog` nutzt sie jetzt statt der entfernten privaten `ThemeCell`.
+- `FirstRunDialog` bekommt eine neue Zeile (zwischen Sprache und den drei
+  Pfaden) mit einer Farbschema-`ComboBox` - wirkt beim Auswählen SOFORT auf
+  das bereits sichtbare Hauptfenster UND auf den Dialog selbst (wie im
+  Voreinstellungen-Reiter "Ansicht"), damit der Nutzer die Wahl direkt sieht
+  statt sie erst nachträglich zu entdecken. Der Button-Cell wird beim
+  Sprachwechsel innerhalb des Dialogs neu gesetzt, damit "Hell"/"Dunkel" auch
+  live mit übersetzt wird.
+- Geänderte/neue Dateien: `ThemeListCell.java` (neu), `SettingsDialog.java`,
+  `FirstRunDialog.java`.
+
+### Hilfe: Mausklick / Strg/Cmd-Klick / Shift-Klick erklärt
+
+Neuer Abschnitt "Mehrfachauswahl in der Tabelle" (`help.selectionTitle`/
+`help.selectionText`, alle 10 Sprachen) zwischen der Kategorie-Ansicht- und
+der "~"-Erklärung: beschreibt einfachen Klick (wählt genau eine Zeile),
+Klick+Strg/Cmd (fügt einzelne Zeile hinzu/entfernt sie) und Klick+Shift
+(wählt den Bereich seit dem letzten Klick) - reine Standard-JavaFX-
+TableView-Selektion, dafür war kein Code nötig, nur die Erklärung fehlte.
+Geänderte Dateien: `HelpDialog.java`, beide `translations.properties`.
+
+### "Memory"-Tab jetzt pro Sprache übersetzt (vorher überall unübersetzt "Memory")
+
+Nutzervorgabe: der Anzeigename der Kategorie `memory` (bisher bewusst in
+allen Sprachen unübersetzt "Memory" gelassen, siehe Abschnitt "Kategorien -
+verifizierter Stand" oben) soll jetzt doch pro Sprache übersetzt werden:
+Deutsch "Fahrwege", Englisch "Track Routes", Niederländisch "Rijwegen",
+Französisch "Connexions mémorisés", Spanisch "Enclavamientos", Italienisch
+"Percorso del tracciato" (plus die 4 neuen Sprachen, siehe unten). Nur der
+Übersetzungs-Schlüssel `category.memory` wurde geändert (`translations.properties`,
+beide Kopien) - der interne XML-Tag `memory`/`track` und jeglicher
+Datei-Inhalt bleiben exakt wie bisher unangetastet, es ist eine reine
+Anzeige-Änderung.
+
+### 4 neue Sprachen: Portugiesisch, Polnisch, Dänisch, Schwedisch
+
+Nutzerwunsch: die Sprachauswahl (mit Flaggen wie bisher) um Portugiesisch
+(`pt`), Polnisch (`pl`), Dänisch (`da`) und Schwedisch (`sv`) erweitern -
+überall, wo bisher 6 Sprachen berücksichtigt wurden (Sprachauswahl-Dropdown,
+Hilfe-Text).
+
+- **`I18n.LANGUAGE_CODES`** erweitert auf 10 Einträge
+  (`de en nl fr es it pt pl da sv`), **`NATIVE_NAMES`** um "Português",
+  "Polski", "Dansk", "Svenska" ergänzt. Da `SettingsDialog`,
+  `FirstRunDialog` und `LanguageListCell` bereits vollständig generisch über
+  `I18n.LANGUAGE_CODES` arbeiten (keine Sprache war je hartkodiert), war
+  dafür KEINE weitere Code-Änderung an der Auswahl-Logik nötig.
+- **4 neue Flaggen-Icons** unter `flags/` (`pt.png`, `pl.png`, `da.png`,
+  `sv.png`, je 30×20px RGB-PNG ohne Transparenz) - im selben schlichten,
+  flachen Streifen-Stil wie die bestehenden 6 Flaggen erzeugt (Pillow/Python):
+  Portugal (grün/rot, vertikal, ohne Wappen - wie auch bei der bestehenden
+  Spanien-Flagge ohne Wappen), Polen (weiß/rot, horizontal), Dänemark und
+  Schweden (jeweils klassisches nordisches Kreuz, zum Mast hin versetzt, in
+  Rot/Weiß bzw. Blau/Gelb).
+- **Alle 168 bestehenden Übersetzungs-Basisschlüssel** um `pt`/`pl`/`da`/`sv`
+  ergänzt (in dieser Reihenfolge direkt nach der jeweiligen `it`-Zeile
+  eingefügt) - in BEIDEN `translations.properties`-Kopien identisch, per
+  Skript eingefügt und anschließend geprüft: alle 168 Schlüssel haben jetzt
+  exakt die 10 erwarteten Sprachcodes, keine doppelten Property-Keys, `diff`
+  zwischen beiden Kopien weiterhin identisch.
+- **Textstellen mit fest genannter Sprachanzahl korrigiert**: die
+  Voreinstellungen-Hilfe (`help.settingsMenuText`, alle jetzt 10 Sprachen)
+  erwähnte "unter den 6 verfügbaren Sprachen" - auf "10" korrigiert (in allen
+  6 ursprünglichen Sprachfassungen, bevor die 4 neuen ergänzt wurden).
+  Ebenso ein Doc-Kommentar in `HelpDialog.java` ("alle 6 Sprachen" → "alle 10
+  Sprachen") und in `CLAUDE.md` ("6 languages (de en nl fr es it)" → "10
+  languages (de en nl fr es it pt pl da sv)").
+- **Wichtiger Hinweis zur Übersetzungsqualität**: die vier neuen Sprachen
+  wurden direkt von mir übersetzt (kein externer Übersetzungsdienst, keine
+  Rückprüfung durch einen Muttersprachler). Allgemeine UI-Begriffe sollten
+  zuverlässig sein, bei modellbahn-spezifischen Fachbegriffen (z.B.
+  "Rückmeldung"/"Fahrwege"/"Booster" auf Polnisch/Dänisch/Schwedisch/
+  Portugiesisch) empfiehlt sich eine Prüfung durch jemanden, der die
+  jeweilige Sprache UND das Modellbahn-Hobby kennt, falls du oder Nutzer
+  dieser Sprachen das nutzen.
+- Geänderte/neue Dateien: `I18n.java`, `CLAUDE.md`, `HelpDialog.java`, beide
+  `translations.properties`, `flags/pt.png`/`pl.png`/`da.png`/`sv.png` (neu).
+
+### Verifikation
+
+Wie immer kein echter Compile-Check möglich (kein JDK 21 in der Sandbox) -
+Klammer-Balance ALLER in dieser Sitzung geänderten/neuen Java-Dateien sowie
+`build.gradle.kts` per Stack-basiertem Python-Parser geprüft (alle
+ausgeglichen), `hello-view.fxml` erneut auf Wohlgeformtheit geprüft, einzige
+Aufrufstelle von `new CategoryEditor(...)` auf die neue 6-Parameter-Signatur
+geprüft. Für die Übersetzungen zusätzlich automatisiert geprüft: alle 168
+Basisschlüssel haben exakt die 10 erwarteten Sprachcodes (kein Schlüssel zu
+viel/zu wenig), keine doppelten Property-Keys, beide
+`translations.properties`-Kopien weiterhin `diff`-identisch.
+
+**Empfehlung wie immer:** einmal `gradlew.bat run` lokal ausführen und
+gezielt testen: zweimal hintereinander dieselbe (oder zwei verschiedene)
+Export-CSV mit verknüpften Einträgen in dieselbe offene Datei importieren
+(zweiter Import sollte "~1..." statt "~..." zeigen, keine Duplikat-Fehler),
+den Ersteinrichtungs-Dialog nach Löschen der Registry-Einstellungen erneut
+durchlaufen (Farbschema-Zeile sollte erscheinen und sofort wirken), den
+neuen Hilfe-Abschnitt zur Mehrfachauswahl sowie die "Fahrwege"-Beschriftung
+im entsprechenden Reiter, und die vier neuen Sprachen in der Sprachauswahl
+(Voreinstellungen → Sprache sowie Ersteinrichtung) inklusive Flaggen und
+korrekt übersetzter Oberfläche.

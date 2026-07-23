@@ -144,6 +144,24 @@ public class HelloController {
     private final Deque<List<XmlNode>> undoStack = new ArrayDeque<>();
     private final Deque<List<XmlNode>> redoStack = new ArrayDeque<>();
 
+    /**
+     * Zählt CSV-Importe innerhalb der aktuellen Sitzung (solange dieselbe
+     * Datei geöffnet bleibt) - liefert an {@link CategoryEditor} die Nummer
+     * für die zusätzliche "~1"/"~2"/...-Durchnummerierung bereits
+     * verknüpfter Einträge (siehe
+     * {@code CategoryEditor.renameLinkedEntriesForThisImport}), damit
+     * mehrere Importe in derselben Sitzung nicht kollidieren. 0 beim ersten
+     * Import (bleibt bei reinem "~"), wird beim Öffnen einer neuen Datei
+     * zurückgesetzt - überlebt aber (anders als der Undo-Verlauf) bewusst
+     * jeden {@code rebuildTabs()}, da dieses Feld hier in HelloController
+     * liegt, nicht im (dabei neu angelegten) CategoryEditor selbst.
+     */
+    private int importCounter = 0;
+
+    private int nextImportSuffix() {
+        return importCounter++;
+    }
+
     @FXML
     private void initialize() {
         openMenuItem.setGraphic(loadIcon("icons/open-icon.png", 16));
@@ -336,6 +354,9 @@ public class HelloController {
             // neuen Datei ergibt er keinen Sinn mehr.
             undoStack.clear();
             redoStack.clear();
+            // Neue Datei = neue Sitzung für die Import-Nummerierung (siehe
+            // nextImportSuffix()).
+            importCounter = 0;
             rebuildTabs();
             fileNameLabel.setText(file.getName());
             statusLabel.setText(i18n.t("status.fileLoaded", file.getName()));
@@ -622,6 +643,32 @@ public class HelloController {
         AboutDialog.show(stage);
     }
 
+    /**
+     * Menüpunkt Hilfe → Update: manuelle Prüfung, unabhängig von der
+     * Einstellung "automatisch beim Start prüfen" (siehe
+     * {@link HelloApplication#start}). Anders als der stille Start-Check
+     * zeigt diese Variante IMMER ein Ergebnis an - auch "bereits aktuell"
+     * oder eine Fehlermeldung (z.B. offline) - da der Nutzer die Prüfung hier
+     * bewusst selbst ausgelöst hat. Der Menüpunkt wird während der laufenden
+     * (kurzen) Netzwerk-Prüfung deaktiviert, damit kein Doppelklick zwei
+     * Anfragen gleichzeitig auslöst.
+     */
+    @FXML
+    private void onCheckForUpdate() {
+        Stage stage = (Stage) tabPane.getScene().getWindow();
+        updateMenuItem.setDisable(true);
+        UpdateChecker.checkAsync(result -> {
+            updateMenuItem.setDisable(false);
+            if (!result.success) {
+                UpdateDialog.showError(stage, result.errorMessage);
+            } else if (result.updateAvailable) {
+                UpdateDialog.showUpdateAvailable(stage, result);
+            } else {
+                UpdateDialog.showUpToDate(stage, result.currentVersion);
+            }
+        });
+    }
+
     private void rebuildTabs() {
         tabPane.getTabs().clear();
         editorsByTab.clear();
@@ -664,7 +711,7 @@ public class HelloController {
 
     private void addCategoryTab(XmlNode controlItems, String categoryName) {
         CategoryEditor editor = new CategoryEditor(categoryName, controlItems, document::markDirty,
-                this::rebuildTabs, this::recordUndoSnapshot);
+                this::rebuildTabs, this::recordUndoSnapshot, this::nextImportSuffix);
         Tab tab = editor.createTab();
         editorsByTab.put(tab, editor);
         editor.entryCountProperty().addListener((obs, oldV, newV) -> {

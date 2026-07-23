@@ -34,6 +34,21 @@ public class HelloApplication extends Application {
         // FirstRunDialog. Bewusst NACH stage.show(), damit der Dialog als
         // modales Fenster über dem bereits sichtbaren Hauptfenster erscheint.
         FirstRunDialog.showIfNeeded(stage);
+
+        // Stiller Update-Check im Hintergrund (siehe UpdateChecker/AppSettings.
+        // getAutoUpdateCheckEnabled(), Standard: an, abschaltbar in den
+        // Voreinstellungen → Ansicht). Bewusst nur bei tatsächlich verfügbarem
+        // Update ein Fenster zeigen - bei Offline-Betrieb oder sonstigem
+        // Fehlschlag bleibt der Start-Check komplett unauffällig; der manuelle
+        // Menüpunkt Hilfe → Update zeigt in diesem Fall trotzdem eine
+        // Fehlermeldung, siehe HelloController.onCheckForUpdate().
+        if (AppSettings.getInstance().getAutoUpdateCheckEnabled()) {
+            UpdateChecker.checkAsync(result -> {
+                if (result.success && result.updateAvailable) {
+                    UpdateDialog.showUpdateAvailable(stage, result);
+                }
+            });
+        }
     }
 
     /**
