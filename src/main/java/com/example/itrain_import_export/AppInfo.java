@@ -16,9 +16,10 @@ import java.util.Properties;
 public final class AppInfo {
 
     private static final String RESOURCE_NAME = "build-info.properties";
-    private static final String FALLBACK_VERSION = "1.11";
+    private static final String FALLBACK_VERSION = "1.12";
 
     private static String cachedBuildNumber;
+    private static String cachedVersion;
 
     private AppInfo() {
     }
@@ -33,6 +34,25 @@ public final class AppInfo {
         if (cachedBuildNumber != null) {
             return cachedBuildNumber;
         }
+        loadProperties();
+        return cachedBuildNumber;
+    }
+
+    /**
+     * Reine Versionsnummer ohne Build-Zeitstempel-Zusatz, z.B. "1.11" -
+     * gedacht für den Vergleich mit der von {@link UpdateChecker} gelesenen
+     * Versionsnummer (ein Zeitstempel-Suffix wie im "Über"-Dialog würde einen
+     * einfachen Versionsvergleich sonst verfälschen).
+     */
+    public static synchronized String getVersion() {
+        if (cachedVersion != null) {
+            return cachedVersion;
+        }
+        loadProperties();
+        return cachedVersion;
+    }
+
+    private static void loadProperties() {
         Properties props = new Properties();
         try (InputStream in = AppInfo.class.getResourceAsStream(RESOURCE_NAME)) {
             if (in != null) {
@@ -42,10 +62,10 @@ public final class AppInfo {
             // Fällt unten auf den Fallback-Wert zurück.
         }
         String version = props.getProperty("version", FALLBACK_VERSION);
+        cachedVersion = version;
         String buildTimestamp = props.getProperty("buildTimestamp");
         cachedBuildNumber = (buildTimestamp == null || buildTimestamp.isBlank() || buildTimestamp.startsWith("$"))
                 ? version
                 : version + " (Build " + buildTimestamp + ")";
-        return cachedBuildNumber;
     }
 }

@@ -39,7 +39,7 @@
                 </Menu>
                 <Menu fx:id="helpMenu" text="Hilfe">
                     <MenuItem fx:id="helpMenuItem" text="Hilfe" onAction="#onHelp"/>
-                    <MenuItem fx:id="updateMenuItem" text="Update (kommt noch)" disable="true"/>
+                    <MenuItem fx:id="updateMenuItem" text="Update" onAction="#onCheckForUpdate"/>
                     <SeparatorMenuItem/>
                     <MenuItem fx:id="aboutMenuItem" text="Über" onAction="#onAbout"/>
                 </Menu>

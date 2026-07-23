@@ -12,7 +12,7 @@ import javafx.stage.Stage;
  * Zeigt die eingebaute Hilfe: kurze Beschreibung des Programmzwecks, gefolgt
  * von Überschriften/Absätzen zu den einzelnen Menüpunkten sowie zur
  * Kategorie-Ansicht (Import/Export inkl. Referenzen, Anlegen/Löschen). Der
- * gesamte Text kommt aus {@link I18n} (alle 6 Sprachen), damit er automatisch
+ * gesamte Text kommt aus {@link I18n} (alle 10 Sprachen), damit er automatisch
  * mit der Oberflächensprache wechselt.
  */
 public final class HelpDialog {
@@ -31,7 +31,9 @@ public final class HelpDialog {
         addParagraph(content, i18n.t("help.editMenuTitle"), i18n.t("help.editMenuText"));
         addParagraph(content, i18n.t("help.settingsMenuTitle"), i18n.t("help.settingsMenuText"));
         addParagraph(content, i18n.t("help.helpMenuTitle"), i18n.t("help.helpMenuText"));
+        addParagraph(content, i18n.t("help.updateTitle"), i18n.t("help.updateText"));
         addParagraph(content, i18n.t("help.categoryViewTitle"), i18n.t("help.categoryViewText"));
+        addParagraph(content, i18n.t("help.selectionTitle"), i18n.t("help.selectionText"));
         addParagraph(content, i18n.t("help.referenceRenameTitle"), i18n.t("help.referenceRenameText"));
         addParagraph(content, i18n.t("help.statusBarTitle"), i18n.t("help.statusBarText"));
 

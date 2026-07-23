@@ -31,7 +31,8 @@ public final class I18n {
     private static final String EXTERNAL_FILE_NAME = "translations.properties";
 
     /** Reihenfolge, in der die Sprache z.B. im Einstellungen-Dropdown erscheint. */
-    public static final List<String> LANGUAGE_CODES = List.of("de", "en", "nl", "fr", "es", "it");
+    public static final List<String> LANGUAGE_CODES =
+            List.of("de", "en", "nl", "fr", "es", "it", "pt", "pl", "da", "sv");
 
     private static final Map<String, String> NATIVE_NAMES = new LinkedHashMap<>();
     static {
@@ -41,6 +42,10 @@ public final class I18n {
         NATIVE_NAMES.put("fr", "Français");
         NATIVE_NAMES.put("es", "Español");
         NATIVE_NAMES.put("it", "Italiano");
+        NATIVE_NAMES.put("pt", "Português");
+        NATIVE_NAMES.put("pl", "Polski");
+        NATIVE_NAMES.put("da", "Dansk");
+        NATIVE_NAMES.put("sv", "Svenska");
     }
 
     private static I18n instance;

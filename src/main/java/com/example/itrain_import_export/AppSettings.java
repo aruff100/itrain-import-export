@@ -23,6 +23,7 @@ public final class AppSettings {
     private static final String KEY_SHOW_SELECTION_CHECKBOX = "showSelectionCheckbox";
     private static final String KEY_SHOW_DATA_EDITOR = "showDataEditor";
     private static final String KEY_RECENT_FILES = "recentFiles";
+    private static final String KEY_AUTO_UPDATE_CHECK = "autoUpdateCheck";
 
     /** Maximale Anzahl gemerkter zuletzt geöffneter Dateien (Menü "Zuletzt verwendet..."). */
     private static final int MAX_RECENT_FILES = 5;
@@ -155,5 +156,19 @@ public final class AppSettings {
         if (current.remove(path)) {
             prefs.put(KEY_RECENT_FILES, String.join("\n", current));
         }
+    }
+
+    /**
+     * Ob bei jedem Programmstart still im Hintergrund auf eine neue Version
+     * geprüft wird (siehe {@link UpdateChecker}, ausgelöst von
+     * {@link HelloApplication#start}). Standard: an. Der manuelle Menüpunkt
+     * Hilfe → Update funktioniert unabhängig davon immer.
+     */
+    public boolean getAutoUpdateCheckEnabled() {
+        return prefs.getBoolean(KEY_AUTO_UPDATE_CHECK, true);
+    }
+
+    public void setAutoUpdateCheckEnabled(boolean enabled) {
+        prefs.putBoolean(KEY_AUTO_UPDATE_CHECK, enabled);
     }
 }

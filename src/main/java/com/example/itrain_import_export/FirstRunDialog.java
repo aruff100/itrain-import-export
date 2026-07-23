@@ -10,6 +10,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
+import javafx.scene.Scene;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
@@ -25,7 +26,7 @@ import java.util.function.Consumer;
 /**
  * Ersteinrichtung: erscheint nur, solange noch KEINER der drei Pfade
  * (iTrain-/Export-/Backup-Ordner) in {@link AppSettings} gesetzt ist -
- * typischerweise also nur beim allerersten Programmstart. Bietet zwei Dinge:
+ * typischerweise also nur beim allerersten Programmstart. Bietet drei Dinge:
  * <p>
  * 1) Eine Sprachauswahl (identisch zum Reiter "Sprache" in den
  * Voreinstellungen, mit Flagge - siehe {@link LanguageListCell}). Wählt der
@@ -34,7 +35,13 @@ import java.util.function.Consumer;
  * in der neuen Sprache erscheinen (Titel, Beschriftungen, Buttons), über
  * einen eigenen, beim Schließen wieder abgemeldeten Sprachwechsel-Listener.
  * <p>
- * 2) Je einen Pfadvorschlag für iTrain-/Export-/Backup-Ordner, abhängig vom
+ * 2) Eine Farbschema-Auswahl (hell/dunkel, identisch zum Reiter "Ansicht" in
+ * den Voreinstellungen, siehe {@link ThemeListCell}) - wirkt sofort auf das
+ * bereits sichtbare Hauptfenster UND auf diesen Dialog selbst, damit der
+ * Nutzer das gewählte Farbschema direkt sieht, statt es erst nachträglich in
+ * den Voreinstellungen zu entdecken.
+ * <p>
+ * 3) Je einen Pfadvorschlag für iTrain-/Export-/Backup-Ordner, abhängig vom
  * Betriebssystem unterhalb des Benutzerverzeichnisses
  * ({@code <Benutzerverzeichnis>/iTrain/layouts} bzw. {@code .../export} bzw.
  * {@code .../backup} - unter Windows z.B. {@code C:\Users\<Name>\iTrain\...},
@@ -97,6 +104,27 @@ public final class FirstRunDialog {
             }
         });
 
+        // Farbschema-Auswahl - dieselbe Zellen-Darstellung ("Hell"/"Dunkel")
+        // wie im Voreinstellungen-Reiter "Ansicht", wirkt aber sofort auf das
+        // bereits sichtbare Hauptfenster UND diesen Dialog selbst (siehe
+        // Listener unten), damit der Nutzer die Wahl direkt sieht.
+        Label themeCaption = new Label(i18n.t("settings.theme"));
+        ComboBox<String> themeCombo = new ComboBox<>(FXCollections.observableArrayList(
+                AppSettings.THEME_LIGHT, AppSettings.THEME_DARK));
+        themeCombo.setValue(settings.getTheme());
+        themeCombo.setCellFactory(list -> new ThemeListCell());
+        themeCombo.setButtonCell(new ThemeListCell());
+        themeCombo.valueProperty().addListener((obs, oldTheme, newTheme) -> {
+            if (newTheme != null) {
+                settings.setTheme(newTheme);
+                ThemeManager.apply(owner.getScene(), newTheme);
+                Scene dialogScene = dialog.getDialogPane().getScene();
+                if (dialogScene != null) {
+                    ThemeManager.apply(dialogScene, newTheme);
+                }
+            }
+        });
+
         Label tcdCaption = new Label(i18n.t("settings.tcdPath"));
         Label exportCaption = new Label(i18n.t("settings.exportPath"));
         Label backupCaption = new Label(i18n.t("settings.backupPath"));
@@ -109,9 +137,10 @@ public final class FirstRunDialog {
         grid.setHgap(10);
         grid.setVgap(12);
         grid.addRow(0, languageCaption, languageCombo);
-        grid.addRow(1, tcdCaption, tcdRow.row);
-        grid.addRow(2, exportCaption, exportRow.row);
-        grid.addRow(3, backupCaption, backupRow.row);
+        grid.addRow(1, themeCaption, themeCombo);
+        grid.addRow(2, tcdCaption, tcdRow.row);
+        grid.addRow(3, exportCaption, exportRow.row);
+        grid.addRow(4, backupCaption, backupRow.row);
 
         VBox content = new VBox(12, introLabel, grid);
         content.setPadding(new Insets(15));
@@ -135,6 +164,11 @@ public final class FirstRunDialog {
             dialog.setTitle(i18n.t("firstRun.title"));
             introLabel.setText(i18n.t("firstRun.intro"));
             languageCaption.setText(i18n.t("settings.language"));
+            themeCaption.setText(i18n.t("settings.theme"));
+            // ThemeListCell übersetzt "Hell"/"Dunkel" erst beim (Neu-)Rendern
+            // der Zelle - ein neuer Button-Cell erzwingt das sofort, auch
+            // wenn sich die Auswahl selbst nicht geändert hat.
+            themeCombo.setButtonCell(new ThemeListCell());
             tcdCaption.setText(i18n.t("settings.tcdPath"));
             exportCaption.setText(i18n.t("settings.exportPath"));
             backupCaption.setText(i18n.t("settings.backupPath"));

@@ -8,7 +8,6 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.GridPane;
@@ -142,8 +141,8 @@ public final class SettingsDialog {
         ComboBox<String> themeCombo = new ComboBox<>(FXCollections.observableArrayList(
                 AppSettings.THEME_LIGHT, AppSettings.THEME_DARK));
         themeCombo.setValue(settings.getTheme());
-        themeCombo.setCellFactory(list -> new ThemeCell());
-        themeCombo.setButtonCell(new ThemeCell());
+        themeCombo.setCellFactory(list -> new ThemeListCell());
+        themeCombo.setButtonCell(new ThemeListCell());
         themeCombo.valueProperty().addListener((obs, oldTheme, newTheme) -> {
             if (newTheme != null) {
                 settings.setTheme(newTheme);
@@ -164,6 +163,10 @@ public final class SettingsDialog {
         showDataEditorBox.setSelected(settings.getShowDataEditor());
         showDataEditorBox.selectedProperty().addListener((obs, oldV, newV) -> settings.setShowDataEditor(newV));
 
+        CheckBox autoUpdateCheckBox = new CheckBox();
+        autoUpdateCheckBox.setSelected(settings.getAutoUpdateCheckEnabled());
+        autoUpdateCheckBox.selectedProperty().addListener((obs, oldV, newV) -> settings.setAutoUpdateCheckEnabled(newV));
+
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(12);
@@ -172,6 +175,7 @@ public final class SettingsDialog {
         grid.addRow(1, new Label(i18n.t("settings.showType")), showTypeBox);
         grid.addRow(2, new Label(i18n.t("settings.showSelectionCheckbox")), showSelectionBox);
         grid.addRow(3, new Label(i18n.t("settings.showDataEditor")), showDataEditorBox);
+        grid.addRow(4, new Label(i18n.t("settings.autoUpdateCheck")), autoUpdateCheckBox);
         return grid;
     }
 
@@ -183,22 +187,6 @@ public final class SettingsDialog {
     private static void applyThemeOnceShown(Dialog<?> dialog, AppSettings settings) {
         dialog.getDialogPane().sceneProperty().addListener((obs, oldScene, newScene) ->
                 ThemeManager.apply(newScene, settings.getTheme()));
-    }
-
-    /** Zeigt "Hell"/"Dunkel" (übersetzt) statt der internen Theme-Codes "light"/"dark". */
-    private static class ThemeCell extends ListCell<String> {
-        @Override
-        protected void updateItem(String theme, boolean empty) {
-            super.updateItem(theme, empty);
-            if (empty || theme == null) {
-                setText(null);
-                return;
-            }
-            I18n i18n = I18n.getInstance();
-            setText(AppSettings.THEME_DARK.equals(theme)
-                    ? i18n.t("settings.themeDark")
-                    : i18n.t("settings.themeLight"));
-        }
     }
 
     private static String pathOrPlaceholder(String path, I18n i18n) {

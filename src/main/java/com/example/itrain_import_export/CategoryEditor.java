@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.IntSupplier;
 
 /**
  * Baut die komplette Bearbeitungsoberfläche für eine control-items-Kategorie
@@ -108,6 +109,15 @@ public class CategoryEditor {
      * {@code HelloController.recordUndoSnapshot()}).
      */
     private final Runnable beforeChange;
+    /**
+     * Liefert bei jedem Aufruf die Nummer des aktuellen Imports innerhalb der
+     * laufenden Sitzung (0 beim ersten Import, 1 beim zweiten, ...) - siehe
+     * {@link #renameLinkedEntriesForThisImport(List)}. Zählt bei
+     * {@code HelloController} und wird beim Öffnen einer neuen Datei
+     * zurückgesetzt, überlebt aber einen {@code rebuildTabs()} (dieser Editor
+     * selbst wird dabei ja neu angelegt).
+     */
+    private final IntSupplier nextImportSuffix;
 
     private final TableView<XmlNode> entryTable = new TableView<>();
     private final TreeView<XmlNode> detailTree = new TreeView<>();
@@ -135,12 +145,13 @@ public class CategoryEditor {
     private int lastClickedIndex = -1;
 
     public CategoryEditor(String categoryName, XmlNode controlItemsNode, Runnable onModified,
-                           Runnable onStructuralChange, Runnable beforeChange) {
+                           Runnable onStructuralChange, Runnable beforeChange, IntSupplier nextImportSuffix) {
         this.categoryName = categoryName;
         this.controlItemsNode = controlItemsNode;
         this.onModified = onModified;
         this.onStructuralChange = onStructuralChange;
         this.beforeChange = beforeChange;
+        this.nextImportSuffix = nextImportSuffix;
         this.categoryNode = controlItemsNode.findChild(categoryName);
     }
 
@@ -698,6 +709,53 @@ public class CategoryEditor {
     }
 
     /**
+     * Verhindert Namenskonflikte, wenn in DERSELBEN Sitzung (solange
+     * dieselbe Datei geöffnet bleibt) mehrfach CSV-Dateien mit bereits
+     * verknüpften, "~"-umbenannten Einträgen importiert werden (siehe
+     * {@link #onExport()}/{@link #renameReferencedChildren}): ohne diese
+     * zusätzliche Nummerierung würde z.B. ein zweiter Import von "~RM1"
+     * entweder mit einem bereits vorhandenen "~RM1" aus einem früheren
+     * Import DIESER Sitzung kollidieren (iTrain verlangt eindeutige Namen)
+     * oder fälschlich als Duplikat übersprungen werden, obwohl es sich
+     * eigentlich um einen ganz anderen Datensatz aus einer anderen
+     * Quelldatei handelt.
+     * <p>
+     * Der erste Import einer Sitzung bleibt unverändert ("~" wie bisher,
+     * {@link #nextImportSuffix} liefert dafür 0); jeder weitere Import
+     * bekommt eine laufende Nummer direkt nach dem "~" ("~1", "~2", ...) -
+     * sowohl für die eigene Definition eines bereits "~"-benannten Eintrags
+     * als auch für JEDE Stelle, an der er innerhalb DIESES Import-Batches
+     * referenziert wird (z.B. eine mit-importierte Aktion, die auf "~RM1"
+     * verweist - siehe {@link #renameReferencedChildren}, hier auf alle
+     * Zeilen des Imports statt nur auf einen einzelnen Export-Eintrag
+     * angewendet). Normal (ohne führendes "~") benannte Einträge sind nicht
+     * betroffen - das sind eigene, echte Daten des Nutzers.
+     */
+    private void renameLinkedEntriesForThisImport(List<XmlNode> parsedNodes) {
+        int suffix = nextImportSuffix.getAsInt();
+        if (suffix <= 0) {
+            return;
+        }
+        Map<String, String> renameMap = new LinkedHashMap<>();
+        for (XmlNode node : parsedNodes) {
+            String name = node.getName();
+            if (name != null && name.startsWith("~")) {
+                renameMap.put(name, "~" + suffix + name.substring(1));
+            }
+        }
+        if (renameMap.isEmpty()) {
+            return;
+        }
+        for (XmlNode node : parsedNodes) {
+            String renamed = renameMap.get(node.getName());
+            if (renamed != null) {
+                node.setAttribute("name", renamed);
+            }
+            renameReferencedChildren(node, renameMap);
+        }
+    }
+
+    /**
      * Öffentlicher Zugriff auf den CSV-Import von außerhalb dieses Editors -
      * genutzt vom Menüpunkt "Export Dateien" in {@link HelloController}, der
      * so denselben Import auslösen kann, ohne dass zuvor zu diesem
@@ -752,17 +810,33 @@ public class CategoryEditor {
                 // "Rückgängig" wieder loswerden können.
                 beforeChange.run();
             }
+
+            // Erst ALLE Zeilen zu XmlNode parsen (statt Zeile für Zeile sofort
+            // einzufügen) - nur so lässt sich vor dem eigentlichen Einfügen
+            // eine session-weite Nummerierung auf bereits verknüpfte ("~"-)
+            // Einträge anwenden, die auch Referenzen ZWISCHEN den Zeilen
+            // dieses Imports berücksichtigt (siehe
+            // renameLinkedEntriesForThisImport).
+            List<XmlNode> parsedNodes = new ArrayList<>();
+            for (List<String> row : dataRows) {
+                parsedNodes.add(TcdDocument.xmlStringToNode(row.get(4)));
+            }
+            if (!parsedNodes.isEmpty()) {
+                renameLinkedEntriesForThisImport(parsedNodes);
+            }
+
             boolean touchesOtherCategories = false;
             int imported = 0;
             int skippedDuplicates = 0;
-            for (List<String> row : dataRows) {
+            for (int i = 0; i < dataRows.size(); i++) {
+                List<String> row = dataRows.get(i);
+                XmlNode node = parsedNodes.get(i);
                 String rowCategory = row.get(0);
                 XmlNode categoryTarget = rowCategory.equals(categoryName)
                         ? ensureCategoryNode() : ensureCategoryNodeGeneric(rowCategory);
                 if (!rowCategory.equals(categoryName)) {
                     touchesOtherCategories = true;
                 }
-                XmlNode node = TcdDocument.xmlStringToNode(row.get(4));
                 // iTrain verlangt pro Kategorie eindeutige Namen (siehe
                 // "Duplicate ... elements"-Fehler) - ein per Verknüpfung
                 // mit-exportierter Eintrag, der im Ziel bereits existiert

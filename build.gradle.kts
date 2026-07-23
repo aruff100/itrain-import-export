@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "com.example"
-version = "1.11"
+version = "1.12"
 
 repositories {
     mavenCentral()
@@ -83,11 +83,11 @@ jlink {
         imageName = "iTrain-Import-Export"
         installerName = "iTrain-Import-Export"
         // Bewusst identisch zu "version" oben (project.version ist jetzt
-        // schon suffixfrei, "1.11") - eigenes Feld bleibt trotzdem
+        // schon suffixfrei, "1.12") - eigenes Feld bleibt trotzdem
         // bestehen, falls App- und Projekt-Version sich künftig einmal
         // unterscheiden sollen; jpackage verlangt ohnehin ein reines
         // Zahlen-/Punkt-Format ohne Suffix wie "-SNAPSHOT".
-        appVersion = "1.11"
+        appVersion = "1.12"
         vendor = "Andre Ruff"
 
         val os = OperatingSystem.current()
