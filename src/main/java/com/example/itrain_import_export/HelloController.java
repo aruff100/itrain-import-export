@@ -166,6 +166,9 @@ public class HelloController {
     private void initialize() {
         openMenuItem.setGraphic(loadIcon("icons/open-icon.png", 16));
         saveMenuItem.setGraphic(loadIcon("icons/save-icon.png", 16));
+        // Gleiches Öffnen-Symbol wie bei "Öffnen..." - das Untermenü
+        // "Zuletzt verwendete öffnen" ist ja ebenfalls eine Öffnen-Aktion.
+        recentFilesMenu.setGraphic(loadIcon("icons/open-icon.png", 16));
 
         // Ribbon: dieselben Aktionen wie im Datei-/Einstellungen-Menü, nur
         // als Symbol-Buttons für schnellen Zugriff. Aussagekräftig durch

@@ -16,7 +16,7 @@ import java.util.Properties;
 public final class AppInfo {
 
     private static final String RESOURCE_NAME = "build-info.properties";
-    private static final String FALLBACK_VERSION = "1.12";
+    private static final String FALLBACK_VERSION = "1.13";
 
     private static String cachedBuildNumber;
     private static String cachedVersion;
