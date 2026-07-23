@@ -38,15 +38,16 @@ import java.util.regex.Pattern;
 public final class UpdateChecker {
 
     /**
-     * TODO (Andre): durch die "Raw"-URL des eigenen GitHub Gists ersetzen,
-     * z.B. https://gist.githubusercontent.com/&lt;benutzername&gt;/&lt;gist-id&gt;/raw/latest.json
-     * Ohne gültige URL liefert die Prüfung einfach einen Fehler
-     * (Verbindung/404) zurück - das Programm bleibt davon unberührt, es wird
-     * lediglich beim manuellen "Update"-Menüpunkt eine Fehlermeldung gezeigt
-     * und der stille Start-Check bleibt wirkungslos.
+     * "Raw"-URL des GitHub Gists von Andre (aruff100), der das
+     * Update-Manifest enthält. Bewusst OHNE Dateinamen und OHNE
+     * Commit-Hash am Ende: bei Ein-Datei-Gists liefert diese Form immer
+     * den NEUESTEN Stand der Datei und übersteht auch ein späteres
+     * Umbenennen der Datei im Gist. Bei jedem Release nur den Gist
+     * bearbeiten (version/notes, ggf. url) - diese URL bleibt für immer
+     * gleich, ein neuer Build ist dafür nicht nötig.
      */
     private static final String MANIFEST_URL =
-            "https://gist.githubusercontent.com/REPLACE_ME/REPLACE_ME/raw/latest.json";
+            "https://gist.githubusercontent.com/aruff100/5535471917759f7b5adaddf26a930e06/raw";
 
     private static final Duration TIMEOUT = Duration.ofSeconds(6);
 
