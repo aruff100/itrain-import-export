@@ -1353,3 +1353,45 @@ korrekt übersetzter Oberfläche.
   Regex-Extraktion + der Versionsvergleich wurden per Python-Simulation
   gegen genau diese echte Antwort getestet (installierte 1.12 → Update;
   1.13/1.14 → aktuell; 1.9/1.2 → Update; alles korrekt).
+
+## Nachtrag 23.07.2026 - Bugfix: Update-Prüfung schlug im fertigen Installer fehl (Version 1.14)
+
+Nutzer meldete: die installierte 1.13 zeigte bei Hilfe → Update "Keine neue
+Version vorhanden" - das war aber (siehe UI-Fehlbild) der FEHLER-Dialog, nicht
+"aktuell". Der Abruf der Gist-URL scheiterte also im über jpackage gebauten
+Installer, obwohl er unter `gradle run` (volle JDK) funktioniert hätte.
+Ursache und Behebung (mehrere Punkte, damit nur EIN weiterer Build nötig ist):
+
+- **Hauptursache - fehlende TLS-/Krypto-Module im Laufzeitabbild**: jlink/
+  jpackage nehmen nur statisch per jdeps erkannte Module mit; die per
+  ServiceLoader geladenen Sicherheitsanbieter (SunEC u.a., nötig für den
+  HTTPS-Handshake mit GitHub) fehlen dadurch im fertigen Installer → jede
+  HTTPS-Verbindung schlägt fehl. Behoben: `--bind-services` zu den
+  jlink-`options` in `build.gradle.kts` ergänzt (nimmt alle ServiceLoader-
+  Anbieter mit ins Abbild). Macht das Abbild etwas größer, ist aber der
+  Standard-Fix für "jlink-App kann kein HTTPS".
+- **Zusätzlich abgesichert - Weiterleitungen**: `UpdateChecker` folgt jetzt
+  HTTP-Weiterleitungen (`followRedirects(HttpClient.Redirect.NORMAL)`) - der
+  Java-HttpClient tut das standardmäßig NICHT. Die kurze Gist-"/raw"-URL
+  lieferte im Test zwar direkt 200, aber falls GitHub künftig umleitet, wäre
+  ein 302 sonst als Fehler gewertet worden.
+- **Diagnose verbessert**: der manuelle Update-Check (Hilfe → Update) zeigt
+  jetzt bei einem Fehler wieder den tatsächlichen technischen Grund an
+  (`UpdateDialog.showError` → Alert-Typ ERROR, `update.errorMessage` mit
+  `{0}`-Detail, alle 10 Sprachen) - beim Einrichten/Testen nötig, sonst
+  tappt man bei jedem Fehlversuch im Dunkeln. Der STILLE Start-Check bleibt
+  unverändert unauffällig (zeigt bei Fehlern gar nichts). Die zwischenzeitlich
+  (als die Manifest-URL noch ein Platzhalter war) bewusst "freundlich"
+  versteckte Fehlermeldung wurde damit rückgängig gemacht - jetzt, mit echter
+  URL, ist ein Fehler ein echtes Problem, das man sehen will.
+- **Version auf 1.14** (`build.gradle.kts` version/appVersion,
+  `AppInfo.FALLBACK_VERSION`) - neuer Build wegen der Fixes.
+- Geänderte Dateien: `build.gradle.kts`, `UpdateChecker.java`,
+  `UpdateDialog.java`, `AppInfo.java`, beide `translations.properties`.
+
+**Test nach dem Build der 1.14:** 1.14 installieren, im Gist die Version auf
+"1.14" lassen und Hilfe → Update drücken - erscheint jetzt "Sie verwenden
+bereits die neueste Version (1.14)", ist der HTTPS-Abruf nachweislich
+repariert. Danach im Gist auf "1.15" stellen → der Update-Dialog sollte
+erscheinen. Sollte weiterhin ein Fehler kommen, zeigt der Dialog nun den
+genauen technischen Grund (bitte dann diesen Text schicken).
