@@ -1309,3 +1309,33 @@ neuen Hilfe-Abschnitt zur Mehrfachauswahl sowie die "Fahrwege"-Beschriftung
 im entsprechenden Reiter, und die vier neuen Sprachen in der Sprachauswahl
 (Voreinstellungen → Sprache sowie Ersteinrichtung) inklusive Flaggen und
 korrekt übersetzter Oberfläche.
+
+## Nachtrag 23.07.2026 - "Zuletzt verwendete öffnen" mit Öffnen-Symbol + Reparatur Sprachpaket
+
+- **Menüpunkt umbenannt**: "Zuletzt verwendet..." heißt jetzt "Zuletzt
+  verwendete öffnen" (`menu.recentFiles`, alle 10 Sprachen sinngemäß, z.B.
+  en "Open Recent Files") und trägt jetzt dasselbe Ordner-Öffnen-Symbol wie
+  "Öffnen..." (`recentFilesMenu.setGraphic(...)` in
+  `HelloController.initialize()`). Alle Textstellen, die den alten
+  Menünamen zitieren (`error.recentFileMissing`, `help.fileMenuText`),
+  wurden in allen 10 Sprachen mit angepasst.
+- **Fehler im Sprachpaket von heute repariert**: beim Einfügen der 4 neuen
+  Sprachen waren in 6 Schlüsseln mit `\n`-Platzhaltern
+  (`error.recentFileMissing`, `update.openLinkManually`,
+  `firstRun.createFolderMessage`/`-Failed`, `editor.exportConfirmMessage`,
+  `editor.exportSuccess` - jeweils nur pt/pl/da/sv) echte Zeilenumbrüche
+  statt literalem `\n` gelandet - die Werte waren dadurch über mehrere
+  physische Zeilen zerrissen (Java-Properties hätte sie abgeschnitten und
+  die Folgezeilen als Müll-Schlüssel gelesen). Per Skript repariert (36
+  Fortsetzungszeilen je Datei mit `\n` wieder angefügt) und anschließend
+  verifiziert: jede Zeile ist wieder eine gültige `schluessel=wert`-Zeile,
+  alle 168 Basisschlüssel haben exakt 10 Sprachen, beide Kopien identisch.
+- Geänderte Dateien: `HelloController.java`, beide `translations.properties`.
+- **Version auf 1.13 angehoben** (auf Nutzerwunsch, um die Update-Funktion
+  real testen zu können): der zuvor gepushte Stand bleibt Version 1.12, die
+  Menü-Umbenennung + Sprachpaket-Reparatur bilden Version 1.13
+  (`build.gradle.kts`: `version`/`jpackage.appVersion`,
+  `AppInfo.FALLBACK_VERSION`). Test-Ablauf: v1.12 taggen/bauen/installieren,
+  dann v1.13 taggen/bauen, 1.13-Installer auf Proton Drive legen, Gist auf
+  Version 1.13 + neuen Link stellen - die installierte 1.12 sollte dann das
+  Update anbieten.
