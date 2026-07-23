@@ -1339,3 +1339,17 @@ korrekt übersetzter Oberfläche.
   dann v1.13 taggen/bauen, 1.13-Installer auf Proton Drive legen, Gist auf
   Version 1.13 + neuen Link stellen - die installierte 1.12 sollte dann das
   Update anbieten.
+- **Echte Manifest-URL eingetragen**: Andre hat den öffentlichen Gist
+  angelegt (aruff100/5535471917759f7b5adaddf26a930e06, Datei heißt dort
+  `gistfile1.txt`, "latest.json" ist nur die Beschreibung - unkritisch) und
+  einen Proton-Drive-ORDNER-Freigabelink erstellt (enthält alle drei
+  Installer; Link bleibt bei künftigen Releases gleich, im Gist muss dann
+  nur noch die Versionsnummer geändert werden). `MANIFEST_URL` in
+  `UpdateChecker.java` zeigt jetzt auf
+  `https://gist.githubusercontent.com/aruff100/5535471917759f7b5adaddf26a930e06/raw`
+  - bewusst OHNE Dateinamen/Commit-Hash (liefert bei Ein-Datei-Gists immer
+  den neuesten Stand, übersteht Datei-Umbenennung). Live verifiziert: die
+  URL liefert das erwartete JSON (version 1.13 + Proton-Link), und die
+  Regex-Extraktion + der Versionsvergleich wurden per Python-Simulation
+  gegen genau diese echte Antwort getestet (installierte 1.12 → Update;
+  1.13/1.14 → aktuell; 1.9/1.2 → Update; alles korrekt).
