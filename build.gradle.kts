@@ -87,8 +87,21 @@ jlink {
     // .github/workflows/release.yml (baut auf einem Windows-, Mac- und
     // Linux-Runner parallel).
     jpackage {
+        val os = OperatingSystem.current()
+        // Betriebssystem-Kürzel für den Installer-Dateinamen, damit ein
+        // Anwender im Proton-Drive-Ordner sofort sieht, welche Datei zu
+        // seinem System gehört (nicht nur an der .msi/.dmg/.deb-Endung). Der
+        // fertige Installer heißt dann z.B. "iTrain-Import-Export-Windows-1.14.msi"
+        // (jpackage hängt die appVersion automatisch hinten an). Der
+        // installierte Programmname selbst bleibt "iTrain-Import-Export"
+        // (imageName), nur der Name der Installationsdatei bekommt das Kürzel.
+        val osLabel = when {
+            os.isWindows -> "Windows"
+            os.isMacOsX -> "macOS"
+            else -> "Linux"
+        }
         imageName = "iTrain-Import-Export"
-        installerName = "iTrain-Import-Export"
+        installerName = "iTrain-Import-Export-$osLabel"
         // Bewusst identisch zu "version" oben (project.version ist jetzt
         // schon suffixfrei, "1.14") - eigenes Feld bleibt trotzdem
         // bestehen, falls App- und Projekt-Version sich künftig einmal
@@ -97,7 +110,6 @@ jlink {
         appVersion = "1.14"
         vendor = "Andre Ruff"
 
-        val os = OperatingSystem.current()
         icon = when {
             os.isWindows -> file("packaging/icons/app-icon.ico")
             os.isMacOsX -> file("packaging/icons/app-icon.icns")

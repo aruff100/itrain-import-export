@@ -43,3 +43,9 @@ bin/
 .DS_Store
 
 ### Lokale Werkzeug-Einstellungen (kein Projekt-Quellcode) ###
+
+### Lokale Arbeits-/Hilfsdateien (kein Projekt-Quellcode) ###
+Hilfetext-bearbeiten.txt
+iTrain-ImportExport-Einstellungen-zuruecksetzen-*.reg
+iTrain-ImportExport-Einstellungen-zuruecksetzen-*.sh
+iTrain-ImportExport-Einstellungen-zuruecksetzen-*.command
