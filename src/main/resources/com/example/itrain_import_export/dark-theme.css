@@ -78,3 +78,14 @@
 .dialog-pane {
     -fx-background-color: #2b2b2b;
 }
+
+/*
+ * Formatierter Hilfetext (HelpDialog): dort werden echte Text-Knoten in einem
+ * TextFlow verwendet, damit einzelne Wörter fett sein können. Text faerbt CSS
+ * ueber -fx-fill, nicht ueber -fx-text-fill - deshalb diese eigene Regel,
+ * bewusst nur fuer .help-text, damit sonstige Beschriftungen (z.B. das rote
+ * "X" der Loeschen-Schaltflaeche) unberuehrt bleiben.
+ */
+.help-text .text {
+    -fx-fill: #e0e0e0;
+}
