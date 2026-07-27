@@ -63,6 +63,7 @@ public final class HelpDialog {
         // Exportieren), dann die Kategorie-Ansicht, die darauf aufbaut.
         addParagraph(content, i18n.t("help.selectionTitle"), i18n.t("help.selectionText"));
         addParagraph(content, i18n.t("help.categoryViewTitle"), i18n.t("help.categoryViewText"));
+        addParagraph(content, i18n.t("help.explorerTitle"), i18n.t("help.explorerText"));
         addParagraph(content, i18n.t("help.referenceRenameTitle"), i18n.t("help.referenceRenameText"));
         addParagraph(content, i18n.t("help.statusBarTitle"), i18n.t("help.statusBarText"));
 

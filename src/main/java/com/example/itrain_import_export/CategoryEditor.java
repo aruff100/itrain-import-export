@@ -3,6 +3,7 @@ package com.example.itrain_import_export;
 import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -48,6 +49,7 @@ import java.io.File;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -124,8 +126,23 @@ public class CategoryEditor {
     private final TextField tagField = new TextField();
     private final TextField textContentField = new TextField();
     private final GridPane tagGrid = new GridPane();
+    /**
+     * Generischer "Daten ändern"-Bereich: Tag- und Textinhalt-Feld plus die
+     * Attribut-Tabelle darunter. Wird durch {@link #configPane} ersetzt, wenn
+     * der Konfigurations-Knoten einer Lokomotive ausgewählt ist.
+     */
+    private final VBox genericPane = new VBox();
+    /** Attribute des im Explorer ausgewählten Knotens, als bearbeitbare Tabelle. */
+    private final TableView<AttributeRow> attributeTable = new TableView<>();
+    private final ObservableList<AttributeRow> attributeRows = FXCollections.observableArrayList();
     private final SimpleIntegerProperty entryCount = new SimpleIntegerProperty(0);
     private final SimpleIntegerProperty selectedCount = new SimpleIntegerProperty(0);
+    /**
+     * Anzahl der mit der aktuellen Auswahl verknüpften Einträge aus anderen
+     * Kategorien (dieselbe Auflösung wie beim Export, siehe
+     * {@link #resolveLinkedEntries}) - für die Statuszeile.
+     */
+    private final SimpleIntegerProperty linkedCount = new SimpleIntegerProperty(0);
 
     /**
      * Spezialisierte Tabelle für {@code <configuration>}-Knoten von
@@ -162,6 +179,14 @@ public class CategoryEditor {
     /** Anzahl der aktuell markierten Einträge in der Tabelle dieser Kategorie. */
     public ReadOnlyIntegerProperty selectedCountProperty() {
         return selectedCount;
+    }
+
+    /**
+     * Anzahl der Einträge anderer Kategorien, die mit der aktuellen Auswahl
+     * verknüpft sind und beim Export automatisch mitgenommen würden.
+     */
+    public ReadOnlyIntegerProperty linkedCountProperty() {
+        return linkedCount;
     }
 
     public String getDisplayName() {
@@ -266,6 +291,13 @@ public class CategoryEditor {
         Map<XmlNode, String> result = new LinkedHashMap<>();
         Set<XmlNode> alreadyHandled = new HashSet<>(selectedEntries);
         Deque<XmlNode> toScan = new ArrayDeque<>(selectedEntries);
+        // Einmalig aufgebauter Suchindex statt linearer Suche je Referenz:
+        // Die Auflösung läuft seit der Statuszeilen-Anzeige "Verbundene
+        // Datensätze" bei JEDER Auswahländerung, nicht mehr nur beim Export -
+        // mit der früheren Schleife über alle Kategorien je Referenz wäre das
+        // bei großen Dateien (mehrere tausend Einträge, vielfach so viele
+        // Referenzen) spürbar geworden.
+        ReferenceIndex index = new ReferenceIndex(controlItemsNode);
 
         while (!toScan.isEmpty()) {
             XmlNode current = toScan.poll();
@@ -274,10 +306,10 @@ public class CategoryEditor {
                 if (refName == null || refName.isBlank()) {
                     continue;
                 }
-                XmlNode found = findEntryByReference(reference.getTagName(), refName);
+                XmlNode found = index.findByReference(reference.getTagName(), refName);
                 if (found != null && !alreadyHandled.contains(found)) {
                     alreadyHandled.add(found);
-                    String category = findCategoryNameOf(found);
+                    String category = index.categoryOf(found);
                     if (category != null) {
                         result.put(found, category);
                         toScan.add(found);
@@ -299,7 +331,8 @@ public class CategoryEditor {
     }
 
     /**
-     * Löst eine Referenz (Tag + name-Attribut) zum tatsächlichen Eintrag auf.
+     * Nachschlagewerk über alle Einträge des Dokuments, um eine Referenz
+     * (Tag + name-Attribut) zum tatsächlichen Eintrag aufzulösen.
      * Zuerst wird ein exakter Tag+Name-Treffer versucht (der Normalfall,
      * z.B. {@code <feedback name="RM1"/>} → {@code <feedback name="RM1">}
      * unter feedbacks). Manche Referenzen verwenden aber je nach
@@ -315,46 +348,47 @@ public class CategoryEditor {
      * teilen sich eine Lok und der zugehörige Zug oft denselben Namen); der
      * exakte Tag-Treffer bleibt deshalb immer die erste Wahl.
      */
-    private XmlNode findEntryByReference(String tag, String name) {
-        XmlNode exact = findEntryByTagAndName(tag, name);
-        if (exact != null) {
-            return exact;
-        }
-        return findEntryByName(name);
-    }
+    private static final class ReferenceIndex {
 
-    /** Sucht in ALLEN Kategorien nach einem direkten Eintrag mit passendem "name"-Attribut, unabhängig vom Tag. */
-    private XmlNode findEntryByName(String name) {
-        for (XmlNode category : controlItemsNode.getChildren()) {
-            for (XmlNode entry : category.getChildren()) {
-                if (name.equals(entry.getAttribute("name"))) {
-                    return entry;
+        /**
+         * Trennzeichen für den zusammengesetzten Schlüssel "Tag + Name". Ein
+         * Leerzeichen ist hier eindeutig, weil XML-Tag-Namen per Definition
+         * kein Leerzeichen enthalten dürfen - der Schlüssel lässt sich also
+         * nicht mehrdeutig zusammensetzen, auch wenn der Name selbst
+         * Leerzeichen enthält (z.B. "DB Dampf GZ").
+         */
+        private static final String SEPARATOR = " ";
+
+        private final Map<String, XmlNode> byTagAndName = new HashMap<>();
+        private final Map<String, XmlNode> byName = new HashMap<>();
+        private final Map<XmlNode, String> categoryByEntry = new java.util.IdentityHashMap<>();
+
+        ReferenceIndex(XmlNode controlItemsNode) {
+            for (XmlNode category : controlItemsNode.getChildren()) {
+                for (XmlNode entry : category.getChildren()) {
+                    categoryByEntry.put(entry, category.getTagName());
+                    String name = entry.getAttribute("name");
+                    if (name == null) {
+                        continue;
+                    }
+                    // putIfAbsent: bei mehrfach vergebenen Namen gewinnt - wie
+                    // bei der früheren Schleife - der zuerst gefundene Eintrag.
+                    byTagAndName.putIfAbsent(entry.getTagName() + SEPARATOR + name, entry);
+                    byName.putIfAbsent(name, entry);
                 }
             }
         }
-        return null;
-    }
 
-    /** Sucht in ALLEN Kategorien nach einem direkten Eintrag mit passendem Tag-Namen und "name"-Attribut. */
-    private XmlNode findEntryByTagAndName(String tag, String name) {
-        for (XmlNode category : controlItemsNode.getChildren()) {
-            for (XmlNode entry : category.getChildren()) {
-                if (entry.getTagName().equals(tag) && name.equals(entry.getAttribute("name"))) {
-                    return entry;
-                }
-            }
+        /** Löst eine Referenz auf: erst exakt über Tag+Name, ersatzweise nur über den Namen. */
+        XmlNode findByReference(String tag, String name) {
+            XmlNode exact = byTagAndName.get(tag + SEPARATOR + name);
+            return exact != null ? exact : byName.get(name);
         }
-        return null;
-    }
 
-    /** Ermittelt, unter welcher Kategorie (direktes Kind von control-items) ein Eintrag tatsächlich steht. */
-    private String findCategoryNameOf(XmlNode entry) {
-        for (XmlNode category : controlItemsNode.getChildren()) {
-            if (category.getChildren().contains(entry)) {
-                return category.getTagName();
-            }
+        /** Kategorie (direktes Kind von control-items), unter der ein Eintrag tatsächlich steht. */
+        String categoryOf(XmlNode entry) {
+            return categoryByEntry.get(entry);
         }
-        return null;
     }
 
     private void bindEntryItems(ObservableList<XmlNode> items) {
@@ -377,8 +411,10 @@ public class CategoryEditor {
 
     private javafx.scene.Node buildListSide() {
         entryTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        entryTable.getSelectionModel().getSelectedIndices().addListener((ListChangeListener<Integer>) change ->
-                selectedCount.set(entryTable.getSelectionModel().getSelectedIndices().size()));
+        entryTable.getSelectionModel().getSelectedIndices().addListener((ListChangeListener<Integer>) change -> {
+            selectedCount.set(entryTable.getSelectionModel().getSelectedIndices().size());
+            updateLinkedCount();
+        });
 
         TableColumn<XmlNode, Void> selectColumn = buildSelectionColumn();
 
@@ -473,10 +509,11 @@ public class CategoryEditor {
         HBox toolbar = new HBox(10, exportSelectedButton, importButton, toolbarSpacer, addButton, deleteButton);
         toolbar.setPadding(new Insets(8));
 
-        Label hint = new Label(i18n.t("editor.deleteHint"));
-        hint.setStyle("-fx-font-size: 11px; -fx-text-fill: gray;");
-
-        VBox box = new VBox(toolbar, entryTable, hint);
+        // Der frühere graue Hinweis "Doppelklick auf eine Zeile löscht den
+        // Eintrag" steht hier bewusst nicht mehr (auf Wunsch entfernt) - die
+        // Funktion selbst bleibt aber unverändert erhalten, siehe
+        // setOnMouseClicked oben.
+        VBox box = new VBox(toolbar, entryTable);
         VBox.setVgrow(entryTable, javafx.scene.layout.Priority.ALWAYS);
         return box;
     }
@@ -984,8 +1021,13 @@ public class CategoryEditor {
         });
 
         buildConfigPane();
+        // Der generische Bereich besteht jetzt aus Tag/Textinhalt PLUS der
+        // Attribut-Tabelle - vorher waren die eigentlichen Daten (z.B.
+        // name="YD7001" address=37 eines <interface>-Elements) gar nicht
+        // änderbar, obwohl der Explorer sie anzeigt.
+        genericPane.getChildren().addAll(tagGrid, buildAttributePane());
 
-        StackPane detailContentStack = new StackPane(tagGrid, configPane);
+        StackPane detailContentStack = new StackPane(genericPane, configPane);
 
         Label dataEditorLabel = new Label(i18n.t("editor.dataEditorLabel"));
         dataEditorLabel.setStyle("-fx-font-weight: bold;");
@@ -1040,6 +1082,7 @@ public class CategoryEditor {
         boolean enabled = node != null;
         tagField.setDisable(!enabled);
         textContentField.setDisable(!enabled);
+        reloadAttributeRows(node);
 
         // Lokomotiven bekommen für ihren "configuration"-Knoten eine
         // spezialisierte Tabelle (Aktiv/Nr/Wert/Typ/Beschreibung) statt der
@@ -1051,10 +1094,25 @@ public class CategoryEditor {
             currentConfigNode = node;
             configTable.setItems(node.getChildren());
         }
-        tagGrid.setVisible(!showConfig);
-        tagGrid.setManaged(!showConfig);
+        genericPane.setVisible(!showConfig);
+        genericPane.setManaged(!showConfig);
         configPane.setVisible(showConfig);
         configPane.setManaged(showConfig);
+    }
+
+    /**
+     * Ermittelt die Anzahl der mit der aktuellen Auswahl verknüpften Einträge
+     * für die Statuszeile - exakt dieselbe Auflösung, die auch der Export
+     * verwendet ({@link #resolveLinkedEntries}), damit die angezeigte Zahl
+     * genau der Anzahl zusätzlich exportierter Datensätze entspricht.
+     */
+    private void updateLinkedCount() {
+        List<XmlNode> selected = new ArrayList<>(entryTable.getSelectionModel().getSelectedItems());
+        if (selected.isEmpty()) {
+            linkedCount.set(0);
+            return;
+        }
+        linkedCount.set(resolveLinkedEntries(selected).size());
     }
 
     private void commitTagName() {
@@ -1071,6 +1129,257 @@ public class CategoryEditor {
             detailTree.refresh();
             entryTable.refresh();
         }
+    }
+
+    // ---------------------------------------------------------------
+    // Attribut-Tabelle des im Explorer ausgewählten Knotens
+    // ---------------------------------------------------------------
+
+    /**
+     * Eine Zeile der Attribut-Tabelle. Bewusst ein eigenes, beobachtbares
+     * Modell statt direkt auf {@link XmlNode#getAttributes()} zu arbeiten:
+     * die Attribute liegen dort in einer {@code LinkedHashMap} (Reihenfolge
+     * wie im Original, was für die Round-Trip-Treue wichtig ist), und eine
+     * Map lässt sich nicht als {@code TableView}-Inhalt beobachten.
+     */
+    public static final class AttributeRow {
+
+        private final SimpleStringProperty name = new SimpleStringProperty();
+        private final SimpleStringProperty value = new SimpleStringProperty();
+
+        AttributeRow(String name, String value) {
+            this.name.set(name);
+            this.value.set(value == null ? "" : value);
+        }
+
+        public SimpleStringProperty nameProperty() {
+            return name;
+        }
+
+        public SimpleStringProperty valueProperty() {
+            return value;
+        }
+
+        String getName() {
+            return name.get();
+        }
+
+        String getValue() {
+            return value.get();
+        }
+    }
+
+    /**
+     * Baut die Attribut-Tabelle für den generischen "Daten ändern"-Bereich:
+     * je eine Zeile pro Attribut des im Daten-Explorer ausgewählten Knotens,
+     * mit editierbarem Namen und Wert sowie "+"/rotem "X" zum Hinzufügen und
+     * Löschen einzelner Attribute (gleiche Symbolik wie über der
+     * Einträge-Tabelle).
+     * <p>
+     * Nötig, weil die eigentlichen Daten der meisten Knoten in ihren
+     * Attributen stecken ({@code <interface name="YD7001" address="37"/>});
+     * vorher ließ sich nur der Tag-Name und ein etwaiger Textinhalt ändern.
+     * Ein Schema gibt es dabei nicht: In einer echten iTrain-Datei kommen
+     * knapp 100 verschiedene Tags mit ganz unterschiedlichen Attributsätzen
+     * vor (und manche Elemente wie {@code <length unit="cm">14.0</length>}
+     * haben Attribute UND Textinhalt) - deshalb generisch statt fest
+     * verdrahtet.
+     */
+    private javafx.scene.Node buildAttributePane() {
+        attributeTable.setEditable(true);
+        attributeTable.setItems(attributeRows);
+        attributeTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        attributeTable.setPlaceholder(new Label(i18n.t("editor.noAttributes")));
+
+        TableColumn<AttributeRow, String> nameColumn = new TableColumn<>(i18n.t("editor.attributeName"));
+        nameColumn.setPrefWidth(140);
+        nameColumn.setCellValueFactory(data -> data.getValue().nameProperty());
+        nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        nameColumn.setOnEditCommit(event -> commitAttributeName(event.getRowValue(), event.getNewValue()));
+
+        TableColumn<AttributeRow, String> valueColumn = new TableColumn<>(i18n.t("editor.attributeValue"));
+        valueColumn.setPrefWidth(200);
+        valueColumn.setCellValueFactory(data -> data.getValue().valueProperty());
+        valueColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        valueColumn.setOnEditCommit(event -> commitAttributeValue(event.getRowValue(), event.getNewValue()));
+
+        attributeTable.getColumns().add(nameColumn);
+        attributeTable.getColumns().add(valueColumn);
+
+        Button addButton = new Button("+");
+        addButton.setOnAction(e -> onAddAttribute());
+        addButton.setTooltip(new Tooltip(i18n.t("editor.addAttribute")));
+        addButton.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-min-width: 32px;");
+
+        Button deleteButton = new Button("X");
+        deleteButton.setOnAction(e -> {
+            AttributeRow selected = attributeTable.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                deleteAttribute(selected);
+            }
+        });
+        deleteButton.setTooltip(new Tooltip(i18n.t("editor.removeAttribute")));
+        deleteButton.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-min-width: 32px; -fx-text-fill: #c0392b;");
+
+        Label attributesLabel = new Label(i18n.t("editor.attributes"));
+        attributesLabel.setStyle("-fx-font-weight: bold;");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        HBox header = new HBox(10, attributesLabel, spacer, addButton, deleteButton);
+        header.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        header.setPadding(new Insets(4, 8, 4, 8));
+
+        VBox box = new VBox(header, attributeTable);
+        VBox.setVgrow(attributeTable, javafx.scene.layout.Priority.ALWAYS);
+        VBox.setVgrow(box, javafx.scene.layout.Priority.ALWAYS);
+        return box;
+    }
+
+    /** Füllt die Attribut-Tabelle neu aus dem gerade ausgewählten Knoten. */
+    private void reloadAttributeRows(XmlNode node) {
+        attributeRows.clear();
+        if (node != null) {
+            for (Map.Entry<String, String> attribute : node.getAttributes().entrySet()) {
+                attributeRows.add(new AttributeRow(attribute.getKey(), attribute.getValue()));
+            }
+        }
+        attributeTable.setDisable(node == null);
+    }
+
+    /**
+     * Benennt ein Attribut um - unter Beibehaltung seiner Position, indem die
+     * gesamte Attributliste in derselben Reihenfolge neu aufgebaut wird
+     * (einfaches Entfernen+Hinzufügen würde es ans Ende schieben und damit
+     * die Reihenfolge der Datei unnötig verändern).
+     */
+    private void commitAttributeName(AttributeRow row, String newName) {
+        if (selectedTreeNode == null) {
+            return;
+        }
+        String oldName = row.getName();
+        String trimmed = newName == null ? "" : newName.trim();
+        if (trimmed.equals(oldName)) {
+            return;
+        }
+        if (!isValidAttributeName(trimmed)) {
+            showAttributeWarning(i18n.t("editor.attributeNameInvalid"));
+            attributeTable.refresh();
+            return;
+        }
+        if (selectedTreeNode.getAttributes().containsKey(trimmed)) {
+            showAttributeWarning(i18n.t("editor.attributeNameExists", trimmed));
+            attributeTable.refresh();
+            return;
+        }
+        beforeChange.run();
+        LinkedHashMap<String, String> rebuilt = new LinkedHashMap<>();
+        for (Map.Entry<String, String> attribute : selectedTreeNode.getAttributes().entrySet()) {
+            if (attribute.getKey().equals(oldName)) {
+                rebuilt.put(trimmed, attribute.getValue());
+            } else {
+                rebuilt.put(attribute.getKey(), attribute.getValue());
+            }
+        }
+        selectedTreeNode.replaceAttributes(rebuilt);
+        row.nameProperty().set(trimmed);
+        onModified.run();
+        afterAttributeChange();
+    }
+
+    /**
+     * Setzt den Wert eines Attributs. Ein leerer Wert bleibt bewusst als
+     * leeres Attribut erhalten ({@code address=""}) statt das Attribut zu
+     * entfernen - Entfernen ist ausdrücklich die Aufgabe des roten "X",
+     * damit ein versehentlich geleertes Feld nicht stillschweigend Daten
+     * löscht.
+     */
+    private void commitAttributeValue(AttributeRow row, String newValue) {
+        if (selectedTreeNode == null) {
+            return;
+        }
+        String value = newValue == null ? "" : newValue;
+        if (value.equals(row.getValue())) {
+            return;
+        }
+        beforeChange.run();
+        selectedTreeNode.setAttribute(row.getName(), value);
+        row.valueProperty().set(value);
+        onModified.run();
+        afterAttributeChange();
+    }
+
+    private void onAddAttribute() {
+        if (selectedTreeNode == null) {
+            return;
+        }
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle(i18n.t("editor.addAttributeTitle"));
+        dialog.setHeaderText(i18n.t("editor.attributeNamePrompt"));
+        Optional<String> result = dialog.showAndWait();
+        if (result.isEmpty()) {
+            return;
+        }
+        String name = result.get().trim();
+        if (!isValidAttributeName(name)) {
+            showAttributeWarning(i18n.t("editor.attributeNameInvalid"));
+            return;
+        }
+        if (selectedTreeNode.getAttributes().containsKey(name)) {
+            showAttributeWarning(i18n.t("editor.attributeNameExists", name));
+            return;
+        }
+        beforeChange.run();
+        selectedTreeNode.setAttribute(name, "");
+        onModified.run();
+        reloadAttributeRows(selectedTreeNode);
+        afterAttributeChange();
+    }
+
+    private void deleteAttribute(AttributeRow row) {
+        if (selectedTreeNode == null) {
+            return;
+        }
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                i18n.t("editor.attributeDeleteConfirm", row.getName()));
+        confirm.setHeaderText(null);
+        Optional<ButtonType> answer = confirm.showAndWait();
+        if (answer.isEmpty() || answer.get() != ButtonType.OK) {
+            return;
+        }
+        beforeChange.run();
+        selectedTreeNode.removeAttribute(row.getName());
+        onModified.run();
+        reloadAttributeRows(selectedTreeNode);
+        afterAttributeChange();
+    }
+
+    /**
+     * Grobe Prüfung auf einen gültigen XML-Attributnamen. Bewusst
+     * konservativ (ASCII-Buchstaben, Ziffern, {@code _ - . :}), weil ein
+     * ungültiger Name die Datei beim Speichern unbrauchbar machen würde;
+     * iTrain selbst verwendet ausschließlich solche Namen.
+     */
+    private static boolean isValidAttributeName(String name) {
+        return name != null && name.matches("[A-Za-z_:][A-Za-z0-9_:.-]*");
+    }
+
+    private void showAttributeWarning(String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING, message);
+        alert.setHeaderText(null);
+        alert.showAndWait();
+    }
+
+    /**
+     * Nach einer Attributänderung müssen Baum und Einträge-Tabelle neu
+     * gezeichnet werden: Der Baum zeigt die Attribute im Zeilentext
+     * ({@link XmlNode#toSummaryString()}), und die Namensspalte der Tabelle
+     * hängt am Attribut "name".
+     */
+    private void afterAttributeChange() {
+        detailTree.refresh();
+        entryTable.refresh();
+        updateLinkedCount();
     }
 
     // ---------------------------------------------------------------

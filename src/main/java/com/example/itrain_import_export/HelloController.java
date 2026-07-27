@@ -48,6 +48,13 @@ import java.util.regex.Pattern;
  */
 public class HelloController {
 
+    /**
+     * Trennung der drei Angaben in der Statuszeile (Einträge / Ausgewählt /
+     * Verbundene Datensätze): breiter Abstand, senkrechter Strich, breiter
+     * Abstand.
+     */
+    private static final String STATUS_SEPARATOR = "      |      ";
+
     @FXML
     private TabPane tabPane;
 
@@ -727,6 +734,11 @@ public class HelloController {
                 updateStatusForSelectedTab();
             }
         });
+        editor.linkedCountProperty().addListener((obs, oldV, newV) -> {
+            if (tabPane.getSelectionModel().getSelectedItem() == tab) {
+                updateStatusForSelectedTab();
+            }
+        });
         tabPane.getTabs().add(tab);
     }
 
@@ -736,7 +748,11 @@ public class HelloController {
         if (editor != null) {
             String entryCountText = i18n.t("status.entryCount", editor.getDisplayName(), editor.entryCountProperty().get());
             String selectedCountText = i18n.t("status.selectedCount", editor.selectedCountProperty().get());
-            statusLabel.setText(entryCountText + "   " + selectedCountText);
+            String linkedCountText = i18n.t("status.linkedCount", editor.linkedCountProperty().get());
+            // Deutlich getrennte Angaben: breiter Abstand plus "|" als
+            // Trennzeichen, damit die drei Zahlen nicht ineinander laufen.
+            statusLabel.setText(entryCountText + STATUS_SEPARATOR + selectedCountText
+                    + STATUS_SEPARATOR + linkedCountText);
         } else {
             statusLabel.setText("");
         }
