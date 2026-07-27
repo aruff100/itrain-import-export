@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "com.example"
-version = "1.14"
+version = "1.15"
 
 repositories {
     mavenCentral()
@@ -91,7 +91,7 @@ jlink {
         // Betriebssystem-Kürzel für den Installer-Dateinamen, damit ein
         // Anwender im Proton-Drive-Ordner sofort sieht, welche Datei zu
         // seinem System gehört (nicht nur an der .msi/.dmg/.deb-Endung). Der
-        // fertige Installer heißt dann z.B. "iTrain-Import-Export-Windows-1.14.msi"
+        // fertige Installer heißt dann z.B. "iTrain-Import-Export-Windows-1.15.msi"
         // (jpackage hängt die appVersion automatisch hinten an). Der
         // installierte Programmname selbst bleibt "iTrain-Import-Export"
         // (imageName), nur der Name der Installationsdatei bekommt das Kürzel.
@@ -103,11 +103,11 @@ jlink {
         imageName = "iTrain-Import-Export"
         installerName = "iTrain-Import-Export-$osLabel"
         // Bewusst identisch zu "version" oben (project.version ist jetzt
-        // schon suffixfrei, "1.14") - eigenes Feld bleibt trotzdem
+        // schon suffixfrei, "1.15") - eigenes Feld bleibt trotzdem
         // bestehen, falls App- und Projekt-Version sich künftig einmal
         // unterscheiden sollen; jpackage verlangt ohnehin ein reines
         // Zahlen-/Punkt-Format ohne Suffix wie "-SNAPSHOT".
-        appVersion = "1.14"
+        appVersion = "1.15"
         vendor = "Andre Ruff"
 
         icon = when {
