@@ -59,8 +59,10 @@ public final class HelpDialog {
         addParagraph(content, i18n.t("help.settingsMenuTitle"), i18n.t("help.settingsMenuText"));
         addParagraph(content, i18n.t("help.helpMenuTitle"), i18n.t("help.helpMenuText"));
         addParagraph(content, i18n.t("help.updateTitle"), i18n.t("help.updateText"));
-        addParagraph(content, i18n.t("help.categoryViewTitle"), i18n.t("help.categoryViewText"));
+        // Reihenfolge bewusst so: erst die Mehrfachauswahl (Grundlage für das
+        // Exportieren), dann die Kategorie-Ansicht, die darauf aufbaut.
         addParagraph(content, i18n.t("help.selectionTitle"), i18n.t("help.selectionText"));
+        addParagraph(content, i18n.t("help.categoryViewTitle"), i18n.t("help.categoryViewText"));
         addParagraph(content, i18n.t("help.referenceRenameTitle"), i18n.t("help.referenceRenameText"));
         addParagraph(content, i18n.t("help.statusBarTitle"), i18n.t("help.statusBarText"));
 
