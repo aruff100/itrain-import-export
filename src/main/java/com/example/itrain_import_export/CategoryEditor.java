@@ -16,6 +16,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionMode;
@@ -447,6 +448,12 @@ public class CategoryEditor {
         entryTable.getColumns().add(typeColumn);
         entryTable.getColumns().add(nameColumn);
         entryTable.getColumns().add(descColumn);
+        // Ohne Resize-Policy behalten die Spalten ihre feste Breite, und rechts
+        // neben der letzten Spalte bleibt ein leerer Rest der Tabelle stehen
+        // (sieht aus wie eine dritte, namenlose Spalte). Mit dieser Policy
+        // dehnt sich statt dessen die letzte Spalte (Beschreibung) auf die
+        // verbleibende Breite aus und wächst beim Vergrößern des Fensters mit.
+        entryTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         bindEntryItems(categoryNode != null ? categoryNode.getChildren() : FXCollections.observableArrayList());
         entryTable.setPlaceholder(new Label(i18n.t("editor.noEntries")));
 
@@ -455,7 +462,9 @@ public class CategoryEditor {
         ContextMenu rowContextMenu = new ContextMenu();
         MenuItem exportItem = new MenuItem(i18n.t("editor.export"));
         exportItem.setOnAction(e -> onExport());
-        rowContextMenu.getItems().add(exportItem);
+        MenuItem editItem = new MenuItem(i18n.t("editor.editEntry"));
+        editItem.setOnAction(e -> onEditEntry());
+        rowContextMenu.getItems().addAll(editItem, exportItem);
 
         entryTable.setRowFactory(tv -> {
             javafx.scene.control.TableRow<XmlNode> row = new javafx.scene.control.TableRow<>();
@@ -1013,12 +1022,13 @@ public class CategoryEditor {
         tagGrid.setPadding(new Insets(8));
         tagGrid.addRow(0, new Label(i18n.t("editor.tag")), tagField);
         tagGrid.addRow(1, new Label(i18n.t("editor.textContent")), textContentField);
-        tagField.setOnAction(e -> commitTagName());
-        tagField.focusedProperty().addListener((obs, was, is) -> {
-            if (!is) {
-                commitTagName();
-            }
-        });
+        // Der Tag-Name ist bewusst NICHT änderbar: er bestimmt die Struktur
+        // der Datei (iTrain erwartet genau diese Element-Namen), während in
+        // diesem Bereich nur Daten geändert werden sollen. Anzeigen (und
+        // Kopieren) bleibt möglich, deshalb schreibgeschützt statt deaktiviert.
+        tagField.setEditable(false);
+        tagField.setFocusTraversable(false);
+        tagField.setStyle("-fx-opacity: 1; -fx-control-inner-background: -fx-background;");
 
         buildConfigPane();
         // Der generische Bereich besteht jetzt aus Tag/Textinhalt PLUS der
@@ -1080,7 +1090,6 @@ public class CategoryEditor {
         tagField.setText(node != null ? node.getTagName() : "");
         textContentField.setText(node != null && node.getTextContent() != null ? node.getTextContent() : "");
         boolean enabled = node != null;
-        tagField.setDisable(!enabled);
         textContentField.setDisable(!enabled);
         reloadAttributeRows(node);
 
@@ -1113,22 +1122,6 @@ public class CategoryEditor {
             return;
         }
         linkedCount.set(resolveLinkedEntries(selected).size());
-    }
-
-    private void commitTagName() {
-        if (selectedTreeNode != null && !tagField.getText().isBlank()) {
-            String newTag = tagField.getText().trim();
-            // Auch hier nur bei tatsächlicher Änderung als "modified" zählen
-            // (siehe textContentField-Listener oben) - sonst würde z.B. das
-            // reine Verlassen des Feldes per Tab schon als Änderung gelten.
-            if (!newTag.equals(selectedTreeNode.getTagName())) {
-                beforeChange.run();
-                selectedTreeNode.setTagName(newTag);
-                onModified.run();
-            }
-            detailTree.refresh();
-            entryTable.refresh();
-        }
     }
 
     // ---------------------------------------------------------------
@@ -1191,11 +1184,12 @@ public class CategoryEditor {
         attributeTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         attributeTable.setPlaceholder(new Label(i18n.t("editor.noAttributes")));
 
+        // Der Attributname ist - wie der Tag - Struktur und daher nur zur
+        // Anzeige; bearbeitet wird ausschließlich der Wert.
         TableColumn<AttributeRow, String> nameColumn = new TableColumn<>(i18n.t("editor.attributeName"));
         nameColumn.setPrefWidth(140);
         nameColumn.setCellValueFactory(data -> data.getValue().nameProperty());
-        nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        nameColumn.setOnEditCommit(event -> commitAttributeName(event.getRowValue(), event.getNewValue()));
+        nameColumn.setEditable(false);
 
         TableColumn<AttributeRow, String> valueColumn = new TableColumn<>(i18n.t("editor.attributeValue"));
         valueColumn.setPrefWidth(200);
@@ -1205,28 +1199,17 @@ public class CategoryEditor {
 
         attributeTable.getColumns().add(nameColumn);
         attributeTable.getColumns().add(valueColumn);
-
-        Button addButton = new Button("+");
-        addButton.setOnAction(e -> onAddAttribute());
-        addButton.setTooltip(new Tooltip(i18n.t("editor.addAttribute")));
-        addButton.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-min-width: 32px;");
-
-        Button deleteButton = new Button("X");
-        deleteButton.setOnAction(e -> {
-            AttributeRow selected = attributeTable.getSelectionModel().getSelectedItem();
-            if (selected != null) {
-                deleteAttribute(selected);
-            }
-        });
-        deleteButton.setTooltip(new Tooltip(i18n.t("editor.removeAttribute")));
-        deleteButton.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-min-width: 32px; -fx-text-fill: #c0392b;");
+        // Wie bei der Einträge-Tabelle: die letzte Spalte (Wert) füllt die
+        // restliche Breite, statt einen leeren Rest stehen zu lassen.
+        attributeTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
 
         Label attributesLabel = new Label(i18n.t("editor.attributes"));
         attributesLabel.setStyle("-fx-font-weight: bold;");
 
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        HBox header = new HBox(10, attributesLabel, spacer, addButton, deleteButton);
+        // Bewusst OHNE "+"/"X": An dieser Stelle werden nur vorhandene Werte
+        // geändert. Attribute anzulegen oder zu entfernen würde die Struktur
+        // eines Elements verändern - dafür ist dieser Bereich nicht gedacht.
+        HBox header = new HBox(10, attributesLabel);
         header.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
         header.setPadding(new Insets(4, 8, 4, 8));
 
@@ -1234,6 +1217,163 @@ public class CategoryEditor {
         VBox.setVgrow(attributeTable, javafx.scene.layout.Priority.ALWAYS);
         VBox.setVgrow(box, javafx.scene.layout.Priority.ALWAYS);
         return box;
+    }
+
+    // ---------------------------------------------------------------
+    // Name/Beschreibung eines Eintrags bearbeiten (Rechtsklick -> Bearbeiten)
+    // ---------------------------------------------------------------
+
+    /**
+     * Bearbeitet Name und Beschreibung des in der Liste markierten Eintrags.
+     * <p>
+     * Bewusst als kleiner Dialog (Eingabetaste = OK) statt als Bearbeitung
+     * direkt in der Tabellenzelle: Ein Doppelklick auf eine Zeile löscht den
+     * Eintrag (mit Rückfrage), und genau dieser Doppelklick ist in JavaFX auch
+     * die Standard-Geste, um eine Tabellenzelle in den Bearbeitungsmodus zu
+     * schalten - beides zusammen würde sich in die Quere kommen.
+     */
+    private void onEditEntry() {
+        XmlNode entry = entryTable.getSelectionModel().getSelectedItem();
+        if (entry == null) {
+            return;
+        }
+        String oldName = entry.getName();
+        XmlNode descriptionNode = entry.findChild("description");
+        String oldDescription = descriptionNode != null && descriptionNode.getTextContent() != null
+                ? descriptionNode.getTextContent() : "";
+
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.initOwner(getWindow());
+        dialog.setTitle(i18n.t("editor.editEntry"));
+        dialog.setHeaderText(null);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        TextField nameInput = new TextField(oldName);
+        TextField descriptionInput = new TextField(oldDescription);
+        nameInput.setPrefColumnCount(30);
+        descriptionInput.setPrefColumnCount(30);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(8);
+        grid.setVgap(8);
+        grid.setPadding(new Insets(10));
+        grid.addRow(0, new Label(i18n.t("editor.columnName")), nameInput);
+        grid.addRow(1, new Label(i18n.t("editor.columnDescription")), descriptionInput);
+        dialog.getDialogPane().setContent(grid);
+        // Farbschema erst anwenden, wenn die Scene existiert (siehe
+        // HelpDialog/SettingsDialog - dasselbe Muster).
+        dialog.getDialogPane().sceneProperty().addListener((obs, oldScene, newScene) ->
+                ThemeManager.apply(newScene, AppSettings.getInstance().getTheme()));
+        javafx.application.Platform.runLater(nameInput::requestFocus);
+
+        Optional<ButtonType> answer = dialog.showAndWait();
+        if (answer.isEmpty() || answer.get() != ButtonType.OK) {
+            return;
+        }
+
+        String newName = nameInput.getText() == null ? "" : nameInput.getText().trim();
+        String newDescription = descriptionInput.getText() == null ? "" : descriptionInput.getText().trim();
+        boolean nameChanged = !newName.equals(oldName);
+        boolean descriptionChanged = !newDescription.equals(oldDescription);
+        if (!nameChanged && !descriptionChanged) {
+            return;
+        }
+        if (nameChanged && newName.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.WARNING, i18n.t("editor.editNameEmpty"));
+            alert.setHeaderText(null);
+            alert.showAndWait();
+            return;
+        }
+        if (nameChanged && categoryNode != null && categoryHasEntry(categoryNode, entry.getTagName(), newName)) {
+            Alert alert = new Alert(Alert.AlertType.WARNING, i18n.t("editor.editNameExists", newName));
+            alert.setHeaderText(null);
+            alert.showAndWait();
+            return;
+        }
+
+        // Wird ein Eintrag umbenannt, zeigen Verweise anderer Einträge (z.B.
+        // eine Aktion, die auf diese Rückmeldung verweist) sonst ins Leere -
+        // iTrain kann die Datei danach nicht mehr öffnen. Deshalb die
+        // Rückfrage, ob die Verweise mit umbenannt werden sollen.
+        int references = nameChanged ? countReferences(oldName) : 0;
+        boolean renameReferences = false;
+        if (references > 0) {
+            ButtonType renameAll = new ButtonType(i18n.t("editor.renameReferencesYes"), ButtonBar.ButtonData.YES);
+            ButtonType onlyEntry = new ButtonType(i18n.t("editor.renameReferencesNo"), ButtonBar.ButtonData.NO);
+            Alert ask = new Alert(Alert.AlertType.CONFIRMATION,
+                    i18n.t("editor.renameReferencesQuestion", references, oldName, newName),
+                    renameAll, onlyEntry, ButtonType.CANCEL);
+            ask.setHeaderText(null);
+            Optional<ButtonType> choice = ask.showAndWait();
+            if (choice.isEmpty() || choice.get() == ButtonType.CANCEL) {
+                return;
+            }
+            renameReferences = choice.get() == renameAll;
+        }
+
+        beforeChange.run();
+        if (nameChanged) {
+            entry.setAttribute("name", newName);
+            if (renameReferences) {
+                // renameReferencedChildren fasst nur NACHFAHREN an, nie den
+                // Eintrag selbst - die Definitionen gleichnamiger Einträge
+                // anderer Kategorien (Lok und Zug teilen sich oft den Namen)
+                // bleiben also unangetastet.
+                Map<String, String> renameMap = Map.of(oldName, newName);
+                for (XmlNode category : controlItemsNode.getChildren()) {
+                    for (XmlNode other : category.getChildren()) {
+                        renameReferencedChildren(other, renameMap);
+                    }
+                }
+            }
+        }
+        if (descriptionChanged) {
+            setDescription(entry, newDescription);
+        }
+        onModified.run();
+        entryTable.refresh();
+        showDetail(entry);
+        updateLinkedCount();
+    }
+
+    /**
+     * Zählt, an wie vielen Stellen im Dokument auf {@code name} verwiesen wird
+     * (Nachfahren-Elemente mit passendem {@code name}-Attribut), ohne den
+     * Eintrag selbst und ohne die Definitionen gleichnamiger Einträge.
+     */
+    private int countReferences(String name) {
+        int count = 0;
+        for (XmlNode category : controlItemsNode.getChildren()) {
+            for (XmlNode entry : category.getChildren()) {
+                for (XmlNode descendant : allDescendants(entry)) {
+                    if (name.equals(descendant.getAttribute("name"))) {
+                        count++;
+                    }
+                }
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Setzt die Beschreibung eines Eintrags. Fehlt das
+     * {@code <description>}-Element, wird es als ERSTES Kind angelegt - in
+     * echten iTrain-Dateien steht es ausnahmslos an erster Stelle (geprüft an
+     * einer Referenzdatei über alle Kategorien hinweg).
+     */
+    private static void setDescription(XmlNode entry, String text) {
+        XmlNode description = entry.findChild("description");
+        if (text.isEmpty()) {
+            if (description != null) {
+                entry.getChildren().remove(description);
+            }
+            return;
+        }
+        if (description == null) {
+            description = new XmlNode("description");
+            entry.getChildren().add(0, description);
+        }
+        description.setTextContent(text);
     }
 
     /** Füllt die Attribut-Tabelle neu aus dem gerade ausgewählten Knoten. */
@@ -1248,51 +1388,10 @@ public class CategoryEditor {
     }
 
     /**
-     * Benennt ein Attribut um - unter Beibehaltung seiner Position, indem die
-     * gesamte Attributliste in derselben Reihenfolge neu aufgebaut wird
-     * (einfaches Entfernen+Hinzufügen würde es ans Ende schieben und damit
-     * die Reihenfolge der Datei unnötig verändern).
-     */
-    private void commitAttributeName(AttributeRow row, String newName) {
-        if (selectedTreeNode == null) {
-            return;
-        }
-        String oldName = row.getName();
-        String trimmed = newName == null ? "" : newName.trim();
-        if (trimmed.equals(oldName)) {
-            return;
-        }
-        if (!isValidAttributeName(trimmed)) {
-            showAttributeWarning(i18n.t("editor.attributeNameInvalid"));
-            attributeTable.refresh();
-            return;
-        }
-        if (selectedTreeNode.getAttributes().containsKey(trimmed)) {
-            showAttributeWarning(i18n.t("editor.attributeNameExists", trimmed));
-            attributeTable.refresh();
-            return;
-        }
-        beforeChange.run();
-        LinkedHashMap<String, String> rebuilt = new LinkedHashMap<>();
-        for (Map.Entry<String, String> attribute : selectedTreeNode.getAttributes().entrySet()) {
-            if (attribute.getKey().equals(oldName)) {
-                rebuilt.put(trimmed, attribute.getValue());
-            } else {
-                rebuilt.put(attribute.getKey(), attribute.getValue());
-            }
-        }
-        selectedTreeNode.replaceAttributes(rebuilt);
-        row.nameProperty().set(trimmed);
-        onModified.run();
-        afterAttributeChange();
-    }
-
-    /**
      * Setzt den Wert eines Attributs. Ein leerer Wert bleibt bewusst als
-     * leeres Attribut erhalten ({@code address=""}) statt das Attribut zu
-     * entfernen - Entfernen ist ausdrücklich die Aufgabe des roten "X",
-     * damit ein versehentlich geleertes Feld nicht stillschweigend Daten
-     * löscht.
+     * leeres Attribut erhalten ({@code address=""}), statt das Attribut zu
+     * entfernen: In diesem Bereich wird ausschließlich der Inhalt geändert,
+     * die Struktur eines Elements bleibt unangetastet.
      */
     private void commitAttributeValue(AttributeRow row, String newValue) {
         if (selectedTreeNode == null) {
@@ -1307,67 +1406,6 @@ public class CategoryEditor {
         row.valueProperty().set(value);
         onModified.run();
         afterAttributeChange();
-    }
-
-    private void onAddAttribute() {
-        if (selectedTreeNode == null) {
-            return;
-        }
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle(i18n.t("editor.addAttributeTitle"));
-        dialog.setHeaderText(i18n.t("editor.attributeNamePrompt"));
-        Optional<String> result = dialog.showAndWait();
-        if (result.isEmpty()) {
-            return;
-        }
-        String name = result.get().trim();
-        if (!isValidAttributeName(name)) {
-            showAttributeWarning(i18n.t("editor.attributeNameInvalid"));
-            return;
-        }
-        if (selectedTreeNode.getAttributes().containsKey(name)) {
-            showAttributeWarning(i18n.t("editor.attributeNameExists", name));
-            return;
-        }
-        beforeChange.run();
-        selectedTreeNode.setAttribute(name, "");
-        onModified.run();
-        reloadAttributeRows(selectedTreeNode);
-        afterAttributeChange();
-    }
-
-    private void deleteAttribute(AttributeRow row) {
-        if (selectedTreeNode == null) {
-            return;
-        }
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
-                i18n.t("editor.attributeDeleteConfirm", row.getName()));
-        confirm.setHeaderText(null);
-        Optional<ButtonType> answer = confirm.showAndWait();
-        if (answer.isEmpty() || answer.get() != ButtonType.OK) {
-            return;
-        }
-        beforeChange.run();
-        selectedTreeNode.removeAttribute(row.getName());
-        onModified.run();
-        reloadAttributeRows(selectedTreeNode);
-        afterAttributeChange();
-    }
-
-    /**
-     * Grobe Prüfung auf einen gültigen XML-Attributnamen. Bewusst
-     * konservativ (ASCII-Buchstaben, Ziffern, {@code _ - . :}), weil ein
-     * ungültiger Name die Datei beim Speichern unbrauchbar machen würde;
-     * iTrain selbst verwendet ausschließlich solche Namen.
-     */
-    private static boolean isValidAttributeName(String name) {
-        return name != null && name.matches("[A-Za-z_:][A-Za-z0-9_:.-]*");
-    }
-
-    private void showAttributeWarning(String message) {
-        Alert alert = new Alert(Alert.AlertType.WARNING, message);
-        alert.setHeaderText(null);
-        alert.showAndWait();
     }
 
     /**
