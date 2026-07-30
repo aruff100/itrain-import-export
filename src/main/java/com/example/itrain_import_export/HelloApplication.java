@@ -52,7 +52,7 @@ public class HelloApplication extends Application {
     }
 
     /**
-     * Lädt das Programm-Icon (icons8-eisenbahn-60.png) aus den Ressourcen.
+     * Lädt das Programm-Icon (app-icon.png, eigene Grafik) aus den Ressourcen.
      * Stage.getIcons() setzt darüber das Fenster-/Taskleisten-Icon
      * plattformübergreifend (Windows, Linux, macOS-Dock als Fallback).
      * Für ein natives .ico/.icns über jpackage müsste die Datei zusätzlich

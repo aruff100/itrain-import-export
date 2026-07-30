@@ -23,8 +23,12 @@ public final class AboutDialog {
         nameLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
         Label authorLabel = new Label(AUTHOR);
         Label versionLabel = new Label(i18n.t("about.versionLabel", AppInfo.getBuildNumber()));
+        Label licenseLabel = new Label(i18n.t("about.licenseNotice"));
+        licenseLabel.setWrapText(true);
+        licenseLabel.setMaxWidth(320);
+        licenseLabel.setStyle("-fx-font-size: 11px; -fx-opacity: 0.8;");
 
-        VBox content = new VBox(6, nameLabel, authorLabel, versionLabel);
+        VBox content = new VBox(6, nameLabel, authorLabel, versionLabel, licenseLabel);
         content.setPadding(new Insets(15));
 
         Alert dialog = new Alert(Alert.AlertType.INFORMATION);

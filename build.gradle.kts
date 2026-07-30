@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "com.example"
-version = "1.15"
+version = "1.16"
 
 repositories {
     mavenCentral()
@@ -107,7 +107,7 @@ jlink {
         // bestehen, falls App- und Projekt-Version sich künftig einmal
         // unterscheiden sollen; jpackage verlangt ohnehin ein reines
         // Zahlen-/Punkt-Format ohne Suffix wie "-SNAPSHOT".
-        appVersion = "1.15"
+        appVersion = "1.16"
         vendor = "Andre Ruff"
 
         icon = when {
