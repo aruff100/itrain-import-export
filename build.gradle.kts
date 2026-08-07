@@ -140,7 +140,18 @@ jlink {
         }
 
         if (os.isWindows) {
-            installerOptions = listOf("--win-menu", "--win-shortcut", "--win-dir-chooser")
+            // --verbose ist DIAGNOSE und soll wieder raus, sobald der
+            // Windows-Build wieder laeuft.
+            //
+            // Der Build bricht auf dem Windows-Runner in der letzten Stufe ab:
+            //   Command [light.exe, ...] exited with 204 code
+            // 204 ist WiX-Code LGHT0204, also ein Fehlschlag der
+            // ICE-Pruefung ("Internal Consistency Evaluator"). WELCHE Pruefung
+            // gescheitert ist, steht in der Ausgabe von light.exe - und die
+            // verschluckt jpackage ohne --verbose. Ohne diese Zeile laesst
+            // sich nur raten.
+            installerOptions = listOf(
+                    "--win-menu", "--win-shortcut", "--win-dir-chooser", "--verbose")
         } else if (os.isLinux) {
             installerOptions = listOf("--linux-shortcut")
         }
