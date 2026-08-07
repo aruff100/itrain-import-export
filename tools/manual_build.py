@@ -53,10 +53,23 @@ from xml.sax.saxutils import escape
 
 PROPERTIES = "translations.properties"
 
+# Die Handbuecher liegen im Ordner handbuch/. Aeltere Staende hatten sie im
+# Projektstamm - deshalb wird dort ersatzweise nachgesehen, damit der Aufruf
+# nicht ins Leere laeuft, wenn jemand mit einem aelteren Stand arbeitet.
 MANUALS = {
-    "de": "iTrain-Import-Export-Handbuch.odt",
-    "en": "iTrain-Import-Export-Manual-EN.odt",
+    "de": ["handbuch/iTrain-Import-Export-Handbuch.odt",
+           "iTrain-Import-Export-Handbuch.odt"],
+    "en": ["handbuch/iTrain-Import-Export-Manual-EN.odt",
+           "iTrain-Import-Export-Manual-EN.odt"],
 }
+
+
+def manual_path(language):
+    """Erster vorhandener Ablageort, sonst der bevorzugte (fuer die Meldung)."""
+    for pfad in MANUALS[language]:
+        if os.path.isfile(pfad):
+            return pfad
+    return MANUALS[language][0]
 
 # Reihenfolge wie im Hilfefenster, siehe HelpDialog.show().
 ORDER = ["intro", "fileMenu", "editMenu", "settingsMenu", "helpMenu", "update",
@@ -161,7 +174,7 @@ def body_xml(abschnitte):
 
 
 def rebuild(language):
-    ziel = MANUALS[language]
+    ziel = manual_path(language)
     if not os.path.isfile(ziel):
         sys.exit(f"{ziel} nicht gefunden - das vorhandene Dokument dient als Geruest.")
 

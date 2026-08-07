@@ -57,8 +57,7 @@ LIESMICH-*.txt
 ### Python-Zwischenstaende der Hilfswerkzeuge ###
 tools/__pycache__/
 
-### decoder.zip ist das gepackte Ergebnis aus decoder/ und wird ueber die
-### Proton-Drive-Freigabe verteilt, nicht ueber das Repository. Die einzelnen
-### Vorlagen in decoder/ sind dagegen versioniert - sie sind aus den
-### Hersteller-Anleitungen erarbeitet und sollen nachvollziehbar bleiben.
+### Decoder-Vorlagen und das daraus gepackte Archiv gehen ueber die
+### Proton-Drive-Freigabe an die Anwender, nicht ueber das Repository.
+decoder/
 decoder.zip
