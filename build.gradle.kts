@@ -93,7 +93,28 @@ jlink {
     options.set(listOf("--strip-debug", "--compress", "zip-6", "--no-header-files", "--no-man-pages", "--bind-services"))
 
     launcher {
-        name = "app"
+        // MUSS mit jpackage.imageName weiter unten übereinstimmen.
+        //
+        // Stand hier "app", während imageName "iTrain-Import-Export" war,
+        // brach der Windows-Installer beim Verpacken ab:
+        //   error LGHT0204 : ICE67: The shortcut '...' is a non-advertised
+        //   shortcut with a file target, but the target file does not exist.
+        //   error LGHT0204 : ICE69: 'file...' references invalid file.
+        //
+        // Grund: Aus dem Namensunterschied entstehen ZWEI Startprogramme.
+        // jpackage legt fuer jedes eine Verknuepfung im Startmenue und auf
+        // dem Desktop an (--win-menu, --win-shortcut), also vier Stueck -
+        // im Protokoll als bundle.wxf Zeile 11/21/30/40 zu sehen. Zwei davon
+        // zeigen auf "app.exe", die es im Abbild gar nicht gibt: Dort liegt
+        // nur "iTrain-Import-Export.exe". Die ICE-Pruefung von WiX faellt
+        // genau darueber.
+        //
+        // Bis Version 1.16 lief der Build mit demselben Namensunterschied
+        // durch; das jlink-Plugin 2.25.0 hat ihn offenbar verdeckt. Der
+        // Wechsel auf 4.1.0 (noetig fuer Java 21) legt ihn offen. Linux und
+        // macOS stoert er nicht - .deb und .dmg pruefen Verknuepfungsziele
+        // nicht so streng wie eine .msi.
+        name = "iTrain-Import-Export"
     }
 
     // Erzeugt echte, plattformspezifische Installationsdateien über das im
