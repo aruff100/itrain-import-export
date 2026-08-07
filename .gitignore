@@ -61,3 +61,28 @@ tools/__pycache__/
 ### Proton-Drive-Freigabe an die Anwender, nicht ueber das Repository.
 decoder/
 decoder.zip
+
+### -------------------------------------------------------------------
+### Nur Programm und Build im Repository
+### -------------------------------------------------------------------
+### Alles Folgende gehoert zum Projekt, wird aber nicht versioniert: Es
+### geht ueber die Proton-Drive-Freigabe an die Anwender oder ist reines
+### Arbeitsmaterial. Fuer den Installer-Build braucht keine dieser Dateien
+### vorhanden zu sein - das Programm selbst liest seine Texte aus
+### src/main/resources und kommt ohne die Kopien im Projektstamm aus.
+###
+### ACHTUNG: Die Arbeitskopien im Projektstamm sind die Vorlage, aus der
+### tools/help_text_sync.py und tools/manual_build.py arbeiten. Sie liegen
+### weiterhin auf der Platte, nur eben unversioniert. Der INHALT bleibt
+### ueber src/main/resources/.../translations.properties und die dortigen
+### decoder-hints_*.txt versioniert - beide sind byte-gleich.
+
+handbuch/
+install/
+zurueck/
+release/
+tools/
+.idea/
+STATUS.md
+translations.properties
+decoder-hints_*.txt
