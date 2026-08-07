@@ -14,7 +14,7 @@
 Les modeles de decodeur sont des tables de CV d'un type de decodeur.
 Plutot que de saisir chaque CV a la main, vous appliquez un modele a une locomotive ou a un wagon - puis vous n'ajustez que ce qui differe sur votre vehicule.
 
-Ces modeles ont ete tires des notices PDF des fabricants par un script. Leur contenu n'est donc pas garanti exact.
+Ces modeles ont ete tires des notices PDF des fabricants par un script. Leur contenu n'est donc pas garanti exact. Merci de le verifier !
 
 **Les trois voies**
 
@@ -27,6 +27,7 @@ Ces modeles ont ete tires des notices PDF des fabricants par un script. Leur con
 Ce fichier CSV ne peut pas etre modifie, mais il peut circuler (courriel, etc.) et etre relu et attribue partout via ce programme d'import/export.
 **Modifier la configuration** vous permet de retravailler vous-meme les modeles sur tous les points.
 Les entrees peuvent etre rendues actives ou inactives, et le type comme les descriptions peuvent recevoir vos propres textes.
+Deplacez-vous toujours d'une cellule a l'autre avec la touche TAB. Elle seule valide le texte.
 
 **L'adresse numerique - ou toute autre valeur - reste votre affaire**
 
@@ -45,7 +46,7 @@ Ce qui compte, c'est le protocole inscrit sur le vehicule sous "decoder" :
 **Ce que le programme ne fait pas**
 
 Il n'ecrit rien sur le decodeur. Il ne lit rien depuis le decodeur.
-Seul le fichier iTrain est modifie ; le transfert vers le vehicule reste l'affaire d'iTrain ou de votre centrale.
+Seul le fichier iTrain est modifie ; programmer votre vehicule ou le relire reste l'affaire d'iTrain.
 
 **Avant d'essayer**
 

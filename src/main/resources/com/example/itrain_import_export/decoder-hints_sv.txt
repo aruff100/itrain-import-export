@@ -14,7 +14,7 @@
 Dekodermallar ar CV-tabeller for en dekodertyp.
 I stallet for att knappa in varje CV for hand for du over en mall till ett lok eller en vagn - och justerar sedan bara det som skiljer sig pa ditt fordon.
 
-Dessa mallar har harletts ur tillverkarnas PDF-filer med ett skript. Innehallet behover darfor inte stamma.
+Dessa mallar har harletts ur tillverkarnas PDF-filer med ett skript. Innehallet behover darfor inte stamma. Kontrollera det!
 
 **De tre vagarna**
 
@@ -27,6 +27,7 @@ Dessa mallar har harletts ur tillverkarnas PDF-filer med ett skript. Innehallet 
 Den CSV-filen gar inte att redigera, men den gar att skicka vidare (e-post med mera) och overallt lasas in och tilldelas igen via detta import-/exportprogram.
 **Redigera konfiguration** later dig sjalv bearbeta mallarna i alla avseenden.
 Poster kan goras aktiva eller inaktiva, och typ och beskrivningar kan forses med egna texter.
+Ga alltid igenom de enskilda cellerna med TAB-tangenten. Bara den tar over texten.
 
 **Den digitala adressen - eller vilket annat varde som helst - ar fortfarande din sak**
 
@@ -45,7 +46,7 @@ Avgorande ar det protokoll som star vid fordonet under "decoder":
 **Vad programmet inte gor**
 
 Det skriver ingenting till dekodern. Det laser ingenting fran dekodern.
-Bara iTrain-filen andras; overforingen till fordonet ar fortfarande iTrains eller din centrals uppgift.
+Bara iTrain-filen andras; att programmera ditt fordon eller lasa av det ar fortfarande iTrains uppgift.
 
 **Innan du provar dig fram**
 

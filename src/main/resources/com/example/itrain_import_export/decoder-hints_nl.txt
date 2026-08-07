@@ -14,7 +14,7 @@
 Decodersjablonen zijn CV-tabellen van een decodertype.
 In plaats van elke CV met de hand in te typen, neem je een sjabloon over in een locomotief of wagen - en pas je daarna alleen nog aan wat bij jouw voertuig afwijkt.
 
-Deze sjablonen zijn met een script uit de pdf's van de fabrikanten afgeleid. De inhoud hoeft daarom niet te kloppen.
+Deze sjablonen zijn met een script uit de pdf's van de fabrikanten afgeleid. De inhoud hoeft daarom niet te kloppen. Controleer die!
 
 **De drie wegen**
 
@@ -27,6 +27,7 @@ Deze sjablonen zijn met een script uit de pdf's van de fabrikanten afgeleid. De 
 Dat CSV-bestand is niet te bewerken, maar wel te vervoeren (e-mail enzovoort) en via dit import-/exportprogramma overal weer in te lezen en toe te wijzen.
 **Configuratie bewerken** laat toe dat je de sjablonen op alle punten zelf bewerkt.
 Daarbij kunnen regels actief of inactief worden gemaakt en kunnen het type en de beschrijvingen van eigen teksten worden voorzien.
+Navigeer door de afzonderlijke cellen altijd met de TAB-toets. Alleen die neemt de tekst over.
 
 **Het digitale adres - of een andere waarde - blijft jouw zaak**
 
@@ -45,7 +46,7 @@ Bepalend is het protocol dat bij het voertuig onder "decoder" staat:
 **Wat het programma niet doet**
 
 Het schrijft niets naar de decoder. Het leest niets uit de decoder.
-Alleen het iTrain-bestand wordt gewijzigd; het overzetten naar het voertuig blijft de taak van iTrain of je centrale.
+Alleen het iTrain-bestand wordt gewijzigd; het programmeren van of uitlezen uit je voertuig blijft de taak van iTrain.
 
 **Voordat je gaat proberen**
 

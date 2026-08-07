@@ -17,7 +17,7 @@
 Decoder-Vorlagen sind CV-Tabellen eines Decoder-Typs. 
 Statt jede CV von Hand einzutippen, uebernimmst du eine Vorlage in eine Lokomotive oder einen Wagen - und passt anschliessend nur noch das an, was bei deinem Fahrzeug abweicht.
 
-Diese Vorlagen sind über ein Sript aus den Hersteller PDF abgeleitet. Der Inhalt muss daher nicht stimmen.
+Diese Vorlagen sind über ein Sript aus den Hersteller PDF abgeleitet. Der Inhalt muss daher nicht stimmen. Bitte prüfen!
 
 **Die drei Wege**
 
@@ -30,6 +30,7 @@ Diese Vorlagen sind über ein Sript aus den Hersteller PDF abgeleitet. Der Inhal
 Diese CSV Datei kann nicht editiert werden, aber transportiert werden (E-Mail, ec.) und über dieses Import-/Export-Programm überall wieder eingelesen und zugeordnet werden.
 **Konfiguration bearbeiten** lässt zu das der Anwender die Vorlagen in allen Bereichen selbst bearbeitet.
 Dabei können Elemente Aktiv oder Inaktiv werden, der Typ und die Beschreibungen können mit eigenen Texten versehen werden. 
+Bitte durch die einzelnen Zellen immer mit der TAB Taste navigieren. Nur diese übernimmt den Text.
 
 **Die Digital-Adresse oder ein anderer Wert bleibt deine Sache**
 
@@ -48,7 +49,7 @@ Massgeblich ist das Protokoll, das beim Fahrzeug unter "decoder" eingetragen ist
 **Was das Programm nicht tut**
 
 Es schreibt nichts auf den Decoder. Es liest nichts aus dem Decoder.
-Geändert wird ausschließlich die iTrain-Datei; das Aufspielen auf das Fahrzeug übernimmt weiterhin iTrain oder deine Zentrale.
+Geändert wird ausschließlich die iTrain-Datei; das Programmieren oder lesen auf dein Fahrzeug übernimmt weiterhin iTrain.
 
 **Vor dem Ausprobieren**
 

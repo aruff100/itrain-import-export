@@ -17,7 +17,7 @@
 Decoder templates are CV tables for a decoder type.
 Instead of typing every CV by hand, you apply a template to a locomotive or wagon - and then only adjust what differs on your particular vehicle.
 
-These templates were derived from the manufacturers' PDFs by a script. Their content is therefore not guaranteed to be correct.
+These templates were derived from the manufacturers' PDFs by a script. Their content is therefore not guaranteed to be correct. Please check it!
 
 **The three routes**
 
@@ -30,6 +30,7 @@ These templates were derived from the manufacturers' PDFs by a script. Their con
 That CSV file cannot be edited, but it can be passed around (e-mail and so on) and read back in and assigned anywhere through this import/export program.
 **Edit configuration** lets you work on the templates yourself in every respect.
 Entries can be made active or inactive, and the type and the descriptions can be given texts of your own.
+Always move through the individual cells with the TAB key. Only that key commits the text.
 
 **The digital address - or any other value - stays your job**
 
@@ -48,7 +49,7 @@ What matters is the protocol recorded on the vehicle under "decoder":
 **What the program does not do**
 
 It does not write anything to the decoder. It does not read anything from the decoder.
-Only the iTrain file is changed; transferring the values to the vehicle remains the job of iTrain or your command station.
+Only the iTrain file is changed; programming your vehicle or reading from it remains the job of iTrain.
 
 **Before you experiment**
 

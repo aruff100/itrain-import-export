@@ -14,7 +14,7 @@
 Szablony dekoderow to tabele CV danego typu dekodera.
 Zamiast wpisywac kazda CV recznie, przenosisz szablon do lokomotywy lub wagonu, a potem poprawiasz tylko to, co w twoim pojezdzie jest inne.
 
-Szablony te zostaly wydobyte z plikow PDF producentow za pomoca skryptu. Ich tresc nie musi wiec byc poprawna.
+Szablony te zostaly wydobyte z plikow PDF producentow za pomoca skryptu. Ich tresc nie musi wiec byc poprawna. Prosze sprawdzic!
 
 **Trzy drogi**
 
@@ -27,6 +27,7 @@ Szablony te zostaly wydobyte z plikow PDF producentow za pomoca skryptu. Ich tre
 Tego pliku CSV nie da sie edytowac, ale mozna go przenosic (poczta elektroniczna itd.) i wszedzie ponownie wczytac oraz przypisac za pomoca tego programu importu/eksportu.
 **Edytuj konfiguracje** pozwala ci samodzielnie opracowac szablony pod kazdym wzgledem.
 Pozycje mozna uczynic aktywnymi lub nieaktywnymi, a typ i opisy mozna opatrzyc wlasnymi tekstami.
+Miedzy poszczegolnymi komorkami poruszaj sie zawsze klawiszem TAB. Tylko on zatwierdza tekst.
 
 **Adres cyfrowy - albo dowolna inna wartosc - pozostaje twoja sprawa**
 
@@ -45,7 +46,7 @@ Decyduje protokol wpisany przy pojezdzie pod "decoder":
 **Czego program nie robi**
 
 Nie zapisuje niczego w dekoderze. Nie odczytuje niczego z dekodera.
-Zmieniany jest wylacznie plik iTrain; przeniesienie wartosci do pojazdu pozostaje zadaniem iTrain lub twojej centrali.
+Zmieniany jest wylacznie plik iTrain; zaprogramowanie pojazdu albo jego odczyt pozostaje zadaniem iTrain.
 
 **Zanim zaczniesz probowac**
 

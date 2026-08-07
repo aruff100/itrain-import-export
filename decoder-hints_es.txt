@@ -14,7 +14,7 @@
 Las plantillas de decoder son tablas de CV de un tipo de decoder.
 En lugar de teclear cada CV a mano, aplicas una plantilla a una locomotora o a un vagon, y despues solo ajustas lo que difiera en tu vehiculo.
 
-Estas plantillas se han extraido de los PDF de los fabricantes mediante un script. Por tanto, su contenido no tiene por que ser correcto.
+Estas plantillas se han extraido de los PDF de los fabricantes mediante un script. Por tanto, su contenido no tiene por que ser correcto. !Compruebalo!
 
 **Los tres caminos**
 
@@ -27,6 +27,7 @@ Estas plantillas se han extraido de los PDF de los fabricantes mediante un scrip
 Ese archivo CSV no se puede editar, pero si transportar (correo electronico, etc.) y volver a leer y asignar en cualquier sitio con este programa de importacion/exportacion.
 **Editar configuracion** permite que trabajes tu mismo las plantillas en todos sus aspectos.
 Las entradas pueden ponerse activas o inactivas, y el tipo y las descripciones pueden recibir textos propios.
+Desplazate por las celdas siempre con la tecla TAB. Solo esa confirma el texto.
 
 **La direccion digital - o cualquier otro valor - sigue siendo cosa tuya**
 
@@ -45,7 +46,7 @@ Lo determinante es el protocolo anotado en el vehiculo bajo "decoder":
 **Lo que el programa no hace**
 
 No escribe nada en el decoder. No lee nada del decoder.
-Solo se modifica el archivo de iTrain; transferir los valores al vehiculo sigue siendo tarea de iTrain o de tu central.
+Solo se modifica el archivo de iTrain; programar tu vehiculo o leerlo sigue siendo tarea de iTrain.
 
 **Antes de experimentar**
 

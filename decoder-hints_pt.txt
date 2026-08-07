@@ -14,7 +14,7 @@
 Os modelos de decoder sao tabelas de CV de um tipo de decoder.
 Em vez de escrever cada CV a mao, aplicas um modelo a uma locomotiva ou a um vagao, e depois ajustas apenas o que difere no teu veiculo.
 
-Estes modelos foram extraidos dos PDF dos fabricantes por um script. O seu conteudo nao tem, portanto, de estar correto.
+Estes modelos foram extraidos dos PDF dos fabricantes por um script. O seu conteudo nao tem, portanto, de estar correto. Por favor, verifica!
 
 **Os tres caminhos**
 
@@ -27,6 +27,7 @@ Estes modelos foram extraidos dos PDF dos fabricantes por um script. O seu conte
 Esse ficheiro CSV nao pode ser editado, mas pode ser transportado (correio eletronico, etc.) e lido e atribuido em qualquer lado atraves deste programa de importacao/exportacao.
 **Editar configuracao** permite-te trabalhar tu proprio os modelos em todos os aspetos.
 As entradas podem ficar ativas ou inativas, e o tipo e as descricoes podem receber textos teus.
+Percorre as celulas sempre com a tecla TAB. So essa confirma o texto.
 
 **O endereco digital - ou qualquer outro valor - continua a ser contigo**
 
@@ -45,7 +46,7 @@ O que conta e o protocolo registado no veiculo em "decoder":
 **O que o programa nao faz**
 
 Nao escreve nada no decoder. Nao le nada do decoder.
-So o ficheiro do iTrain e alterado; passar os valores para o veiculo continua a ser tarefa do iTrain ou da tua central.
+So o ficheiro do iTrain e alterado; programar o teu veiculo ou le-lo continua a ser tarefa do iTrain.
 
 **Antes de experimentares**
 

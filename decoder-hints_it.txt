@@ -14,7 +14,7 @@
 I modelli di decoder sono tabelle CV di un tipo di decoder.
 Invece di digitare ogni CV a mano, applichi un modello a una locomotiva o a un carro, e poi adatti solo cio che sul tuo rotabile e diverso.
 
-Questi modelli sono stati ricavati dai PDF dei costruttori tramite uno script. Il loro contenuto non e quindi garantito corretto.
+Questi modelli sono stati ricavati dai PDF dei costruttori tramite uno script. Il loro contenuto non e quindi garantito corretto. Da verificare!
 
 **Le tre strade**
 
@@ -27,6 +27,7 @@ Questi modelli sono stati ricavati dai PDF dei costruttori tramite uno script. I
 Quel file CSV non e modificabile, ma puo essere trasportato (posta elettronica ecc.) e riletto e assegnato ovunque tramite questo programma di importazione/esportazione.
 **Modifica configurazione** ti permette di rielaborare tu stesso i modelli sotto ogni aspetto.
 Le voci possono essere rese attive o inattive, e il tipo e le descrizioni possono ricevere testi tuoi.
+Spostati fra le singole celle sempre con il tasto TAB. Solo quello conferma il testo.
 
 **L'indirizzo digitale - o qualunque altro valore - resta affare tuo**
 
@@ -45,7 +46,7 @@ Conta il protocollo indicato sul rotabile sotto "decoder":
 **Che cosa il programma non fa**
 
 Non scrive nulla sul decoder. Non legge nulla dal decoder.
-Viene modificato soltanto il file iTrain; il trasferimento sul rotabile resta compito di iTrain o della tua centrale.
+Viene modificato soltanto il file iTrain; programmare il rotabile o rileggerlo resta compito di iTrain.
 
 **Prima di fare prove**
 

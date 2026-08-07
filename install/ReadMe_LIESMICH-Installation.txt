@@ -110,7 +110,7 @@ Was danach zur Verfuegung steht, zeigt "Einstellungen" ->
 
 Hinweis: Die mitgelieferten Vorlagen sind per Skript aus den PDF-Anleitungen
 der Hersteller abgeleitet. Ihr Inhalt muss nicht in jedem Punkt stimmen -
-bitte gegen die Anleitung Ihres Decoders pruefen.
+Bitte gegen die Anleitung deines Decoders pruefen.
 
 
 EINSTELLUNGEN ZURUECKSETZEN

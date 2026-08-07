@@ -14,7 +14,7 @@
 Dekoderskabeloner er CV-tabeller for en dekodertype.
 I stedet for at taste hver CV i hand overfoerer du en skabelon til et lokomotiv eller en vogn - og tilpasser derefter kun det, der afviger pa dit koeretoej.
 
-Disse skabeloner er udledt af fabrikanternes PDF-filer med et script. Indholdet behoever derfor ikke at vaere rigtigt.
+Disse skabeloner er udledt af fabrikanternes PDF-filer med et script. Indholdet behoever derfor ikke at vaere rigtigt. Kontroller det venligst!
 
 **De tre veje**
 
@@ -27,6 +27,7 @@ Disse skabeloner er udledt af fabrikanternes PDF-filer med et script. Indholdet 
 Den CSV-fil kan ikke redigeres, men den kan sendes videre (e-mail osv.) og overalt indlaeses og tildeles igen via dette import-/eksportprogram.
 **Rediger konfiguration** lader dig selv bearbejde skabelonerne pa alle punkter.
 Poster kan goeres aktive eller inaktive, og type og beskrivelser kan forsynes med dine egne tekster.
+Navigér altid gennem de enkelte celler med TAB-tasten. Kun den overtager teksten.
 
 **Den digitale adresse - eller en hvilken som helst anden vaerdi - er fortsat din sag**
 
@@ -45,7 +46,7 @@ Afgoerende er den protokol, der star ved koeretoejet under "decoder":
 **Hvad programmet ikke goer**
 
 Det skriver intet til dekoderen. Det laeser intet fra dekoderen.
-Kun iTrain-filen aendres; overfoerslen til koeretoejet er fortsat iTrains eller din centrals opgave.
+Kun iTrain-filen aendres; at programmere dit koeretoej eller laese fra det er fortsat iTrains opgave.
 
 **For du proever dig frem**
 
