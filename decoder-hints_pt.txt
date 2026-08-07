@@ -1,0 +1,52 @@
+# Notas sobre a funcao de decoder (importar/exportar)
+#
+# Podes editar este ficheiro livremente. E procurado primeiro na pasta de
+# trabalho do programa; caso contrario usa-se a copia incluida.
+#
+# Formato:
+#   **negrito**        destaca uma passagem
+#   "- " no inicio     transforma a linha num ponto de lista
+#   linha vazia        comeca um novo paragrafo
+#   # no inicio da linha e um comentario e nao e mostrado
+
+**O que esta funcao faz**
+
+Os modelos de decoder sao tabelas de CV de um tipo de decoder.
+Em vez de escrever cada CV a mao, aplicas um modelo a uma locomotiva ou a um vagao, e depois ajustas apenas o que difere no teu veiculo.
+
+Estes modelos foram extraidos dos PDF dos fabricantes por um script. O seu conteudo nao tem, portanto, de estar correto.
+
+**Os tres caminhos**
+
+- **Ler modelo**: aplica um modelo guardado ao veiculo selecionado. Os valores de CV que o veiculo ja tivesse sao substituidos.
+- **Escrever modelo**: guarda os valores de CV do veiculo selecionado como novo modelo, reutilizavel mais tarde noutros veiculos.
+- **Editar configuracao**: abre a tabela de CV do veiculo para alterar, completar e apagar valores individuais.
+
+**Ler modelo** usa-se quando queres atribuir uma determinada tabela de CV a uma locomotiva e depois confronta-la em iTrain com os valores reais, pela via de programacao ou com POM.
+**Escrever modelo** usa-se quando ja dotaste os decoders de configuracoes e textos. O modelo e guardado como ficheiro CSV.
+Esse ficheiro CSV nao pode ser editado, mas pode ser transportado (correio eletronico, etc.) e lido e atribuido em qualquer lado atraves deste programa de importacao/exportacao.
+**Editar configuracao** permite-te trabalhar tu proprio os modelos em todos os aspetos.
+As entradas podem ficar ativas ou inativas, e o tipo e as descricoes podem receber textos teus.
+
+**O endereco digital - ou qualquer outro valor - continua a ser contigo**
+
+Um modelo traz os valores do tipo de decoder, nao os do teu veiculo. Verifica **CV 1** (e **CV 17/18** com endereco longo) depois de ler; caso contrario varias locomotivas andarao no mesmo endereco.
+Isso corrige-se no iTrain, uma vez aberto ai o ficheiro.
+Convem ler por completo todos os valores pela via de programacao ou com POM e atualiza-los a partir dai.
+
+**Nem todos os decoders aceitam todos os modelos**
+
+O que conta e o protocolo registado no veiculo em "decoder":
+
+- **DCC, FMZ, CTC, SX2**: todos os parametros sao aplicados.
+- **SX1 e Selectrix**: apenas os cinco primeiros parametros; o formato nao conhece mais.
+- **Motorola, multiprotocolo, analogico**: sem importacao; aqui nao ha CV no sentido destes modelos.
+
+**O que o programa nao faz**
+
+Nao escreve nada no decoder. Nao le nada do decoder.
+So o ficheiro do iTrain e alterado; passar os valores para o veiculo continua a ser tarefa do iTrain ou da tua central.
+
+**Antes de experimentares**
+
+Faz uma copia do ficheiro do teu layout. O programa faz copia de seguranca automatica antes de cada abertura (Preferencias -> Caminhos), mas uma copia tua num sitio que conheces tranquiliza mais a primeira vez.

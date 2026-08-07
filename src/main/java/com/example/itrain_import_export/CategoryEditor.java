@@ -44,6 +44,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 
 import java.io.File;
@@ -147,7 +148,7 @@ public class CategoryEditor {
 
     /**
      * Spezialisierte Tabelle für {@code <configuration>}-Knoten von
-     * Lokomotiven (Spalten Aktiv/Nr/Wert/Typ/Beschreibung statt der
+     * Lokomotiven und Wagen (Spalten Aktiv/Nr/Wert/Typ/Beschreibung statt der
      * generischen Tag-/Textinhalt-Felder) - ersetzt {@link #tagGrid} im
      * "Daten-Einstellen"-Bereich, sobald im Daten-Explorer ein
      * {@code configuration}-Knoten ausgewählt ist. Andere Kategorien folgen
@@ -156,6 +157,22 @@ public class CategoryEditor {
     private final TableView<XmlNode> configTable = new TableView<>();
     private final VBox configPane = new VBox();
     private XmlNode currentConfigNode;
+
+    /**
+     * Öffnet die Konfiguration im großen Fenster. Sitzt über dem
+     * Daten-Explorer und ist nur bei ausgewähltem {@code configuration}-Knoten
+     * sichtbar (siehe {@link #selectNode}).
+     */
+    private final Button editConfigButton = new Button();
+
+    /**
+     * Kräftiges Blau mit weißer Schrift - bewusst anders als die Pastelltöne
+     * der Ribbon-Knöpfe: Dieser Knopf erscheint nur bei einem ausgewählten
+     * {@code configuration}-Knoten und soll dann ins Auge fallen. Wird auch
+     * im Erfassungsfenster für den Hinweis-Knopf verwendet.
+     */
+    static final String STYLE_CONFIG_EDIT =
+            "-fx-background-color: #2f6fb5; -fx-text-fill: white; -fx-font-weight: bold;";
 
     /** Kann null sein, solange diese Kategorie in der Datei nicht existiert. */
     private XmlNode categoryNode;
@@ -488,11 +505,13 @@ public class CategoryEditor {
             return row;
         });
 
-        Button exportSelectedButton = new Button(i18n.t("editor.exportSelected"));
-        exportSelectedButton.setOnAction(e -> onExport());
-
-        Button importButton = new Button(i18n.t("editor.import"));
-        importButton.setOnAction(e -> onImport());
+        // Die vier Import-/Export-Schaltflächen ("Markierte exportieren",
+        // "In Kategorie importieren", "Decoder exportieren", "Decoder
+        // importieren") stehen seit 01.08.2026 nicht mehr hier, sondern
+        // zentral im Ribbon des Hauptfensters (siehe HelloController) - sie
+        // wirken von dort auf den gerade sichtbaren Kategorie-Reiter. In
+        // dieser Werkzeugleiste bleiben nur die beiden Symbol-Schaltflächen,
+        // die sich unmittelbar auf die Tabelle darunter beziehen.
 
         // "Neuer Eintrag" und "Löschen" als reine Symbol-Buttons ("+"/rotes
         // "X"), rechtsbündig über der Tabelle - der Tooltip trägt weiterhin
@@ -515,7 +534,7 @@ public class CategoryEditor {
         Region toolbarSpacer = new Region();
         HBox.setHgrow(toolbarSpacer, Priority.ALWAYS);
 
-        HBox toolbar = new HBox(10, exportSelectedButton, importButton, toolbarSpacer, addButton, deleteButton);
+        HBox toolbar = new HBox(10, toolbarSpacer, addButton, deleteButton);
         toolbar.setPadding(new Insets(8));
 
         // Der frühere graue Hinweis "Doppelklick auf eine Zeile löscht den
@@ -814,6 +833,24 @@ public class CategoryEditor {
         onImport();
     }
 
+    /**
+     * Öffentliche Auslöser für die drei übrigen Import-/Export-Aktionen -
+     * aufgerufen von den Ribbon-Schaltflächen des Hauptfensters, die seit
+     * 01.08.2026 an die Stelle der früheren Schaltflächen in dieser
+     * Kategorie-Werkzeugleiste getreten sind.
+     */
+    public void triggerExport() {
+        onExport();
+    }
+
+    public void triggerDecoderExport() {
+        onDecoderExport();
+    }
+
+    public void triggerDecoderImport() {
+        onDecoderImport();
+    }
+
     private void onImport() {
         FileChooser chooser = new FileChooser();
         chooser.setTitle(i18n.t("editor.import"));
@@ -842,6 +879,16 @@ public class CategoryEditor {
                 if (row.size() < 5) {
                     throw new IllegalStateException(i18n.t("editor.importInvalidFormat"));
                 }
+            }
+
+            // Decoder-Vorlagen sehen zwar wie ein normaler Export aus, sind
+            // aber KEINE vollständigen Katalog-Einträge, sondern nur der
+            // <configuration>-Teilbaum eines Fahrzeugs. Würden sie hier
+            // eingelesen, käme ein configuration-Element als eigenständiger
+            // Eintrag in die Kategorie und iTrain könnte die Datei nicht mehr
+            // öffnen. Deshalb abweisen und auf den richtigen Weg hinweisen.
+            if (DecoderTemplate.looksLikeDecoderCsv(dataRows)) {
+                throw new IllegalStateException(i18n.t("editor.decoderWrongImportWay"));
             }
 
             // Eine Export-Datei kann (seit der Verknüpfung verwandter
@@ -915,6 +962,421 @@ public class CategoryEditor {
             alert.setHeaderText(i18n.t("editor.importErrorTitle"));
             alert.showAndWait();
         }
+    }
+
+    /**
+     * Nur Fahrzeuge (Lokomotiven, Wagen) haben einen
+     * {@code <configuration>}-Knoten mit den CV-Werten des eingebauten
+     * Decoders - nur dort sind die beiden Decoder-Schaltflächen im Ribbon
+     * benutzbar (siehe {@code HelloController.updateRibbonState}).
+     */
+    public boolean supportsDecoderConfiguration() {
+        return "locomotives".equals(categoryName) || "wagons".equals(categoryName);
+    }
+
+    /**
+     * Liefert den Eintrag, auf den sich eine Decoder-Aktion bezieht: es muss
+     * GENAU einer markiert sein. Bei keiner oder mehrfacher Markierung
+     * erscheint ein Hinweis und es wird {@code null} zurückgegeben - eine
+     * Decoder-Konfiguration gehört immer zu genau einem Fahrzeug.
+     */
+    private XmlNode requireSingleSelection() {
+        List<XmlNode> selected = entryTable.getSelectionModel().getSelectedItems();
+        if (selected.size() != 1 || selected.get(0) == null) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION, i18n.t("editor.decoderSelectOne"));
+            alert.setHeaderText(null);
+            alert.showAndWait();
+            return null;
+        }
+        return selected.get(0);
+    }
+
+    /**
+     * Zeigt vor einer Decoder-Aktion den Hinweistext, solange er nicht
+     * abgeschaltet wurde (siehe {@link DecoderHintsDialog}).
+     *
+     * @return {@code false}, wenn der Anwender dort abbricht - dann unterbleibt
+     *         die Aktion.
+     */
+    private boolean decoderHintsAccepted() {
+        Window window = getWindow();
+        return DecoderHintsDialog.confirm(window instanceof Stage stage ? stage : null);
+    }
+
+    /**
+     * "Decoder-Informationen exportieren": schreibt den
+     * {@code <configuration>}-Knoten des markierten Fahrzeugs als
+     * Vorlagen-CSV in den Decoder-Ordner (siehe {@link DecoderTemplate}).
+     * Vorher wird nach einer Bezeichnung gefragt - sie erscheint später in
+     * der Vorlagen-Auswahl und wird auch als Dateiname verwendet.
+     */
+    private void onDecoderExport() {
+        XmlNode entry = requireSingleSelection();
+        if (entry == null) {
+            return;
+        }
+        if (!decoderHintsAccepted()) {
+            return;
+        }
+        XmlNode configuration = entry.findChild(DecoderTemplate.CONFIGURATION_TAG);
+        if (configuration == null || configuration.getChildren().isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION,
+                    i18n.t("editor.decoderNothingToExport", entry.getName()));
+            alert.setHeaderText(null);
+            alert.showAndWait();
+            return;
+        }
+
+        File targetDir = requireDecoderDirectory();
+        if (targetDir == null) {
+            return;
+        }
+
+        TextInputDialog nameDialog = new TextInputDialog(entry.getName());
+        nameDialog.setTitle(i18n.t("editor.decoderExport"));
+        nameDialog.setHeaderText(i18n.t("editor.decoderExportNameHeader"));
+        Optional<String> nameResult = nameDialog.showAndWait();
+        if (nameResult.isEmpty() || nameResult.get().isBlank()) {
+            return;
+        }
+        String templateName = nameResult.get().trim();
+
+        TextInputDialog descDialog = new TextInputDialog("");
+        descDialog.setTitle(i18n.t("editor.decoderExport"));
+        descDialog.setHeaderText(i18n.t("editor.decoderExportDescHeader"));
+        Optional<String> descResult = descDialog.showAndWait();
+        if (descResult.isEmpty()) {
+            return;
+        }
+
+        File target = new File(targetDir, DecoderTemplate.toFileName(templateName) + ".csv");
+        if (target.exists()) {
+            Alert overwrite = new Alert(Alert.AlertType.CONFIRMATION,
+                    i18n.t("editor.decoderOverwrite", target.getName()),
+                    ButtonType.YES, ButtonType.NO);
+            overwrite.setHeaderText(null);
+            Optional<ButtonType> answer = overwrite.showAndWait();
+            if (answer.isEmpty() || answer.get() != ButtonType.YES) {
+                return;
+            }
+        }
+
+        try {
+            DecoderTemplate.write(target, templateName, descResult.get().trim(), configuration);
+            Alert done = new Alert(Alert.AlertType.INFORMATION,
+                    i18n.t("editor.decoderExportSuccess",
+                            configuration.getChildren().size(), target.getAbsolutePath()));
+            done.setHeaderText(null);
+            done.showAndWait();
+        } catch (Exception ex) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, String.valueOf(ex.getMessage()));
+            alert.setHeaderText(i18n.t("editor.exportErrorTitle"));
+            alert.showAndWait();
+        }
+    }
+
+    /**
+     * "Decoder-Informationen importieren": ersetzt den
+     * {@code <configuration>}-Knoten des markierten Fahrzeugs durch den einer
+     * gewählten Vorlage. Ist bereits eine Konfiguration vorhanden, wird
+     * vorher gefragt (sie geht dabei komplett verloren - "Rückgängig" holt
+     * sie zurück). Fehlt sie, wird sie neu angelegt (siehe
+     * {@link #insertConfiguration}).
+     */
+    private void onDecoderImport() {
+        XmlNode entry = requireSingleSelection();
+        if (entry == null) {
+            return;
+        }
+        if (!decoderHintsAccepted()) {
+            return;
+        }
+
+        // Protokoll-Prüfung VOR der Vorlagenauswahl: Bei einem Fahrzeug, das
+        // gar keine CVs kennt (Motorola, Multi, Analog), soll der Anwender
+        // nicht erst eine Vorlage aussuchen müssen, um dann abgewiesen zu
+        // werden.
+        String protocol = DecoderProtocol.read(entry);
+        DecoderProtocol.Rule rule = DecoderProtocol.ruleFor(protocol);
+        if (rule == DecoderProtocol.Rule.NONE) {
+            Alert blocked = new Alert(Alert.AlertType.ERROR,
+                    i18n.t("editor.decoderProtocolBlocked",
+                            entry.getName(), DecoderProtocol.displayName(protocol)));
+            blocked.setTitle(i18n.t("editor.decoderImport"));
+            blocked.setHeaderText(null);
+            blocked.showAndWait();
+            return;
+        }
+
+        Optional<DecoderTemplate> chosen = DecoderTemplateChooser.choose(getWindow());
+        if (chosen.isEmpty()) {
+            return;
+        }
+        DecoderTemplate template = chosen.get();
+
+        // Ein Fahrzeug ohne <decoder>-Element hat in iTrain gar keinen
+        // Digitaldecoder zugewiesen - bei Wagen der Normalfall.
+        //
+        // Nur die Konfiguration einzufügen genügt dort NICHT: iTrain zeigt
+        // eine CV-Konfiguration ohne zugehörigen Decoder überhaupt nicht an.
+        // In der Beispieldatei ist beides zu sehen - "Tankwagen" hat
+        //     <decoder protocol="dcc"/> <configuration count="1">...
+        // und wird angezeigt, "VT75 Beiwagen" hat nur <configuration> und
+        // bleibt in iTrain unsichtbar.
+        //
+        // Deshalb bei Wagen anbieten, den Decoder gleich mit anzulegen. Das
+        // Protokoll wählt der Anwender: Die Vorlagen tragen keines (geprüft
+        // an allen mitgelieferten Dateien - am <configuration>-Knoten steht
+        // nur count), und es aus dem Vorlagennamen zu raten wäre bei
+        // "Zimo MS/MN" oder "D&H" nicht möglich.
+        //
+        // Bei Lokomotiven bleibt es bei der bisherigen Warnung: Eine Lok ohne
+        // Decoder ist ungewöhnlich genug, dass sie eher auf einen Fehler in
+        // der Datei hindeutet als auf einen fehlenden Eintrag.
+        if (entry.findChild(CONFIGURATION_ANCHOR_TAG) == null) {
+            if ("wagons".equals(categoryName)) {
+                String chosenProtocol = askForDecoderProtocol(entry.getName());
+                if (chosenProtocol == null) {
+                    return;
+                }
+                insertDecoder(entry, chosenProtocol);
+                // Regel neu bestimmen: Wer hier sx1 wählt, bekommt weiter
+                // unten die Kürzung auf fünf Werte - mit der zuvor
+                // ermittelten Regel (ohne Decoder: ALL) bliebe sie aus.
+                protocol = chosenProtocol;
+                rule = DecoderProtocol.ruleFor(protocol);
+            } else {
+                Alert warn = new Alert(Alert.AlertType.CONFIRMATION,
+                        i18n.t("editor.decoderNoDecoderElement", entry.getName()),
+                        ButtonType.YES, ButtonType.NO);
+                warn.setTitle(i18n.t("editor.decoderImport"));
+                warn.setHeaderText(null);
+                Optional<ButtonType> proceed = warn.showAndWait();
+                if (proceed.isEmpty() || proceed.get() != ButtonType.YES) {
+                    return;
+                }
+            }
+        }
+
+        XmlNode existing = entry.findChild(DecoderTemplate.CONFIGURATION_TAG);
+        if (existing != null && !existing.getChildren().isEmpty()) {
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                    i18n.t("editor.decoderReplaceConfirm",
+                            entry.getName(), existing.getChildren().size(), template.getName()),
+                    ButtonType.YES, ButtonType.NO);
+            confirm.setTitle(i18n.t("editor.decoderImport"));
+            confirm.setHeaderText(null);
+            Optional<ButtonType> answer = confirm.showAndWait();
+            if (answer.isEmpty() || answer.get() != ButtonType.YES) {
+                return;
+            }
+        }
+
+        try {
+            XmlNode newConfiguration = template.toConfigurationNode();
+
+            // Protokolle mit wenigen Konfigurationswerten (SX1): nur die
+            // ersten Einträge übernehmen. Gefragt wird nur, wenn dabei
+            // tatsächlich etwas wegfällt - sonst wäre es eine Rückfrage ohne
+            // Folgen. Stillschweigend kürzen wäre die schlechtere Wahl: Wer
+            // eine Vorlage mit 136 CVs auswählt und hinterher 5 vorfindet,
+            // hielte das für einen Fehler des Programms.
+            if (rule == DecoderProtocol.Rule.LIMITED
+                    && newConfiguration.getChildren().size() > DecoderProtocol.LIMITED_MAX) {
+                Alert limit = new Alert(Alert.AlertType.CONFIRMATION,
+                        i18n.t("editor.decoderProtocolLimited",
+                                DecoderProtocol.displayName(protocol),
+                                template.getName(),
+                                newConfiguration.getChildren().size(),
+                                DecoderProtocol.LIMITED_MAX),
+                        ButtonType.YES, ButtonType.NO);
+                limit.setTitle(i18n.t("editor.decoderImport"));
+                limit.setHeaderText(null);
+                Optional<ButtonType> proceed = limit.showAndWait();
+                if (proceed.isEmpty() || proceed.get() != ButtonType.YES) {
+                    return;
+                }
+            }
+            if (newConfiguration.getChildren().size() > DecoderProtocol.maxParameters(protocol)) {
+                newConfiguration.getChildren()
+                        .subList(DecoderProtocol.maxParameters(protocol),
+                                newConfiguration.getChildren().size())
+                        .clear();
+            }
+
+            // Der configuration-Knoten trägt in echten iTrain-Dateien ein
+            // count-Attribut (z.B. count="86"). TcdDocument berechnet count
+            // nur für die 15 bekannten Kategorien neu, nicht hier - deshalb
+            // sicherheitshalber selbst auf die tatsächliche Kinderzahl setzen,
+            // falls die Vorlage einen abweichenden Wert mitbringt.
+            if (newConfiguration.getAttribute("count") != null) {
+                newConfiguration.setAttribute("count",
+                        String.valueOf(newConfiguration.getChildren().size()));
+            }
+            beforeChange.run();
+            if (existing != null) {
+                // An Ort und Stelle ersetzen - so bleibt die Position des
+                // Knotens innerhalb des Fahrzeugs garantiert unverändert.
+                int index = entry.getChildren().indexOf(existing);
+                entry.getChildren().set(index, newConfiguration);
+            } else {
+                insertConfiguration(entry, newConfiguration);
+            }
+            onModified.run();
+            // Den Detailbaum komplett neu aufbauen: der configuration-Knoten
+            // wurde ausgetauscht, ein bloßes refresh() würde noch den alten
+            // Teilbaum zeigen.
+            showDetail(entry);
+            entryTable.refresh();
+            updateLinkedCount();
+            // Erfolgsmeldung und Adress-Warnung in EINEM Dialog: Eine Vorlage
+            // bringt immer die Digital-Adresse (CV 1 bzw. 17/18) des
+            // Fahrzeugs mit, aus dem sie ursprünglich exportiert wurde - der
+            // Wert im Decoder des Zielfahrzeugs ist ein anderer. Der Nutzer
+            // muss ihn nach dem Start von iTrain per POM oder von Hand
+            // richtigstellen, sonst spricht iTrain die Lok unter einer
+            // falschen Adresse an. Bewusst nur eine Schaltfläche ("Weiter"),
+            // da es hier nichts zu entscheiden gibt.
+            ButtonType continueButton = new ButtonType(
+                    i18n.t("decoder.installContinue"), ButtonBar.ButtonData.OK_DONE);
+            Alert done = new Alert(Alert.AlertType.WARNING,
+                    i18n.t("editor.decoderImportSuccess",
+                            newConfiguration.getChildren().size(), entry.getName())
+                            + "\n\n" + i18n.t("editor.decoderAddressWarning"),
+                    continueButton);
+            done.setTitle(i18n.t("editor.decoderImport"));
+            done.setHeaderText(null);
+            done.showAndWait();
+        } catch (Exception ex) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, String.valueOf(ex.getMessage()));
+            alert.setHeaderText(i18n.t("editor.importErrorTitle"));
+            alert.showAndWait();
+        }
+    }
+
+    /**
+     * Element, auf das {@code <configuration>} unmittelbar folgt. Anhand
+     * einer echten iTrain-Datei (N-Anlage3.tcdz) über alle Fahrzeuge mit
+     * Konfiguration geprüft - bei Lokomotiven UND Wagen steht die
+     * Konfiguration ausnahmslos direkt hinter {@code <decoder>}:
+     * <pre>
+     * &lt;locomotive&gt;: [description] interface [id] decoder configuration length ...
+     * &lt;wagon&gt;:      interface decoder configuration functions ...
+     * </pre>
+     */
+    private static final String CONFIGURATION_ANCHOR_TAG = "decoder";
+
+    /**
+     * Tag-Namen, die in einem Fahrzeug NACH {@code <configuration>} stehen -
+     * Rückfall, falls ein Fahrzeug ausnahmsweise gar kein
+     * {@code <decoder>}-Element hat. Ebenfalls aus der echten Datei
+     * abgeleitet (Vereinigung aus Lokomotiven und Wagen).
+     */
+    private static final List<String> TAGS_AFTER_CONFIGURATION = List.of(
+            "length", "options", "feedback", "delay", "acceleration", "deceleration",
+            "speed-limit", "speed-control", "image", "functions", "fuel", "maintenance",
+            "total", "comment");
+
+    /**
+     * Fügt einen neuen {@code <configuration>}-Knoten in ein Fahrzeug ein,
+     * das bisher keinen hatte. Die Position ist entscheidend: iTrain erwartet
+     * die Kinder eines Elements in fester Reihenfolge und verweigert sonst
+     * das Öffnen der Datei (vgl. den früheren "boosters"-Fehler).
+     * <p>
+     * Vorgehen in drei Stufen:
+     * <ol>
+     * <li>Hinter {@code <decoder>} einsortieren - der belegte Normalfall
+     *     (siehe {@link #CONFIGURATION_ANCHOR_TAG}).</li>
+     * <li>Fehlt {@code <decoder>}: vor das erste Element setzen, das laut
+     *     {@link #TAGS_AFTER_CONFIGURATION} hinter der Konfiguration steht.</li>
+     * <li>Greift auch das nicht (unbekannte Struktur): ans Ende hängen.</li>
+     * </ol>
+     */
+    /**
+     * Tag-Namen, die in einem Fahrzeug VOR {@code <decoder>} stehen. Aus der
+     * echten Datei abgelesen; belegt sind die Folgen
+     * {@code interface > decoder} und {@code interface > id > decoder},
+     * bei Lokomotiven zusätzlich {@code description > interface > decoder}.
+     */
+    private static final List<String> TAGS_BEFORE_DECODER =
+            List.of("description", "interface", "id");
+
+    /**
+     * Fragt, ob für ein Fahrzeug ohne Decoder einer angelegt werden soll, und
+     * mit welchem Protokoll.
+     *
+     * @return das gewählte Protokoll, oder {@code null} bei Abbruch - dann
+     *         unterbleibt der ganze Import
+     */
+    private String askForDecoderProtocol(String vehicleName) {
+        // Nur Protokolle, die überhaupt eine CV-Konfiguration kennen. Ein
+        // Decoder mit "mot" oder "analog" anzulegen wäre widersinnig: Die
+        // Vorlage, die gleich eingelesen werden soll, ließe sich damit im
+        // selben Atemzug nicht mehr einlesen.
+        List<String> protocols = List.of("dcc", "fmz", "ctc", "sx2", "sx1");
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(protocols.get(0), protocols);
+        dialog.initOwner(getWindow());
+        dialog.setTitle(i18n.t("editor.decoderImport"));
+        dialog.setHeaderText(null);
+        dialog.setContentText(i18n.t("editor.decoderInsertQuestion", vehicleName));
+        return dialog.showAndWait().orElse(null);
+    }
+
+    /**
+     * Legt ein {@code <decoder protocol="..."/>} an der Stelle an, an der
+     * iTrain es erwartet: hinter {@code interface} bzw. {@code id} und vor
+     * allem Übrigen.
+     * <p>
+     * Die Position ist nicht beliebig - iTrain erwartet die Kinder eines
+     * Elements in fester Reihenfolge und verweigert sonst das Öffnen der
+     * Datei (vgl. den früheren "boosters"-Fehler). Deshalb wird hinter das
+     * <b>letzte</b> Element aus {@link #TAGS_BEFORE_DECODER} eingefügt und
+     * nicht einfach an den Anfang.
+     */
+    private void insertDecoder(XmlNode entry, String protocol) {
+        XmlNode decoder = new XmlNode(CONFIGURATION_ANCHOR_TAG);
+        decoder.setAttribute("protocol", protocol);
+
+        List<XmlNode> children = entry.getChildren();
+        for (int i = children.size() - 1; i >= 0; i--) {
+            if (TAGS_BEFORE_DECODER.contains(children.get(i).getTagName())) {
+                children.add(i + 1, decoder);
+                return;
+            }
+        }
+        // Kein bekanntes Element davor - dann ganz nach vorn. Ein Wagen ohne
+        // interface und ohne id ist zwar ungewöhnlich, aber der Decoder steht
+        // in jeder beobachteten Struktur vor length, functions und Co.
+        children.add(0, decoder);
+    }
+
+    private void insertConfiguration(XmlNode entry, XmlNode configuration) {
+        List<XmlNode> children = entry.getChildren();
+        for (int i = children.size() - 1; i >= 0; i--) {
+            if (CONFIGURATION_ANCHOR_TAG.equals(children.get(i).getTagName())) {
+                children.add(i + 1, configuration);
+                return;
+            }
+        }
+        for (int i = 0; i < children.size(); i++) {
+            if (TAGS_AFTER_CONFIGURATION.contains(children.get(i).getTagName())) {
+                children.add(i, configuration);
+                return;
+            }
+        }
+        children.add(configuration);
+    }
+
+    /** Vorlagen-Ordner, oder null (mit Hinweis), falls noch keiner eingestellt ist. */
+    private File requireDecoderDirectory() {
+        String dir = AppSettings.getInstance().getDecoderDirectory();
+        if (dir != null && !dir.isBlank() && new File(dir).isDirectory()) {
+            return new File(dir);
+        }
+        Alert alert = new Alert(Alert.AlertType.INFORMATION, i18n.t("editor.decoderNoDirectory"));
+        alert.setHeaderText(null);
+        alert.showAndWait();
+        return null;
     }
 
     private void onAddEntry() {
@@ -991,14 +1453,36 @@ public class CategoryEditor {
 
     private javafx.scene.Node buildDetailSide() {
         detailTree.setShowRoot(true);
-        detailTree.setCellFactory(tv -> new GuideLineTreeCell());
+        // Die Hervorhebung des configuration-Knotens gilt nur dort, wo er auch
+        // wirklich Decoder-Einstellungen bedeutet (Lokomotiven, Wagen) - siehe
+        // supportsDecoderConfiguration(). Als Wert übergeben und nicht als
+        // Abfrage: Die Kategorie eines Editors steht bei seiner Erzeugung fest.
+        boolean highlightConfiguration = supportsDecoderConfiguration();
+        detailTree.setCellFactory(tv -> new GuideLineTreeCell(highlightConfiguration));
         detailTree.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> {
             if (newV != null) {
                 selectNode(newV.getValue());
             }
         });
 
-        VBox treeBox = new VBox(new Label(i18n.t("editor.structureLabel")), detailTree);
+        // Der Knopf zum Bearbeiten der Decoder-Konfiguration sitzt bewusst
+        // HIER, über dem Daten-Explorer, und nicht im Bereich "Daten ändern":
+        // Der ist standardmäßig ausgeblendet (siehe unten), der Knopf wäre
+        // also erst nach Umlegen einer Einstellung zu sehen. Er erscheint
+        // genau dann, wenn ein configuration-Knoten ausgewählt ist - siehe
+        // selectNode(). Kräftiges Blau mit weißer Schrift statt der
+        // Pastelltöne der Ribbon-Knöpfe: Er taucht nur gelegentlich auf und
+        // soll dann auch auffallen.
+        editConfigButton.setText(i18n.t("editor.configEditWindow"));
+        editConfigButton.setTooltip(new Tooltip(i18n.t("editor.configEditWindowHint")));
+        editConfigButton.setStyle(STYLE_CONFIG_EDIT);
+        editConfigButton.setOnAction(e -> openConfigurationWindow());
+        editConfigButton.setVisible(false);
+        editConfigButton.setManaged(false);
+        HBox editConfigRow = new HBox(editConfigButton);
+        editConfigRow.setPadding(new Insets(0, 0, 6, 0));
+
+        VBox treeBox = new VBox(new Label(i18n.t("editor.structureLabel")), editConfigRow, detailTree);
         VBox.setVgrow(detailTree, javafx.scene.layout.Priority.ALWAYS);
 
         textContentField.textProperty().addListener((obs, oldV, newV) -> {
@@ -1093,11 +1577,13 @@ public class CategoryEditor {
         textContentField.setDisable(!enabled);
         reloadAttributeRows(node);
 
-        // Lokomotiven bekommen für ihren "configuration"-Knoten eine
+        // Fahrzeuge bekommen für ihren "configuration"-Knoten eine
         // spezialisierte Tabelle (Aktiv/Nr/Wert/Typ/Beschreibung) statt der
         // generischen Tag-/Textinhalt-Felder - andere Kategorien folgen
-        // später mit eigenen spezialisierten Ansichten.
-        boolean showConfig = node != null && "locomotives".equals(categoryName)
+        // später mit eigenen spezialisierten Ansichten. Lokomotiven UND
+        // Wagen, weil beide einen Decoder haben können (bei Wagen z.B. für
+        // Licht oder Kupplung) und der Aufbau des Knotens derselbe ist.
+        boolean showConfig = node != null && supportsDecoderConfiguration()
                 && "configuration".equals(node.getTagName());
         if (showConfig) {
             currentConfigNode = node;
@@ -1107,6 +1593,11 @@ public class CategoryEditor {
         genericPane.setManaged(!showConfig);
         configPane.setVisible(showConfig);
         configPane.setManaged(showConfig);
+        // Der Knopf unter dem Daten-Explorer taucht nur bei einem
+        // configuration-Knoten auf - unabhängig davon, ob der Bereich
+        // "Daten ändern" eingeblendet ist.
+        editConfigButton.setVisible(showConfig);
+        editConfigButton.setManaged(showConfig);
     }
 
     /**
@@ -1502,6 +1993,9 @@ public class CategoryEditor {
             }
         });
 
+        // Kein zweiter "In eigenem Fenster bearbeiten"-Knopf hier: Er sitzt
+        // unter dem Daten-Explorer, weil dieser Bereich standardmäßig
+        // ausgeblendet ist (Einstellungen -> Ansicht -> "Daten ändern").
         HBox configToolbar = new HBox(10, addParamButton, deleteParamButton);
         configToolbar.setPadding(new Insets(8, 0, 8, 0));
 
@@ -1509,6 +2003,82 @@ public class CategoryEditor {
         VBox.setVgrow(configTable, javafx.scene.layout.Priority.ALWAYS);
         configPane.setVisible(false);
         configPane.setManaged(false);
+    }
+
+    /**
+     * Öffnet den gerade angezeigten {@code <configuration>}-Knoten im großen
+     * Erfassungsfenster ({@link DecoderCaptureWindow}) zum Bearbeiten.
+     * <p>
+     * Das Fenster arbeitet auf Kopien und schreibt erst beim Übernehmen
+     * zurück; ein Abbruch bleibt also folgenlos. Der Knoten selbst wird dabei
+     * nicht ausgetauscht, sondern nur neu befüllt - so bleibt seine Position
+     * innerhalb des Fahrzeugs unverändert, worauf iTrain empfindlich
+     * reagiert.
+     */
+    private void openConfigurationWindow() {
+        if (currentConfigNode == null) {
+            return;
+        }
+        if (!decoderHintsAccepted()) {
+            return;
+        }
+        XmlNode entry = entryTable.getSelectionModel().getSelectedItem();
+        String name = entry != null ? entry.getName() : "";
+        Window window = getWindow();
+        DecoderCaptureWindow.showForConfiguration(
+                window instanceof Stage stage ? stage : null,
+                name,
+                DecoderProtocol.read(entry),
+                currentConfigNode,
+                beforeChange,
+                () -> {
+                    onModified.run();
+                    // Der Explorer zeigt die Parameter als Teilbaum: Nach dem
+                    // Übernehmen muss er neu aufgebaut werden, ein refresh()
+                    // allein zeigte noch die alten Kinder.
+                    if (entry != null) {
+                        showDetail(entry);
+                        // showDetail wählt den Fahrzeug-Knoten aus; damit wäre
+                        // die Konfiguration wieder zugeklappt und der Knopf
+                        // verschwunden. Deshalb gleich wieder dorthin
+                        // zurückspringen, wo man gerade gearbeitet hat.
+                        selectInTree(currentConfigNode);
+                    }
+                    configTable.refresh();
+                });
+    }
+
+    /**
+     * Wählt im Daten-Explorer den Eintrag zu einem bestimmten Knoten aus und
+     * klappt die Ebenen darüber auf. Der Baum wird nach Änderungen komplett
+     * neu aufgebaut, die {@link XmlNode}-Objekte bleiben dabei aber dieselben
+     * - darüber lässt sich die vorherige Stelle wiederfinden.
+     */
+    private void selectInTree(XmlNode node) {
+        if (node == null || detailTree.getRoot() == null) {
+            return;
+        }
+        TreeItem<XmlNode> found = findTreeItem(detailTree.getRoot(), node);
+        if (found == null) {
+            return;
+        }
+        for (TreeItem<XmlNode> parent = found.getParent(); parent != null; parent = parent.getParent()) {
+            parent.setExpanded(true);
+        }
+        detailTree.getSelectionModel().select(found);
+    }
+
+    private static TreeItem<XmlNode> findTreeItem(TreeItem<XmlNode> item, XmlNode node) {
+        if (item.getValue() == node) {
+            return item;
+        }
+        for (TreeItem<XmlNode> child : item.getChildren()) {
+            TreeItem<XmlNode> found = findTreeItem(child, node);
+            if (found != null) {
+                return found;
+            }
+        }
+        return null;
     }
 
     private static String emptyIfNull(String value) {
@@ -1614,17 +2184,62 @@ public class CategoryEditor {
      * die Linien werden zusätzlich vor dem Text eingefügt.
      */
     private static final class GuideLineTreeCell extends TreeCell<XmlNode> {
+
+        /**
+         * Stilklasse für den {@code configuration}-Knoten. Die Farbe steht im
+         * Stylesheet, damit das dunkle Schema einen aufgehellten Blauton
+         * setzen kann - siehe dark-theme.css.
+         */
+        private static final String CONFIG_STYLE_CLASS = "configuration-node";
+
+        /**
+         * Blau für das helle Schema. Muss hier stehen und nicht im Stylesheet:
+         * Hell ist das JavaFX-Standardaussehen ohne eigenes Stylesheet, es gibt
+         * dort also keine Datei, in der die Regel stehen könnte.
+         */
+        private static final String CONFIG_STYLE_LIGHT = "-fx-text-fill: #2f6fb5;";
+
+        /** Ob in dieser Kategorie überhaupt ein Decoder-Knoten vorkommen kann. */
+        private final boolean highlightConfiguration;
+
+        private GuideLineTreeCell(boolean highlightConfiguration) {
+            this.highlightConfiguration = highlightConfiguration;
+        }
+
         @Override
         protected void updateItem(XmlNode item, boolean empty) {
             super.updateItem(item, empty);
             if (empty || item == null) {
                 setText(null);
                 setGraphic(null);
+                markConfiguration(false);
                 return;
             }
             setText(item.toString());
             javafx.scene.Node lines = buildGuideLines(getTreeItem());
             setGraphic(lines);
+            // Der configuration-Knoten fällt farblich auf: Er ist der einzige,
+            // hinter dem weitere Optionen stecken (die CV-Tabelle des Decoders
+            // und die Schaltfläche zum Bearbeiten). Ohne Hervorhebung sieht er
+            // aus wie jeder andere Zweig, und man klickt ihn nicht an.
+            markConfiguration(highlightConfiguration && "configuration".equals(item.getTagName()));
+        }
+
+        /**
+         * Setzt bzw. entfernt Stilklasse und Inline-Farbe. Beides muss beim
+         * Wiederverwenden der Zelle zurückgenommen werden: TreeCells werden
+         * beim Blättern recycelt, und eine hängengebliebene Farbe würde einen
+         * beliebigen anderen Knoten blau einfärben.
+         */
+        private void markConfiguration(boolean isConfiguration) {
+            getStyleClass().remove(CONFIG_STYLE_CLASS);
+            if (isConfiguration) {
+                getStyleClass().add(CONFIG_STYLE_CLASS);
+                setStyle(AppSettings.THEME_DARK.equals(AppSettings.getInstance().getTheme())
+                        ? "" : CONFIG_STYLE_LIGHT);
+            } else {
+                setStyle("");
+            }
         }
 
         /** Baut die Führungslinien-Grafik für die Ebene des übergebenen Baum-Elements. */

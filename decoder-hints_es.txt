@@ -1,0 +1,52 @@
+# Notas sobre la funcion de decoder (importar/exportar)
+#
+# Puedes editar este archivo libremente. Primero se busca en el directorio de
+# trabajo del programa; si no, se usa la copia incluida.
+#
+# Formato:
+#   **negrita**        resalta un pasaje
+#   "- " al principio  convierte la linea en una vineta
+#   linea vacia        inicia un nuevo parrafo
+#   # al principio de linea es un comentario y no se muestra
+
+**Que hace esta funcion**
+
+Las plantillas de decoder son tablas de CV de un tipo de decoder.
+En lugar de teclear cada CV a mano, aplicas una plantilla a una locomotora o a un vagon, y despues solo ajustas lo que difiera en tu vehiculo.
+
+Estas plantillas se han extraido de los PDF de los fabricantes mediante un script. Por tanto, su contenido no tiene por que ser correcto.
+
+**Los tres caminos**
+
+- **Leer plantilla**: aplica una plantilla guardada al vehiculo seleccionado. Los valores de CV que ya tuviera el vehiculo se sustituyen.
+- **Escribir plantilla**: guarda los valores de CV del vehiculo seleccionado como nueva plantilla, reutilizable mas adelante en otros vehiculos.
+- **Editar configuracion**: abre la tabla de CV del vehiculo para cambiar, completar y borrar valores concretos.
+
+**Leer plantilla** se usa cuando quieres asignar una tabla de CV determinada a una locomotora y despues contrastarla en iTrain con los valores reales, por via de programacion o con POM.
+**Escribir plantilla** se usa cuando ya has dotado a los decoders de configuraciones y textos. La plantilla se guarda como archivo CSV.
+Ese archivo CSV no se puede editar, pero si transportar (correo electronico, etc.) y volver a leer y asignar en cualquier sitio con este programa de importacion/exportacion.
+**Editar configuracion** permite que trabajes tu mismo las plantillas en todos sus aspectos.
+Las entradas pueden ponerse activas o inactivas, y el tipo y las descripciones pueden recibir textos propios.
+
+**La direccion digital - o cualquier otro valor - sigue siendo cosa tuya**
+
+Una plantilla trae los valores del tipo de decoder, no los de tu vehiculo. Comprueba **CV 1** (y **CV 17/18** con direccion larga) despues de leerla; de lo contrario varias locomotoras circularan con la misma direccion.
+Eso se corrige en iTrain, una vez abierto alli el archivo.
+Conviene leer por completo todos los valores por la via de programacion o con POM y actualizarlos a partir de ahi.
+
+**No todos los decoders admiten todas las plantillas**
+
+Lo determinante es el protocolo anotado en el vehiculo bajo "decoder":
+
+- **DCC, FMZ, CTC, SX2**: se aplican todos los parametros.
+- **SX1 y Selectrix**: solo los cinco primeros parametros; el formato no conoce mas.
+- **Motorola, multiprotocolo, analogico**: sin importacion; aqui no hay CV en el sentido de estas plantillas.
+
+**Lo que el programa no hace**
+
+No escribe nada en el decoder. No lee nada del decoder.
+Solo se modifica el archivo de iTrain; transferir los valores al vehiculo sigue siendo tarea de iTrain o de tu central.
+
+**Antes de experimentar**
+
+Haz una copia de tu archivo de maqueta. El programa hace copia de seguridad automatica antes de cada apertura (Preferencias -> Rutas), pero una copia propia en un lugar que conozcas tranquiliza mas la primera vez.

@@ -1,0 +1,52 @@
+# Uwagi do funkcji dekodera (import/eksport)
+#
+# Ten plik mozesz dowolnie edytowac. Najpierw szukany jest w katalogu roboczym
+# programu, w przeciwnym razie uzywana jest kopia dolaczona do programu.
+#
+# Format:
+#   **pogrubienie**     wyroznia fragment
+#   "- " na poczatku    zamienia wiersz w punkt listy
+#   pusty wiersz        zaczyna nowy akapit
+#   # na poczatku wiersza to komentarz i nie jest wyswietlany
+
+**Co robi ta funkcja**
+
+Szablony dekoderow to tabele CV danego typu dekodera.
+Zamiast wpisywac kazda CV recznie, przenosisz szablon do lokomotywy lub wagonu, a potem poprawiasz tylko to, co w twoim pojezdzie jest inne.
+
+Szablony te zostaly wydobyte z plikow PDF producentow za pomoca skryptu. Ich tresc nie musi wiec byc poprawna.
+
+**Trzy drogi**
+
+- **Wczytaj szablon**: przenosi zapisany szablon do zaznaczonego pojazdu. Dotychczasowe wartosci CV pojazdu zostaja zastapione.
+- **Zapisz szablon**: zapisuje wartosci CV zaznaczonego pojazdu jako nowy szablon, ktory pozniej wykorzystasz w innych pojazdach.
+- **Edytuj konfiguracje**: otwiera tabele CV pojazdu, aby bezposrednio zmieniac, uzupelniac i usuwac poszczegolne wartosci.
+
+**Wczytaj szablon** stosujesz, gdy chcesz przypisac lokomotywie okreslona tabele CV, a nastepnie uzgodnic ja w iTrain z rzeczywistymi wartosciami - torem programujacym albo przez POM.
+**Zapisz szablon** stosujesz, gdy juz opatrzyles dekodery konfiguracjami i opisami. Szablon zapisywany jest jako plik CSV.
+Tego pliku CSV nie da sie edytowac, ale mozna go przenosic (poczta elektroniczna itd.) i wszedzie ponownie wczytac oraz przypisac za pomoca tego programu importu/eksportu.
+**Edytuj konfiguracje** pozwala ci samodzielnie opracowac szablony pod kazdym wzgledem.
+Pozycje mozna uczynic aktywnymi lub nieaktywnymi, a typ i opisy mozna opatrzyc wlasnymi tekstami.
+
+**Adres cyfrowy - albo dowolna inna wartosc - pozostaje twoja sprawa**
+
+Szablon wnosi wartosci typu dekodera, a nie twojego pojazdu. Po wczytaniu sprawdz **CV 1** (a przy dlugim adresie **CV 17/18**) - inaczej kilka lokomotyw pojedzie na tym samym adresie.
+Poprawia sie to w iTrain, po otwarciu tam pliku.
+Warto odczytac wszystkie wartosci w calosci torem programujacym albo przez POM i na tej podstawie je zaktualizowac.
+
+**Nie kazdy dekoder przyjmuje kazdy szablon**
+
+Decyduje protokol wpisany przy pojezdzie pod "decoder":
+
+- **DCC, FMZ, CTC, SX2**: przejmowane sa wszystkie parametry.
+- **SX1 i Selectrix**: tylko piec pierwszych parametrow - wiecej ten format nie zna.
+- **Motorola, wieloprotokolowy, analogowy**: brak importu; nie ma tu CV w rozumieniu tych szablonow.
+
+**Czego program nie robi**
+
+Nie zapisuje niczego w dekoderze. Nie odczytuje niczego z dekodera.
+Zmieniany jest wylacznie plik iTrain; przeniesienie wartosci do pojazdu pozostaje zadaniem iTrain lub twojej centrali.
+
+**Zanim zaczniesz probowac**
+
+Zrob kopie pliku swojej makiety. Program wprawdzie tworzy kopie zapasowa automatycznie przed kazdym otwarciem (Ustawienia -> Sciezki), ale wlasna kopia w znanym ci miejscu za pierwszym razem uspokaja bardziej.

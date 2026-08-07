@@ -9,6 +9,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
@@ -64,6 +65,13 @@ public final class HelpDialog {
         addParagraph(content, i18n.t("help.selectionTitle"), i18n.t("help.selectionText"));
         addParagraph(content, i18n.t("help.categoryViewTitle"), i18n.t("help.categoryViewText"));
         addParagraph(content, i18n.t("help.explorerTitle"), i18n.t("help.explorerText"));
+        addParagraph(content, i18n.t("help.decoderTitle"), i18n.t("help.decoderText"));
+        addParagraph(content, i18n.t("help.decoderHintsTitle"), i18n.t("help.decoderHintsText"));
+        addParagraph(content, i18n.t("help.captureTitle"), i18n.t("help.captureText"));
+        // Fensterverwaltung am Ende der Bedienabschnitte: Sie betrifft alle
+        // Fenster gleichermaßen und ist erst verständlich, wenn man weiß,
+        // welche es überhaupt gibt.
+        addParagraph(content, i18n.t("help.windowsTitle"), i18n.t("help.windowsText"));
         addParagraph(content, i18n.t("help.referenceRenameTitle"), i18n.t("help.referenceRenameText"));
         addParagraph(content, i18n.t("help.statusBarTitle"), i18n.t("help.statusBarText"));
 
@@ -206,12 +214,14 @@ public final class HelpDialog {
     }
 
     /**
-     * Erzeugt einen TextFlow mit eigener Stilklasse. Nötig fürs dunkle
-     * Farbschema: {@code Text}-Knoten färbt CSS über {@code -fx-fill} (nicht
-     * über {@code -fx-text-fill} wie bei Labels), und diese Regel soll gezielt
-     * nur hier gelten - eine globale {@code .text}-Regel würde auch die
-     * Beschriftungen von Buttons/Tabellen überschreiben (z.B. das bewusst rote
-     * "X" der Löschen-Schaltfläche).
+     * Erzeugt einen TextFlow mit eigener Stilklasse.
+     * <p>
+     * Die Schriftfarbe kommt <b>nicht</b> von dieser Stilklasse, sondern wird
+     * je Textbaustein direkt gesetzt (siehe {@link #textFill()}) - der Versuch
+     * über CSS hat nicht funktioniert. Die Klasse bleibt trotzdem: Sie ist der
+     * Ansatzpunkt, falls am Hilfetext einmal etwas anderes gestaltet werden
+     * soll (Abstände, Schriftgröße), und dokumentiert im Stylesheet, wo dieser
+     * Text herkommt.
      */
     private static TextFlow newTextFlow() {
         TextFlow flow = new TextFlow();
@@ -227,6 +237,37 @@ public final class HelpDialog {
         if (bold) {
             run.setStyle("-fx-font-weight: bold;");
         }
+        // Schriftfarbe ausdrücklich setzen, nicht über CSS. Siehe textFill().
+        run.setFill(textFill());
         runs.add(run);
+    }
+
+    /**
+     * Schriftfarbe für die Textbausteine, passend zum eingestellten Farbschema.
+     *
+     * <h2>Warum hier und nicht im Stylesheet</h2>
+     * {@link Text} ist eine <b>Form</b>, keine Beschriftung: Die Farbe heißt
+     * dort {@code -fx-fill}, nicht {@code -fx-text-fill}, und ohne Angabe ist
+     * sie <b>schwarz</b> - im dunklen Schema also unlesbar. Eine Regel
+     * {@code .help-text .text} in {@code dark-theme.css} sollte das erledigen,
+     * hat es in der Praxis aber nicht getan: Überschriften (echte
+     * {@link Label}) erschienen weiß, der Fließtext daneben blieb schwarz.
+     * <p>
+     * Statt weiter zu raten, warum der Selektor nicht greift, wird die Farbe
+     * jetzt direkt gesetzt. Das ist ohnehin die verlässlichere Variante -
+     * ein programmatisch gesetzter Wert hat Vorrang vor jedem Stylesheet und
+     * kann nicht von einer späteren CSS-Änderung versehentlich ausgehebelt
+     * werden. Dieselbe Entscheidung wie bei der Skizze im Hinweis-Fenster
+     * (siehe {@code DecoderCaptureWindow.buildIllustration}).
+     * <p>
+     * Die Farbe wird beim Aufbau des Textes festgelegt. Das genügt, weil alle
+     * betroffenen Fenster (Hilfe, Hinweise, Decoder-Hinweise) modal sind und
+     * jedes Mal neu aufgebaut werden - das Farbschema kann sich nicht ändern,
+     * während eines davon offen steht.
+     */
+    private static Color textFill() {
+        return AppSettings.THEME_DARK.equals(AppSettings.getInstance().getTheme())
+                ? Color.web("#e0e0e0")
+                : Color.BLACK;
     }
 }

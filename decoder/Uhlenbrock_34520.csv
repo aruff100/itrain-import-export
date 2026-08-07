@@ -1,0 +1,582 @@
+﻿"Kategorie";"Typ";"Name";"Beschreibung";"XML"
+"decoder-configuration";"configuration";"Uhlenbrock Sounddecoder 34 520";"Uhlenbrock Sounddecoder 34 520 - CV-Tabelle des Lokdecoders plus SUSI-Sound-CVs (Adressbereich 1, Werkseinstellung von CV 897) aus der Betriebsanleitung Bes34520; nicht enthalten: Banken 1-4 des Function-Mappings sowie die bankabhaengigen Experten-CVs A-E, die ueber CV 1021 umgeschaltet werden und dieselbe Nummer mehrfach belegen";"<configuration count=""193"">
+  <parameter nr=""1"" value=""3"">
+    <description>Lokadresse</description>
+  </parameter>
+  <parameter nr=""2"" value=""1"">
+    <description>Minimale Geschwindigkeit (ändern, bis die Lok bei Fahrstufe 1 gerade fährt)</description>
+  </parameter>
+  <parameter nr=""3"" value=""5"">
+    <description>Anfahrverzögerung, / 1 bedeutet, alle 5 ms wird die aktuelle interne Geschwindigkeit um 1 erhöht / Beträgt die interne maximale Geschwindigkeit z.B. 200 (CV 5 = 50 oder / CV 94 = 200), dann beträgt die Anfahrzeit von 0 auf Fmax 1 Sekunde</description>
+  </parameter>
+  <parameter nr=""4"" value=""5"">
+    <description>Bremsverzögerung (Zeitfaktor wie CV 3)</description>
+  </parameter>
+  <parameter nr=""5"" value=""48"">
+    <description>Maximale Geschwindigkeit (muss größer als CV 2 sein)</description>
+  </parameter>
+  <parameter nr=""6"" value=""24"">
+    <description>Mittlere Geschwindigkeit (muss größer als CV 2 und kleiner als CV 5 sein)</description>
+  </parameter>
+  <parameter nr=""7"">
+    <description>Softwareversion (Der verwendete Prozessor kann upgedatet werden)</description>
+  </parameter>
+  <parameter nr=""8"" value=""85"">
+    <description>Herstellerkennung Decoderreset, Werte wie in CV 59</description>
+  </parameter>
+  <parameter nr=""12"" value=""255"">
+    <description>Betriebsarten / Bit 0=1 DC (Analogbetrieb Gleichstrom) ein / Bit 1=1 AC (Analogbetrieb Wechselstrom) ein / Bit 2=1 Datenformat DCC ein / Bit 3=1 Datenformat Motorola ein / Bit 4=1 Datenformat Selectrix ein / Bit 5=1 Datenformat mfx ein (nur mfx® Varianten) / Achtung: Sind alle Datenformate ausgeschaltet, kann der Decoder im / Digitalbetrieb nur noch programmiert werden.</description>
+  </parameter>
+  <parameter nr=""13"" value=""0"">
+    <description>Funktionstasten im Analogbetrieb aktivieren / Bit 0-7 -&gt; F1 bis F8; Bit = 0 Funktion aus, Bit = 1 Funktion ein</description>
+  </parameter>
+  <parameter nr=""14"" value=""1"">
+    <description>Funktionstasten im Analogbetrieb aktivieren / Bit 0 und Bit 4-7 -&gt; F0 und F9 bis F12; Bit = 0 Funktion aus, Bit = 1 Funktion ein</description>
+  </parameter>
+  <parameter nr=""15"" value=""1"">
+    <description>Decoder Programmierschloss</description>
+  </parameter>
+  <parameter nr=""16"" value=""1"">
+    <description>Decoder Programmierschloss Indexzahl</description>
+  </parameter>
+  <parameter nr=""17"" value=""2000"">
+    <description>Lange Lokadresse / 17 = Höherwertiges Byte / 18 = Niederwertiges Byte</description>
+  </parameter>
+  <parameter nr=""18"" value=""2000"">
+    <description>Lange Lokadresse / 17 = Höherwertiges Byte / 18 = Niederwertiges Byte</description>
+  </parameter>
+  <parameter nr=""19"" value=""0"">
+    <description>Consist Adresse (Doppeltraktion) / 0 = Consist Adresse (CADR) ist nicht aktiv / Wenn Bit 7 = 1 wird die Fahrtrichtung umgekehrt, / also gewünschte CADR + 128 = Fahrtrichtungsumkehr</description>
+  </parameter>
+  <parameter nr=""27"" value=""0"">
+    <description>Einstellungen Bremssignal (automatisches Halten) / Bit 0 = 1 -&gt; ABC rechte Schiene positiver / Bit 1 = 1 -&gt; ABC linke Schiene positiver / Bit 4 = 1 -&gt; DC mit Fahrtrichtung entgegengesetzt / Bit 5 = 1 -&gt; DC mit Fahrtrichtung gleich / Bit 7 = 0 -&gt; ABC nur Fahrtrichtung vorwärts, wenn Bit 0 = 1 oder Bit 1 = 1 / Bit 7 = 1 -&gt; ABC nur Fahrtrichtung rückwärts, wenn Bit 0 = 1 oder Bit 1 = 1</description>
+  </parameter>
+  <parameter nr=""28"" value=""131"">
+    <description>RailCom® Konfiguration / Bit 0 = 1 -&gt; Kanal1 ein / Bit 1 = 1 -&gt; Kanal2 ein / Bit 7 = 1 -&gt; RailCom Plus® ein</description>
+  </parameter>
+  <parameter nr=""29"" value=""14"">
+    <description>Konfiguration nach DCC-Norm / Bit 0=0 Normale Fahrtrichtung / Bit 0=1 Entgegengesetzte Fahrtrichtung / Bit 1=0 14 Fahrstufen / Bit 1=1 28 Fahrstufen / Bit 2=0 Nur Digitalbetrieb / Bit 2=1 Automatische Analog-/Digitalumschaltung / Bit 3=0 RailCom® ausgeschaltet / Bit 3=1 RailCom® eingeschaltet / Bit 4=0 Fahrstufen über CV 2, 5 und 6 / Bit 4=1 Kennlinie aus CV 67 - 94 benutzen / Bit 5=0 Kurze Adresse (CV 1) / Bit 5=1 Lange Adresse (CV 17/18)</description>
+  </parameter>
+  <parameter nr=""30"" value=""0"">
+    <description>Fehlerspeicher für Funktionsausgänge, Motor und Temperaturüberwachung / 1 = Fehler Fkt.-Ausgänge, 2 = Fehler Motor, 4 = Temperaturüberschreitung</description>
+  </parameter>
+  <parameter nr=""31"" value=""0"">
+    <description>1. Zeiger CV für CV-Bänke</description>
+  </parameter>
+  <parameter nr=""32"" value=""255"">
+    <description>2. Zeiger CV für CV-Bänke</description>
+  </parameter>
+  <parameter nr=""33"" value=""1"">
+    <description>Einfaches Function Mapping / Zuordnung der Funktionsausgänge zu den CVs / CV 33 Lichtfunktionstaste (F0) bei Vorwärtsfahrt / CV 34 Lichtfunktionstaste (F0) bei Rückwärtsfahrt / CV 35 Funktionstaste F1 / CV 36 Funktionstaste F2 / CV 37 Funktionstaste F3 / CV 38 Funktionstaste F4 / CV 39 Funktionstaste F5 / CV 40 Funktionstaste F6 / CV 41 Funktionstaste F7 / CV 42 Funktionstaste F8 / CV 43 Funktionstaste F9 / CV 44 Funktionstaste F10 / CV 45 Funktionstaste F11 / CV 46 Funktionstaste F12 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 0, Standard) Wert / Bit 0 Lichtausgang vorn 1 / Bit 1 Lichtausgang hinten 2 / Bit 2 Funktionsausgang A1 4 / Bit 3 Funktionsausgang A2 8 / Bit 4 Funktionsausgang A3 16 / Bit 5 Funktionsausgang A4 32 / Bit 6 Rangiergang 64 / Bit 7 Anfahr-/Bremsverzögerung 128 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 1, fkt-Mapping shift) Wert / Bit 0 Funktionsausgang A2 1 / Bit 1 Funktionsausgang A3 2 / Bit 2 Funktionsausgang A4 4 / Bit 3 Rangiergang 8 / Bit 4 Anfahr-/Bremsverzögerung 16 / Bit 5 Funktionsausgang A5 32 / Bit 6 Funktionsausgang A6 64 / Bit 7 Funktionsausgang A7 128</description>
+  </parameter>
+  <parameter nr=""34"" value=""1"">
+    <description>Einfaches Function Mapping / Zuordnung der Funktionsausgänge zu den CVs / CV 33 Lichtfunktionstaste (F0) bei Vorwärtsfahrt / CV 34 Lichtfunktionstaste (F0) bei Rückwärtsfahrt / CV 35 Funktionstaste F1 / CV 36 Funktionstaste F2 / CV 37 Funktionstaste F3 / CV 38 Funktionstaste F4 / CV 39 Funktionstaste F5 / CV 40 Funktionstaste F6 / CV 41 Funktionstaste F7 / CV 42 Funktionstaste F8 / CV 43 Funktionstaste F9 / CV 44 Funktionstaste F10 / CV 45 Funktionstaste F11 / CV 46 Funktionstaste F12 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 0, Standard) Wert / Bit 0 Lichtausgang vorn 1 / Bit 1 Lichtausgang hinten 2 / Bit 2 Funktionsausgang A1 4 / Bit 3 Funktionsausgang A2 8 / Bit 4 Funktionsausgang A3 16 / Bit 5 Funktionsausgang A4 32 / Bit 6 Rangiergang 64 / Bit 7 Anfahr-/Bremsverzögerung 128 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 1, fkt-Mapping shift) Wert / Bit 0 Funktionsausgang A2 1 / Bit 1 Funktionsausgang A3 2 / Bit 2 Funktionsausgang A4 4 / Bit 3 Rangiergang 8 / Bit 4 Anfahr-/Bremsverzögerung 16 / Bit 5 Funktionsausgang A5 32 / Bit 6 Funktionsausgang A6 64 / Bit 7 Funktionsausgang A7 128</description>
+  </parameter>
+  <parameter nr=""35"" value=""1"">
+    <description>Einfaches Function Mapping / Zuordnung der Funktionsausgänge zu den CVs / CV 33 Lichtfunktionstaste (F0) bei Vorwärtsfahrt / CV 34 Lichtfunktionstaste (F0) bei Rückwärtsfahrt / CV 35 Funktionstaste F1 / CV 36 Funktionstaste F2 / CV 37 Funktionstaste F3 / CV 38 Funktionstaste F4 / CV 39 Funktionstaste F5 / CV 40 Funktionstaste F6 / CV 41 Funktionstaste F7 / CV 42 Funktionstaste F8 / CV 43 Funktionstaste F9 / CV 44 Funktionstaste F10 / CV 45 Funktionstaste F11 / CV 46 Funktionstaste F12 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 0, Standard) Wert / Bit 0 Lichtausgang vorn 1 / Bit 1 Lichtausgang hinten 2 / Bit 2 Funktionsausgang A1 4 / Bit 3 Funktionsausgang A2 8 / Bit 4 Funktionsausgang A3 16 / Bit 5 Funktionsausgang A4 32 / Bit 6 Rangiergang 64 / Bit 7 Anfahr-/Bremsverzögerung 128 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 1, fkt-Mapping shift) Wert / Bit 0 Funktionsausgang A2 1 / Bit 1 Funktionsausgang A3 2 / Bit 2 Funktionsausgang A4 4 / Bit 3 Rangiergang 8 / Bit 4 Anfahr-/Bremsverzögerung 16 / Bit 5 Funktionsausgang A5 32 / Bit 6 Funktionsausgang A6 64 / Bit 7 Funktionsausgang A7 128</description>
+  </parameter>
+  <parameter nr=""36"" value=""1"">
+    <description>Einfaches Function Mapping / Zuordnung der Funktionsausgänge zu den CVs / CV 33 Lichtfunktionstaste (F0) bei Vorwärtsfahrt / CV 34 Lichtfunktionstaste (F0) bei Rückwärtsfahrt / CV 35 Funktionstaste F1 / CV 36 Funktionstaste F2 / CV 37 Funktionstaste F3 / CV 38 Funktionstaste F4 / CV 39 Funktionstaste F5 / CV 40 Funktionstaste F6 / CV 41 Funktionstaste F7 / CV 42 Funktionstaste F8 / CV 43 Funktionstaste F9 / CV 44 Funktionstaste F10 / CV 45 Funktionstaste F11 / CV 46 Funktionstaste F12 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 0, Standard) Wert / Bit 0 Lichtausgang vorn 1 / Bit 1 Lichtausgang hinten 2 / Bit 2 Funktionsausgang A1 4 / Bit 3 Funktionsausgang A2 8 / Bit 4 Funktionsausgang A3 16 / Bit 5 Funktionsausgang A4 32 / Bit 6 Rangiergang 64 / Bit 7 Anfahr-/Bremsverzögerung 128 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 1, fkt-Mapping shift) Wert / Bit 0 Funktionsausgang A2 1 / Bit 1 Funktionsausgang A3 2 / Bit 2 Funktionsausgang A4 4 / Bit 3 Rangiergang 8 / Bit 4 Anfahr-/Bremsverzögerung 16 / Bit 5 Funktionsausgang A5 32 / Bit 6 Funktionsausgang A6 64 / Bit 7 Funktionsausgang A7 128</description>
+  </parameter>
+  <parameter nr=""37"" value=""1"">
+    <description>Einfaches Function Mapping / Zuordnung der Funktionsausgänge zu den CVs / CV 33 Lichtfunktionstaste (F0) bei Vorwärtsfahrt / CV 34 Lichtfunktionstaste (F0) bei Rückwärtsfahrt / CV 35 Funktionstaste F1 / CV 36 Funktionstaste F2 / CV 37 Funktionstaste F3 / CV 38 Funktionstaste F4 / CV 39 Funktionstaste F5 / CV 40 Funktionstaste F6 / CV 41 Funktionstaste F7 / CV 42 Funktionstaste F8 / CV 43 Funktionstaste F9 / CV 44 Funktionstaste F10 / CV 45 Funktionstaste F11 / CV 46 Funktionstaste F12 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 0, Standard) Wert / Bit 0 Lichtausgang vorn 1 / Bit 1 Lichtausgang hinten 2 / Bit 2 Funktionsausgang A1 4 / Bit 3 Funktionsausgang A2 8 / Bit 4 Funktionsausgang A3 16 / Bit 5 Funktionsausgang A4 32 / Bit 6 Rangiergang 64 / Bit 7 Anfahr-/Bremsverzögerung 128 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 1, fkt-Mapping shift) Wert / Bit 0 Funktionsausgang A2 1 / Bit 1 Funktionsausgang A3 2 / Bit 2 Funktionsausgang A4 4 / Bit 3 Rangiergang 8 / Bit 4 Anfahr-/Bremsverzögerung 16 / Bit 5 Funktionsausgang A5 32 / Bit 6 Funktionsausgang A6 64 / Bit 7 Funktionsausgang A7 128</description>
+  </parameter>
+  <parameter nr=""38"" value=""1"">
+    <description>Einfaches Function Mapping / Zuordnung der Funktionsausgänge zu den CVs / CV 33 Lichtfunktionstaste (F0) bei Vorwärtsfahrt / CV 34 Lichtfunktionstaste (F0) bei Rückwärtsfahrt / CV 35 Funktionstaste F1 / CV 36 Funktionstaste F2 / CV 37 Funktionstaste F3 / CV 38 Funktionstaste F4 / CV 39 Funktionstaste F5 / CV 40 Funktionstaste F6 / CV 41 Funktionstaste F7 / CV 42 Funktionstaste F8 / CV 43 Funktionstaste F9 / CV 44 Funktionstaste F10 / CV 45 Funktionstaste F11 / CV 46 Funktionstaste F12 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 0, Standard) Wert / Bit 0 Lichtausgang vorn 1 / Bit 1 Lichtausgang hinten 2 / Bit 2 Funktionsausgang A1 4 / Bit 3 Funktionsausgang A2 8 / Bit 4 Funktionsausgang A3 16 / Bit 5 Funktionsausgang A4 32 / Bit 6 Rangiergang 64 / Bit 7 Anfahr-/Bremsverzögerung 128 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 1, fkt-Mapping shift) Wert / Bit 0 Funktionsausgang A2 1 / Bit 1 Funktionsausgang A3 2 / Bit 2 Funktionsausgang A4 4 / Bit 3 Rangiergang 8 / Bit 4 Anfahr-/Bremsverzögerung 16 / Bit 5 Funktionsausgang A5 32 / Bit 6 Funktionsausgang A6 64 / Bit 7 Funktionsausgang A7 128</description>
+  </parameter>
+  <parameter nr=""39"" value=""1"">
+    <description>Einfaches Function Mapping / Zuordnung der Funktionsausgänge zu den CVs / CV 33 Lichtfunktionstaste (F0) bei Vorwärtsfahrt / CV 34 Lichtfunktionstaste (F0) bei Rückwärtsfahrt / CV 35 Funktionstaste F1 / CV 36 Funktionstaste F2 / CV 37 Funktionstaste F3 / CV 38 Funktionstaste F4 / CV 39 Funktionstaste F5 / CV 40 Funktionstaste F6 / CV 41 Funktionstaste F7 / CV 42 Funktionstaste F8 / CV 43 Funktionstaste F9 / CV 44 Funktionstaste F10 / CV 45 Funktionstaste F11 / CV 46 Funktionstaste F12 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 0, Standard) Wert / Bit 0 Lichtausgang vorn 1 / Bit 1 Lichtausgang hinten 2 / Bit 2 Funktionsausgang A1 4 / Bit 3 Funktionsausgang A2 8 / Bit 4 Funktionsausgang A3 16 / Bit 5 Funktionsausgang A4 32 / Bit 6 Rangiergang 64 / Bit 7 Anfahr-/Bremsverzögerung 128 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 1, fkt-Mapping shift) Wert / Bit 0 Funktionsausgang A2 1 / Bit 1 Funktionsausgang A3 2 / Bit 2 Funktionsausgang A4 4 / Bit 3 Rangiergang 8 / Bit 4 Anfahr-/Bremsverzögerung 16 / Bit 5 Funktionsausgang A5 32 / Bit 6 Funktionsausgang A6 64 / Bit 7 Funktionsausgang A7 128</description>
+  </parameter>
+  <parameter nr=""40"" value=""1"">
+    <description>Einfaches Function Mapping / Zuordnung der Funktionsausgänge zu den CVs / CV 33 Lichtfunktionstaste (F0) bei Vorwärtsfahrt / CV 34 Lichtfunktionstaste (F0) bei Rückwärtsfahrt / CV 35 Funktionstaste F1 / CV 36 Funktionstaste F2 / CV 37 Funktionstaste F3 / CV 38 Funktionstaste F4 / CV 39 Funktionstaste F5 / CV 40 Funktionstaste F6 / CV 41 Funktionstaste F7 / CV 42 Funktionstaste F8 / CV 43 Funktionstaste F9 / CV 44 Funktionstaste F10 / CV 45 Funktionstaste F11 / CV 46 Funktionstaste F12 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 0, Standard) Wert / Bit 0 Lichtausgang vorn 1 / Bit 1 Lichtausgang hinten 2 / Bit 2 Funktionsausgang A1 4 / Bit 3 Funktionsausgang A2 8 / Bit 4 Funktionsausgang A3 16 / Bit 5 Funktionsausgang A4 32 / Bit 6 Rangiergang 64 / Bit 7 Anfahr-/Bremsverzögerung 128 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 1, fkt-Mapping shift) Wert / Bit 0 Funktionsausgang A2 1 / Bit 1 Funktionsausgang A3 2 / Bit 2 Funktionsausgang A4 4 / Bit 3 Rangiergang 8 / Bit 4 Anfahr-/Bremsverzögerung 16 / Bit 5 Funktionsausgang A5 32 / Bit 6 Funktionsausgang A6 64 / Bit 7 Funktionsausgang A7 128</description>
+  </parameter>
+  <parameter nr=""41"" value=""1"">
+    <description>Einfaches Function Mapping / Zuordnung der Funktionsausgänge zu den CVs / CV 33 Lichtfunktionstaste (F0) bei Vorwärtsfahrt / CV 34 Lichtfunktionstaste (F0) bei Rückwärtsfahrt / CV 35 Funktionstaste F1 / CV 36 Funktionstaste F2 / CV 37 Funktionstaste F3 / CV 38 Funktionstaste F4 / CV 39 Funktionstaste F5 / CV 40 Funktionstaste F6 / CV 41 Funktionstaste F7 / CV 42 Funktionstaste F8 / CV 43 Funktionstaste F9 / CV 44 Funktionstaste F10 / CV 45 Funktionstaste F11 / CV 46 Funktionstaste F12 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 0, Standard) Wert / Bit 0 Lichtausgang vorn 1 / Bit 1 Lichtausgang hinten 2 / Bit 2 Funktionsausgang A1 4 / Bit 3 Funktionsausgang A2 8 / Bit 4 Funktionsausgang A3 16 / Bit 5 Funktionsausgang A4 32 / Bit 6 Rangiergang 64 / Bit 7 Anfahr-/Bremsverzögerung 128 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 1, fkt-Mapping shift) Wert / Bit 0 Funktionsausgang A2 1 / Bit 1 Funktionsausgang A3 2 / Bit 2 Funktionsausgang A4 4 / Bit 3 Rangiergang 8 / Bit 4 Anfahr-/Bremsverzögerung 16 / Bit 5 Funktionsausgang A5 32 / Bit 6 Funktionsausgang A6 64 / Bit 7 Funktionsausgang A7 128</description>
+  </parameter>
+  <parameter nr=""42"" value=""1"">
+    <description>Einfaches Function Mapping / Zuordnung der Funktionsausgänge zu den CVs / CV 33 Lichtfunktionstaste (F0) bei Vorwärtsfahrt / CV 34 Lichtfunktionstaste (F0) bei Rückwärtsfahrt / CV 35 Funktionstaste F1 / CV 36 Funktionstaste F2 / CV 37 Funktionstaste F3 / CV 38 Funktionstaste F4 / CV 39 Funktionstaste F5 / CV 40 Funktionstaste F6 / CV 41 Funktionstaste F7 / CV 42 Funktionstaste F8 / CV 43 Funktionstaste F9 / CV 44 Funktionstaste F10 / CV 45 Funktionstaste F11 / CV 46 Funktionstaste F12 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 0, Standard) Wert / Bit 0 Lichtausgang vorn 1 / Bit 1 Lichtausgang hinten 2 / Bit 2 Funktionsausgang A1 4 / Bit 3 Funktionsausgang A2 8 / Bit 4 Funktionsausgang A3 16 / Bit 5 Funktionsausgang A4 32 / Bit 6 Rangiergang 64 / Bit 7 Anfahr-/Bremsverzögerung 128 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 1, fkt-Mapping shift) Wert / Bit 0 Funktionsausgang A2 1 / Bit 1 Funktionsausgang A3 2 / Bit 2 Funktionsausgang A4 4 / Bit 3 Rangiergang 8 / Bit 4 Anfahr-/Bremsverzögerung 16 / Bit 5 Funktionsausgang A5 32 / Bit 6 Funktionsausgang A6 64 / Bit 7 Funktionsausgang A7 128</description>
+  </parameter>
+  <parameter nr=""43"" value=""1"">
+    <description>Einfaches Function Mapping / Zuordnung der Funktionsausgänge zu den CVs / CV 33 Lichtfunktionstaste (F0) bei Vorwärtsfahrt / CV 34 Lichtfunktionstaste (F0) bei Rückwärtsfahrt / CV 35 Funktionstaste F1 / CV 36 Funktionstaste F2 / CV 37 Funktionstaste F3 / CV 38 Funktionstaste F4 / CV 39 Funktionstaste F5 / CV 40 Funktionstaste F6 / CV 41 Funktionstaste F7 / CV 42 Funktionstaste F8 / CV 43 Funktionstaste F9 / CV 44 Funktionstaste F10 / CV 45 Funktionstaste F11 / CV 46 Funktionstaste F12 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 0, Standard) Wert / Bit 0 Lichtausgang vorn 1 / Bit 1 Lichtausgang hinten 2 / Bit 2 Funktionsausgang A1 4 / Bit 3 Funktionsausgang A2 8 / Bit 4 Funktionsausgang A3 16 / Bit 5 Funktionsausgang A4 32 / Bit 6 Rangiergang 64 / Bit 7 Anfahr-/Bremsverzögerung 128 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 1, fkt-Mapping shift) Wert / Bit 0 Funktionsausgang A2 1 / Bit 1 Funktionsausgang A3 2 / Bit 2 Funktionsausgang A4 4 / Bit 3 Rangiergang 8 / Bit 4 Anfahr-/Bremsverzögerung 16 / Bit 5 Funktionsausgang A5 32 / Bit 6 Funktionsausgang A6 64 / Bit 7 Funktionsausgang A7 128</description>
+  </parameter>
+  <parameter nr=""44"" value=""1"">
+    <description>Einfaches Function Mapping / Zuordnung der Funktionsausgänge zu den CVs / CV 33 Lichtfunktionstaste (F0) bei Vorwärtsfahrt / CV 34 Lichtfunktionstaste (F0) bei Rückwärtsfahrt / CV 35 Funktionstaste F1 / CV 36 Funktionstaste F2 / CV 37 Funktionstaste F3 / CV 38 Funktionstaste F4 / CV 39 Funktionstaste F5 / CV 40 Funktionstaste F6 / CV 41 Funktionstaste F7 / CV 42 Funktionstaste F8 / CV 43 Funktionstaste F9 / CV 44 Funktionstaste F10 / CV 45 Funktionstaste F11 / CV 46 Funktionstaste F12 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 0, Standard) Wert / Bit 0 Lichtausgang vorn 1 / Bit 1 Lichtausgang hinten 2 / Bit 2 Funktionsausgang A1 4 / Bit 3 Funktionsausgang A2 8 / Bit 4 Funktionsausgang A3 16 / Bit 5 Funktionsausgang A4 32 / Bit 6 Rangiergang 64 / Bit 7 Anfahr-/Bremsverzögerung 128 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 1, fkt-Mapping shift) Wert / Bit 0 Funktionsausgang A2 1 / Bit 1 Funktionsausgang A3 2 / Bit 2 Funktionsausgang A4 4 / Bit 3 Rangiergang 8 / Bit 4 Anfahr-/Bremsverzögerung 16 / Bit 5 Funktionsausgang A5 32 / Bit 6 Funktionsausgang A6 64 / Bit 7 Funktionsausgang A7 128</description>
+  </parameter>
+  <parameter nr=""45"" value=""1"">
+    <description>Einfaches Function Mapping / Zuordnung der Funktionsausgänge zu den CVs / CV 33 Lichtfunktionstaste (F0) bei Vorwärtsfahrt / CV 34 Lichtfunktionstaste (F0) bei Rückwärtsfahrt / CV 35 Funktionstaste F1 / CV 36 Funktionstaste F2 / CV 37 Funktionstaste F3 / CV 38 Funktionstaste F4 / CV 39 Funktionstaste F5 / CV 40 Funktionstaste F6 / CV 41 Funktionstaste F7 / CV 42 Funktionstaste F8 / CV 43 Funktionstaste F9 / CV 44 Funktionstaste F10 / CV 45 Funktionstaste F11 / CV 46 Funktionstaste F12 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 0, Standard) Wert / Bit 0 Lichtausgang vorn 1 / Bit 1 Lichtausgang hinten 2 / Bit 2 Funktionsausgang A1 4 / Bit 3 Funktionsausgang A2 8 / Bit 4 Funktionsausgang A3 16 / Bit 5 Funktionsausgang A4 32 / Bit 6 Rangiergang 64 / Bit 7 Anfahr-/Bremsverzögerung 128 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 1, fkt-Mapping shift) Wert / Bit 0 Funktionsausgang A2 1 / Bit 1 Funktionsausgang A3 2 / Bit 2 Funktionsausgang A4 4 / Bit 3 Rangiergang 8 / Bit 4 Anfahr-/Bremsverzögerung 16 / Bit 5 Funktionsausgang A5 32 / Bit 6 Funktionsausgang A6 64 / Bit 7 Funktionsausgang A7 128</description>
+  </parameter>
+  <parameter nr=""46"" value=""1"">
+    <description>Einfaches Function Mapping / Zuordnung der Funktionsausgänge zu den CVs / CV 33 Lichtfunktionstaste (F0) bei Vorwärtsfahrt / CV 34 Lichtfunktionstaste (F0) bei Rückwärtsfahrt / CV 35 Funktionstaste F1 / CV 36 Funktionstaste F2 / CV 37 Funktionstaste F3 / CV 38 Funktionstaste F4 / CV 39 Funktionstaste F5 / CV 40 Funktionstaste F6 / CV 41 Funktionstaste F7 / CV 42 Funktionstaste F8 / CV 43 Funktionstaste F9 / CV 44 Funktionstaste F10 / CV 45 Funktionstaste F11 / CV 46 Funktionstaste F12 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 0, Standard) Wert / Bit 0 Lichtausgang vorn 1 / Bit 1 Lichtausgang hinten 2 / Bit 2 Funktionsausgang A1 4 / Bit 3 Funktionsausgang A2 8 / Bit 4 Funktionsausgang A3 16 / Bit 5 Funktionsausgang A4 32 / Bit 6 Rangiergang 64 / Bit 7 Anfahr-/Bremsverzögerung 128 / Belegung der einzelnen Bits (bei CV100/101 Bit x = 1, fkt-Mapping shift) Wert / Bit 0 Funktionsausgang A2 1 / Bit 1 Funktionsausgang A3 2 / Bit 2 Funktionsausgang A4 4 / Bit 3 Rangiergang 8 / Bit 4 Anfahr-/Bremsverzögerung 16 / Bit 5 Funktionsausgang A5 32 / Bit 6 Funktionsausgang A6 64 / Bit 7 Funktionsausgang A7 128</description>
+  </parameter>
+  <parameter nr=""47"" value=""12"">
+    <description>Motorola 1. trinäre Adresse (direkt nur mit Motorola Programmierverfahren)</description>
+  </parameter>
+  <parameter nr=""48"" value=""0"">
+    <description>Motorola 2. trinäre Adresse (nur mit Motorola Programmierverfahren)</description>
+  </parameter>
+  <parameter nr=""49"" value=""0"">
+    <description>Motorola 3. trinäre Adresse (nur mit Motorola Programmierverfahren)</description>
+  </parameter>
+  <parameter nr=""50"" value=""0"">
+    <description>Decoder Konfiguration 1 / Bit 0=0 Motorola 2. Adresse nicht benutzen / Bit 0=1 Motorola 2. Adresse benutzen / Bit 1=0 Motorola 3. Adresse nicht benutzen / Bit 1=1 Motorola 3. Adresse benutzen / Bit 2=0 Lichtausgänge nicht tauschen / Bit 2=1 Lichtausgänge tauschen / Bit 3=0 Frequenz Licht, A1 bis A7 = 156Hz / Bit 3=1 Frequenz Licht, A1 bis A5 = 24KHz / Bit 4=0 SUSI = SUSI / Bit 4=1 SUSI = A3/A4 Ausgabe Function Mapping -Tabelle / Bit 5=0 SUSI = SUSI / Bit 5=1 SUSI DATA = Eing.1, CLK = Eing. 2 / Bit 6=0 A8 = Ausgang mit Logikpegel / Bit 6=1 A8 = Eingang 3 / Bit 7=0 Intellimatic = AUS / Bit 7=1 Intellimatic = EIN</description>
+  </parameter>
+  <parameter nr=""51"" value=""3"">
+    <description>Decoder Konfiguration 2 / Bit 0=0 Motorregelung aus / Bit 0=1 Motorregelung ein / Bit 1=0 Motorregelung PID - Regler / Bit 1=1 Motorregelung SX - Regler / Bit 2=0 keine dynamische Periodendauer der Motorregelung / Bit 2=1 dynamische Periodendauer der Motorregelung</description>
+  </parameter>
+  <parameter nr=""53"" value=""40"">
+    <description>Periodendauer der Motorregelung in 100µs Schritten</description>
+  </parameter>
+  <parameter nr=""54"" value=""100"">
+    <description>Motorregelung P-Konstante des PID Reglers</description>
+  </parameter>
+  <parameter nr=""55"" value=""40"">
+    <description>Motorregelung I-Konstante des PID Reglers</description>
+  </parameter>
+  <parameter nr=""56"" value=""32"">
+    <description>Motorregelung D-Konstante des PID Reglers</description>
+  </parameter>
+  <parameter nr=""57"" value=""6"">
+    <description>Regler Offset</description>
+  </parameter>
+  <parameter nr=""58"" value=""8"">
+    <description>Messlücke zur EMK-Messung in 100µs Schritten</description>
+  </parameter>
+  <parameter nr=""59"" value=""0"">
+    <description>Reset auf die Werkseinstellung (auch über CV8 möglich) / 1 = CV 0 - 256, sowie CV257 - 512 (RailCom® Bank 7) / 2 = CV 257 - 512 (RailCom Plus® Banken 5 &amp; 6) / 3 = CV 257 - 512 (erweitertes Function Mapping Banken 1 &amp; 2) / 4 = CV 257 - 512 (PWM-Modulation Funktionsausgänge Banken 3 &amp; 4) / 5 = CV 257 - 512 (Intellimatic Bank 8)</description>
+  </parameter>
+  <parameter nr=""60"">
+    <description>Kurzschlussüberwachung Motor-, Funktionsausgänge, Temperaturüberw. / Eingeschaltet (nicht verändern)</description>
+  </parameter>
+  <parameter nr=""61"">
+    <description>Konstante für die Temperaturabschaltung</description>
+  </parameter>
+  <parameter nr=""62"">
+    <description>Konstante der Kurzschlusserkennung der Fkt.-Ausgänge (nicht verändern)</description>
+  </parameter>
+  <parameter nr=""63"">
+    <description>Konstante der Kurzschlusserkennung des Motorausgangs (nicht verändern)</description>
+  </parameter>
+  <parameter nr=""64"" value=""0"">
+    <description>Page Register / für die CV Programmierung mit einer Motorolazentrale</description>
+  </parameter>
+  <parameter nr=""65"" value=""0"">
+    <description>Offset-Register / für die CV Programmierung mit einer Motorolazentrale</description>
+  </parameter>
+  <parameter nr=""66"" value=""0"">
+    <description>Geschwindigkeitskorrektur vorwärts</description>
+  </parameter>
+  <parameter nr=""67"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""68"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""69"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""70"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""71"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""72"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""73"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""74"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""75"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""76"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""77"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""78"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""79"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""80"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""81"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""82"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""83"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""84"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""85"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""86"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""87"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""88"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""89"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""90"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""91"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""92"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""93"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""94"">
+    <description>Erweiterte Fahrstufenkennlinie für die Fahrstufen 1 - 28</description>
+  </parameter>
+  <parameter nr=""95"" value=""0"">
+    <description>Geschwindigkeitskorrektur rückwärts</description>
+  </parameter>
+  <parameter nr=""96"" value=""0"">
+    <description>Art des Function Mappings / 0 = einfaches Function Mapping, 1 = erweitertes Function Mapping</description>
+  </parameter>
+  <parameter nr=""97"" value=""8"">
+    <description>ABC Bremsen / Spannungsdifferenz für Diodenstrecke ist ca. CV-Wert * 0,12V</description>
+  </parameter>
+  <parameter nr=""98"" value=""30"">
+    <description>Geschwindigkeit in der ABC Langsamfahrstrecke</description>
+  </parameter>
+  <parameter nr=""100"" value=""0"">
+    <description>Function Mapping Shift (F0 - F4) Wert / Bit 0 Änderung der Zuordnung in CV35 (F1) 1 / Bit 1 Änderung der Zuordnung in CV36 (F2) 2 / Bit 2 Änderung der Zuordnung in CV37 (F3) 4 / Bit 3 Änderung der Zuordnung in CV38 (F4) 8 / Bit 4 Änderung der Zuordnung in CV33 (F0v) 16 / Bit 5 Änderung der Zuordnung in CV34 (F0r) 32</description>
+  </parameter>
+  <parameter nr=""101"" value=""0"">
+    <description>Function Mapping Shift (F5 - F12) Wert / Bit 0 Änderung der Zuordnung in CV39 (F5) 1 / Bit 1 Änderung der Zuordnung in CV40 (F6) 2 / Bit 2 Änderung der Zuordnung in CV41 (F7) 4 / Bit 3 Änderung der Zuordnung in CV42 (F8) 8 / Bit 4 Änderung der Zuordnung in CV43 (F9) 16 / Bit 5 Änderung der Zuordnung in CV44 (F10) 32 / Bit 6 Änderung der Zuordnung in CV45 (F11) 64 / Bit 7 Änderung der Zuordnung in CV46 (F12) 128</description>
+  </parameter>
+  <parameter nr=""102"" value=""30"">
+    <description>Analogbetrieb Konfiguration Wert / Bit 0/1 00 = max. Geschwindigkeit keine Regelung 0 / 01 = max. Geschwindigkeit wie CV106 1 / 10 = Trafospg. messen und CV103 und CV104 benutzen 2* / Bit 2 0 = Regler AUS, 1 = Regler EIN 4* / Bit 3 0 = PID Regler, 1 = SX-Regler 8* / Bit 4 1 = dynamische Wiederholrate 16*</description>
+  </parameter>
+  <parameter nr=""103"" value=""150"">
+    <description>Analog: mindest Trafospannung für Fsoll = 0</description>
+  </parameter>
+  <parameter nr=""104"" value=""180"">
+    <description>Analog: maximale Trafospannung für Fsoll = Fmax</description>
+  </parameter>
+  <parameter nr=""105"" value=""30"">
+    <description>Analog: Hysterese</description>
+  </parameter>
+  <parameter nr=""106"" value=""200"">
+    <description>Analog: Fmax</description>
+  </parameter>
+  <parameter nr=""107"" value=""0"">
+    <description>Beleuchtung vorne abschalten</description>
+  </parameter>
+  <parameter nr=""108"" value=""0"">
+    <description>Beleuchtung hinten abschalten</description>
+  </parameter>
+  <parameter nr=""109"" value=""0"">
+    <description>Blinkgenerator, Zuordnung der Phase 1 zu den Ausgängen / Bit 0-7 -&gt; A0 bis A7; Bit = 0 -&gt; Blinkphase 1 aus, Bit = 1 -&gt; Blinkphase 1 ein</description>
+  </parameter>
+  <parameter nr=""110"" value=""0"">
+    <description>Blinkgenerator, Zuordnung der Phase 2 zu den Ausgängen / Bit 0-7 -&gt; A0 bis A7; Bit = 0 -&gt; Blinkphase 2 aus, Bit = 1 -&gt; Blinkphase 2 ein</description>
+  </parameter>
+  <parameter nr=""111"" value=""5"">
+    <description>Blinkgenerator Einschaltzeit in 100ms Schritten</description>
+  </parameter>
+  <parameter nr=""112"" value=""5"">
+    <description>Blinkgenerator Ausschaltzeit in 100ms Schritten</description>
+  </parameter>
+  <parameter nr=""113"" value=""0"">
+    <description>Ausschalten der Funktionsausgänge A1 - A7 in Fahrtrichtung vorwärts / Bit 1-7 -&gt; A1 - A7; Bit = 0 -&gt; Ausgang ein, Bit = 1 -&gt; Ausgang aus</description>
+  </parameter>
+  <parameter nr=""114"" value=""0"">
+    <description>Ausschalten der Funktionsausgänge A1 - A7 in Fahrtrichtung rückwärts / Bit 1-7 -&gt; A1 - A7; Bit = 0 -&gt; Ausgang ein, Bit = 1 -&gt; Ausgang aus</description>
+  </parameter>
+  <parameter nr=""115"" value=""1"">
+    <description>Einstellung der Zugkategorie für LISSY</description>
+  </parameter>
+  <parameter nr=""116"" value=""63"">
+    <description>Dimmung der Licht- und Funktionsausgänge A1 - A7 / 0 = Ausgang aus, 63 = Ausgang 100%</description>
+  </parameter>
+  <parameter nr=""117"" value=""63"">
+    <description>Dimmung der Licht- und Funktionsausgänge A1 - A7 / 0 = Ausgang aus, 63 = Ausgang 100%</description>
+  </parameter>
+  <parameter nr=""118"" value=""63"">
+    <description>Dimmung der Licht- und Funktionsausgänge A1 - A7 / 0 = Ausgang aus, 63 = Ausgang 100%</description>
+  </parameter>
+  <parameter nr=""119"" value=""63"">
+    <description>Dimmung der Licht- und Funktionsausgänge A1 - A7 / 0 = Ausgang aus, 63 = Ausgang 100%</description>
+  </parameter>
+  <parameter nr=""120"" value=""63"">
+    <description>Dimmung der Licht- und Funktionsausgänge A1 - A7 / 0 = Ausgang aus, 63 = Ausgang 100%</description>
+  </parameter>
+  <parameter nr=""121"" value=""63"">
+    <description>Dimmung der Licht- und Funktionsausgänge A1 - A7 / 0 = Ausgang aus, 63 = Ausgang 100%</description>
+  </parameter>
+  <parameter nr=""122"" value=""63"">
+    <description>Dimmung der Licht- und Funktionsausgänge A1 - A7 / 0 = Ausgang aus, 63 = Ausgang 100%</description>
+  </parameter>
+  <parameter nr=""123"" value=""63"">
+    <description>Dimmung der Licht- und Funktionsausgänge A1 - A7 / 0 = Ausgang aus, 63 = Ausgang 100%</description>
+  </parameter>
+  <parameter nr=""124"" value=""1"">
+    <description>Kupplungswiederholungen für elektrische Kupplungen an A1 - A7 / 0 = keine Kupplung</description>
+  </parameter>
+  <parameter nr=""125"" value=""10"">
+    <description>Einschaltzeit der Kupplung, Wert * 100ms (mit PWM aus CV117 - 123)</description>
+  </parameter>
+  <parameter nr=""126"" value=""20"">
+    <description>Haltezeit der Kupplung, Wert * 100ms</description>
+  </parameter>
+  <parameter nr=""127"" value=""10"">
+    <description>Pausenzeit der Kupplung, Wert * 100ms</description>
+  </parameter>
+  <parameter nr=""128"" value=""30"">
+    <description>Halte- PWM</description>
+  </parameter>
+  <parameter nr=""129"" value=""0"">
+    <description>Zuordnung der Ausgänge A1 - A7 elektrische Kupplungen (0 = keine Kuppl.) / Bit 1-7 -&gt; A1 - A7</description>
+  </parameter>
+  <parameter nr=""130"" value=""0"">
+    <description>Dynamische Rauchgeneratoransteuerung an A1 - A7 Wert / 0 = kein Rauchgeneratorbetrieb 0* / Bit 0-3 -&gt; 1=A1, 2=A2, 3=A3, 4=A4, 5=A5, 6=A6, 7=A7 1-7 / Bit 4-7 = 1 -&gt; Anfahrzeit = Wert * 200ms 16-240</description>
+  </parameter>
+  <parameter nr=""131"" value=""5"">
+    <description>Dynamische Rauchgeneratoransteuerung, Lastschwelle</description>
+  </parameter>
+  <parameter nr=""132"" value=""16"">
+    <description>Dynamische Rauchgeneratoransteuerung, PWM-Normalbetrieb</description>
+  </parameter>
+  <parameter nr=""133"" value=""2"">
+    <description>Dynamische Rauchgeneratoransteuerung, PWM-Leerlauf (Stand)</description>
+  </parameter>
+  <parameter nr=""134"" value=""30"">
+    <description>Dynamische Rauchgeneratoransteuerung, Anfahrzeit in 100ms Schritten</description>
+  </parameter>
+  <parameter nr=""135"" value=""0"">
+    <description>Rangiertango (automatische Entkupplungsfahrt), Fahrstufe (0 = aus)</description>
+  </parameter>
+  <parameter nr=""136"" value=""10"">
+    <description>Rangiertango, Andrückzeit T1 * 100ms</description>
+  </parameter>
+  <parameter nr=""137"" value=""10"">
+    <description>Rangiertango, Abrückzeit T2 * 100ms</description>
+  </parameter>
+  <parameter nr=""138"" value=""0"">
+    <description>Konstanter Bremsweg in cm, Fahrstufenschwellwert / Erst oberhalb wird mit konstantem Bremsweg gebremst (0 = aus)</description>
+  </parameter>
+  <parameter nr=""139"" value=""50"">
+    <description>Konstanter Bremsweg in cm, erster Bremsweg</description>
+  </parameter>
+  <parameter nr=""140"" value=""25"">
+    <description>Konstanter Bremsweg in cm, alternativer Bremsweg (aktiviert durch cross-bit)</description>
+  </parameter>
+  <parameter nr=""141"" value=""40"">
+    <description>Konstanter Bremsweg in cm, Maximalgeschwindigkeit der Modelllok in cm/s</description>
+  </parameter>
+  <parameter nr=""142"" value=""0"">
+    <description>Konstanter Bremsweg in cm, Restwert der ermittelten Maximalgeschwindigkeit</description>
+  </parameter>
+  <parameter nr=""143"" value=""0"">
+    <description>Konstanter Bremsweg in cm, Aktivierung durch (0 = aus): / Bit 0 = 1 -&gt; Sollfahrstufe = 0 / Bit 1 = 1 -&gt; ABC Bremsen / Bit 2 = 1 -&gt; DC Bremsen / Bit 3 = 1 -&gt; DCC Bremssignal</description>
+  </parameter>
+  <parameter nr=""144"" value=""12"">
+    <description>Anfahrverzögerung 2 (als Ersatz für CV3)</description>
+  </parameter>
+  <parameter nr=""145"" value=""12"">
+    <description>Bremsverzögerung 2, (als Ersatz für CV4)</description>
+  </parameter>
+  <parameter nr=""146"" value=""24"">
+    <description>Anfahrverzögerung 3 (als Ersatz für CV3)</description>
+  </parameter>
+  <parameter nr=""147"" value=""24"">
+    <description>Bremsverzögerung 3, (als Ersatz für CV4)</description>
+  </parameter>
+  <parameter nr=""148"" value=""255"">
+    <description>Funktionstastennummer für ABV 2 (255=aus)</description>
+  </parameter>
+  <parameter nr=""149"" value=""255"">
+    <description>Funktionstastennummer für ABV 3 (255=aus)</description>
+  </parameter>
+  <parameter nr=""150"" value=""10"">
+    <description>Zweite Dimmung der Licht- und Funktionsausgänge A1 - A7 / 0 = aus, 63 = 100%</description>
+  </parameter>
+  <parameter nr=""151"" value=""10"">
+    <description>Zweite Dimmung der Licht- und Funktionsausgänge A1 - A7 / 0 = aus, 63 = 100%</description>
+  </parameter>
+  <parameter nr=""152"" value=""10"">
+    <description>Zweite Dimmung der Licht- und Funktionsausgänge A1 - A7 / 0 = aus, 63 = 100%</description>
+  </parameter>
+  <parameter nr=""153"" value=""10"">
+    <description>Zweite Dimmung der Licht- und Funktionsausgänge A1 - A7 / 0 = aus, 63 = 100%</description>
+  </parameter>
+  <parameter nr=""154"" value=""10"">
+    <description>Zweite Dimmung der Licht- und Funktionsausgänge A1 - A7 / 0 = aus, 63 = 100%</description>
+  </parameter>
+  <parameter nr=""155"" value=""10"">
+    <description>Zweite Dimmung der Licht- und Funktionsausgänge A1 - A7 / 0 = aus, 63 = 100%</description>
+  </parameter>
+  <parameter nr=""156"" value=""10"">
+    <description>Zweite Dimmung der Licht- und Funktionsausgänge A1 - A7 / 0 = aus, 63 = 100%</description>
+  </parameter>
+  <parameter nr=""157"" value=""10"">
+    <description>Zweite Dimmung der Licht- und Funktionsausgänge A1 - A7 / 0 = aus, 63 = 100%</description>
+  </parameter>
+  <parameter nr=""159"" value=""0"">
+    <description>Kennzeichnung der Funktionen F22 - F28 zur Übergabe an SUSI / Bit 0-6; Bit = 1 --&gt; F22 - F28 wird an SUSI übergeben</description>
+  </parameter>
+  <parameter nr=""160"" value=""20"">
+    <description>Servosteuerung, Servo 1 Stellung 1 (Funktionstaste aus)</description>
+  </parameter>
+  <parameter nr=""161"" value=""200"">
+    <description>Servosteuerung, Servo 1 Stellung 2 (Funktionstaste ein)</description>
+  </parameter>
+  <parameter nr=""162"" value=""30"">
+    <description>Servosteuerung, Servo 1 Umlaufzeit in 100ms Schritten</description>
+  </parameter>
+  <parameter nr=""163"" value=""20"">
+    <description>Servosteuerung, Servo 2 Stellung 1 (Funktionstaste aus)</description>
+  </parameter>
+  <parameter nr=""164"" value=""200"">
+    <description>Servosteuerung, Servo 2 Stellung 2 (Funktionstaste ein)</description>
+  </parameter>
+  <parameter nr=""165"" value=""30"">
+    <description>Servosteuerung, Servo 2 Umlaufzeit in 100ms Schritten</description>
+  </parameter>
+  <parameter nr=""166"" value=""0"">
+    <description>Servosteuerung über: SUSI = 1, A6 = 64, A7 = 128</description>
+  </parameter>
+  <parameter nr=""167"" value=""7"">
+    <description>Funktionstastennummer für Servo 1 an SUSI-CLK</description>
+  </parameter>
+  <parameter nr=""168"" value=""8"">
+    <description>Funktionstastennummer für Servo 2 an SUSI-Data</description>
+  </parameter>
+  <parameter nr=""170"" value=""0"">
+    <description>Zuordnung PWM-Verlauf für Lichtausgang, A1 - A7 / Verlauf 1 - 8, Bit 7 = 1 -&gt; Verlauf nur aktiv, wenn CROSS-Ausgabebit gesetzt</description>
+  </parameter>
+  <parameter nr=""171"" value=""0"">
+    <description>Zuordnung PWM-Verlauf für Lichtausgang, A1 - A7 / Verlauf 1 - 8, Bit 7 = 1 -&gt; Verlauf nur aktiv, wenn CROSS-Ausgabebit gesetzt</description>
+  </parameter>
+  <parameter nr=""172"" value=""0"">
+    <description>Zuordnung PWM-Verlauf für Lichtausgang, A1 - A7 / Verlauf 1 - 8, Bit 7 = 1 -&gt; Verlauf nur aktiv, wenn CROSS-Ausgabebit gesetzt</description>
+  </parameter>
+  <parameter nr=""173"" value=""0"">
+    <description>Zuordnung PWM-Verlauf für Lichtausgang, A1 - A7 / Verlauf 1 - 8, Bit 7 = 1 -&gt; Verlauf nur aktiv, wenn CROSS-Ausgabebit gesetzt</description>
+  </parameter>
+  <parameter nr=""174"" value=""0"">
+    <description>Zuordnung PWM-Verlauf für Lichtausgang, A1 - A7 / Verlauf 1 - 8, Bit 7 = 1 -&gt; Verlauf nur aktiv, wenn CROSS-Ausgabebit gesetzt</description>
+  </parameter>
+  <parameter nr=""175"" value=""0"">
+    <description>Zuordnung PWM-Verlauf für Lichtausgang, A1 - A7 / Verlauf 1 - 8, Bit 7 = 1 -&gt; Verlauf nur aktiv, wenn CROSS-Ausgabebit gesetzt</description>
+  </parameter>
+  <parameter nr=""176"" value=""0"">
+    <description>Zuordnung PWM-Verlauf für Lichtausgang, A1 - A7 / Verlauf 1 - 8, Bit 7 = 1 -&gt; Verlauf nur aktiv, wenn CROSS-Ausgabebit gesetzt</description>
+  </parameter>
+  <parameter nr=""177"" value=""0"">
+    <description>Zuordnung PWM-Verlauf für Lichtausgang, A1 - A7 / Verlauf 1 - 8, Bit 7 = 1 -&gt; Verlauf nur aktiv, wenn CROSS-Ausgabebit gesetzt</description>
+  </parameter>
+  <parameter nr=""178"" value=""15"">
+    <description>PWM-Verlauf, Periodendauer der Wiedergabe (Wert * 64ms)</description>
+  </parameter>
+  <parameter nr=""179"" value=""0"">
+    <description>PWM-Verlauf, Phasenlage der Ausgänge / Bit 0-7 = 0 A0h - A7 -&gt; Phasenlage 0° / Bit 0-7 = 1 A0h - A7 -&gt; Phasenlage 180°</description>
+  </parameter>
+  <parameter nr=""180"" value=""0"">
+    <description>PWM-Verlauf, Haltezeit, nach dem CROSS-Ausgabebit aus (Wert * 100ms)</description>
+  </parameter>
+  <parameter nr=""181"" value=""0"">
+    <description>Feuerbüchsenflackern der Licht- und Funktionsausgänge A1 - A7 / Bit 0-7 -&gt; A0 - A7; Bit = 0 -&gt; Flackern aus, Bit = 1 -&gt; Flackern ein</description>
+  </parameter>
+  <parameter nr=""182"" value=""0"">
+    <description>Feuerbüchsenflackern, Flackereinstellungen / Bit 0-3 -&gt; Flackerrythmus ändern (Wertebereich 1 bis 15) / Bit 4-6 -&gt; Helligkeit ändern (Wertebereich 16, 32, 48, 64, 80, 96, 112) / Bit 7 = 1 -&gt; Ausgang immer hell (kombinierbar mit Bit 4-6)</description>
+  </parameter>
+  <parameter nr=""183"" value=""0"">
+    <description>Energiesparlampeneffekt der Licht- und Funktionsausgänge A1 - A7 / Bit 0-7 -&gt; A0 - A7; Bit = 0 -&gt; Effekt aus, Bit = 1 -&gt; Effekt ein</description>
+  </parameter>
+  <parameter nr=""184"" value=""10"">
+    <description>Energiesparlampeneffekt, Grundhelligkeit</description>
+  </parameter>
+  <parameter nr=""185"" value=""100"">
+    <description>Energiesparlampeneffekt, Zeit bis maximale Helligkeit erreicht ist (Wert * 5ms)</description>
+  </parameter>
+  <parameter nr=""186"" value=""0"">
+    <description>Ein- und Ausblenden der Licht- und Funktionsausgänge A1 - A7 / Bit 0-7 -&gt; A0 - A7; Bit = 0 -&gt; Blendfunktion aus, Bit = 1 -&gt; Blendfunktion ein</description>
+  </parameter>
+  <parameter nr=""187"" value=""30"">
+    <description>Ein- und Ausblenden, Blendzeit (Wert * 10ms)</description>
+  </parameter>
+  <parameter nr=""188"" value=""0"">
+    <description>Neonröhren Einschalteffekt der Licht- und Funktionsausgänge A1 - A7 / Bit 0-7 -&gt; A0 - A7; Bit = 0 -&gt; Effekt aus, Bit = 1 -&gt; Effekt ein</description>
+  </parameter>
+  <parameter nr=""189"" value=""20"">
+    <description>Neonröhren Einschalteffekt, Blitzzeit (Wert * 5ms)</description>
+  </parameter>
+  <parameter nr=""190"" value=""20"">
+    <description>Neonröhren Einschalteffekt, maximale Blitzanzahl</description>
+  </parameter>
+  <parameter nr=""200"" value=""10"">
+    <description>Motorregelung, geschwindigkeitsabhängige Periode / minimale Fahrstufe bis zu der die Periodendauer = CV53 gesetzt wird</description>
+  </parameter>
+  <parameter nr=""201"" value=""150"">
+    <description>maximale Fahrstufe ab der die Periodendauer = CV202 gesetzt wird</description>
+  </parameter>
+  <parameter nr=""202"" value=""250"">
+    <description>maximale Periodendauer in 100µs Schritten (min=CV53)</description>
+  </parameter>
+  <parameter nr=""897"" value=""1"">
+    <description>SUSI Adressbereich / 1 = von 900 bis 939 / 2 = von 940 bis 979 / 3 = von 980 bis 1019</description>
+  </parameter>
+  <parameter nr=""900"" value=""85"">
+    <description>Herstellerkennung</description>
+  </parameter>
+  <parameter nr=""901"">
+    <description>Softwareversion</description>
+  </parameter>
+  <parameter nr=""902"" value=""192"">
+    <description>Lautstärke des Sounds</description>
+  </parameter>
+  <parameter nr=""903"" value=""37"">
+    <description>function (f0) aktiviert Sound Nummer x (x = Wert der CV) / x = 0 kein Sound wird aktiviert / x &lt;&gt; 0 siehe Tabelle Kapitel / „Ein und ausschalten der Sounds“</description>
+  </parameter>
+  <parameter nr=""931"">
+    <description>f28 aktiviert Sound Nummer x</description>
+  </parameter>
+  <parameter nr=""933"" value=""0"">
+    <description>Soundabschaltzeit bei längerem Stand: 0=aus, 1-255 = Sek.</description>
+  </parameter>
+  <parameter nr=""934"" value=""200"">
+    <description>Schaltschwelle für Elektrolüfter bei einer E-Lok / 0 = sofort ab Losfahren, 255 = kein Lüftergeräusch</description>
+  </parameter>
+  <parameter nr=""935"" value=""137"">
+    <description>Konfiguration Wert / Bit 0 = 0 Auspuffschlag Dampflok nur über Reedk. / Bit 0 = 1 Auspuffschlag Dampflok automatisch und / per Reedkontakt 1 / Bit 1 = 1 Änderung Fahrgeräusch 2 / Bit 2 = 1 Auspuffschläge halbieren 4 / Bit 3 = 1 Bremsenquiet. bei Fahrst. = 0 abschalten 8 / Bit 4 = 0 Feuerbüchse flackern / Bit 4 = 1 Ausgang Feuerb. wenn Heizer schaufelt 16 / Bit 6 = 1 Ändern der Faderzeit auf 8 Sekunden und / automatisch an beim Einschalten 64</description>
+  </parameter>
+  <parameter nr=""936"" value=""80"">
+    <description>Schwelle für Bremsgeräusch / 255 = kein Bremsenquietschen</description>
+  </parameter>
+  <parameter nr=""937"" value=""15"">
+    <description>Leerlaufzeit in Sekunden / 0 = Leerlauf aus 255 = Leerlauf immer ein</description>
+  </parameter>
+  <parameter nr=""938"" value=""0"">
+    <description>Zeit zwischen zwei Auspuffschlägen / bei maximaler Lokgeschwindigkeit ohne Kontakt</description>
+  </parameter>
+  <parameter nr=""939"" value=""245"">
+    <description>Zeit zwischen zwei Auspuffschlägen / bei minimaler Lokgeschwindigkeit ohne Kontakt</description>
+  </parameter>
+  <parameter nr=""1021"" value=""0"">
+    <description>Einstellung der zu programmierenden Bank A - E / Für nachfolgende Einstellungen: / Bank A = 1, B = 2, C = 3, D = 4, E = 5</description>
+  </parameter>
+</configuration>"

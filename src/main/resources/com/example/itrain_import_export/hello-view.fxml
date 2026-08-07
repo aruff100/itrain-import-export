@@ -6,10 +6,12 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns="http://javafx.com/javafx/21"
@@ -33,12 +35,20 @@
                 <Menu fx:id="editMenu" text="Bearbeiten">
                     <MenuItem fx:id="undoMenuItem" text="Rückgängig" onAction="#onUndo"/>
                     <MenuItem fx:id="redoMenuItem" text="Wiederholen" onAction="#onRedo"/>
+                    <!-- Getrennt, weil es nichts an den Daten ändert, sondern
+                         nur die Fenster wieder einsammelt. -->
+                    <SeparatorMenuItem/>
+                    <MenuItem fx:id="centerWindowsMenuItem" text="Alle Fenster zentrieren" onAction="#onCenterWindows"/>
                 </Menu>
                 <Menu fx:id="settingsMenu" text="Einstellungen">
                     <MenuItem fx:id="preferencesMenuItem" text="Voreinstellungen" onAction="#onPreferences"/>
+                    <SeparatorMenuItem/>
+                    <MenuItem fx:id="decoderInstallMenuItem" text="Decoder-Vorlagen installieren" onAction="#onDecoderInstall"/>
+                    <MenuItem fx:id="decoderTemplatesMenuItem" text="Decoder-Vorlagen" onAction="#onDecoderTemplates"/>
                 </Menu>
                 <Menu fx:id="helpMenu" text="Hilfe">
                     <MenuItem fx:id="helpMenuItem" text="Hilfe" onAction="#onHelp"/>
+                    <MenuItem fx:id="manualMenuItem" text="Handbuch" onAction="#onOpenManual"/>
                     <MenuItem fx:id="updateMenuItem" text="Update" onAction="#onCheckForUpdate"/>
                     <SeparatorMenuItem/>
                     <MenuItem fx:id="aboutMenuItem" text="Über" onAction="#onAbout"/>
@@ -50,6 +60,25 @@
                 <Button fx:id="undoToolButton" onAction="#onUndo"/>
                 <Button fx:id="redoToolButton" onAction="#onRedo"/>
                 <Button fx:id="preferencesToolButton" onAction="#onPreferences"/>
+                <!-- Trennstrich: rechts davon die Import-/Export-
+                     Schaltflächen, die auf den gerade sichtbaren
+                     Kategorie-Reiter wirken (Beschriftung und Pastellfarbe
+                     setzt HelloController). -->
+                <Separator orientation="VERTICAL"/>
+                <Button fx:id="exportSelectedToolButton" onAction="#onExportSelected"/>
+                <Button fx:id="importCategoryToolButton" onAction="#onImportCategory"/>
+                <!-- Zweiter Trennstrich: links davon der Austausch ganzer
+                     Katalog-Einträge, rechts davon alles zum Decoder (also
+                     zum configuration-Teilbaum eines Fahrzeugs). Die beiden
+                     Regionen sind nötig, weil eine ToolBar ihren Abstand
+                     fest vorgibt - der Trennstrich allein stünde sonst zu
+                     dicht an den Schaltflächen. -->
+                <Region minWidth="10"/>
+                <Separator orientation="VERTICAL"/>
+                <Region minWidth="10"/>
+                <Button fx:id="decoderExportToolButton" onAction="#onDecoderExport"/>
+                <Button fx:id="decoderImportToolButton" onAction="#onDecoderImport"/>
+                <Button fx:id="decoderCaptureToolButton" onAction="#onDecoderCapture"/>
             </ToolBar>
             <Label fx:id="fileNameLabel" text="Keine Datei geladen.">
                 <VBox.margin>

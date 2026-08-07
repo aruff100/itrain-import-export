@@ -50,3 +50,15 @@ iTrain-ImportExport-Einstellungen-zuruecksetzen-*.reg
 iTrain-ImportExport-Einstellungen-zuruecksetzen-*.sh
 iTrain-ImportExport-Einstellungen-zuruecksetzen-*.command
 LIESMICH-*.txt
+
+### Sicherungskopien des Handbuch-Generators (tools/manual_build.py) ###
+*.odt.bak
+
+### Python-Zwischenstaende der Hilfswerkzeuge ###
+tools/__pycache__/
+
+### decoder.zip ist das gepackte Ergebnis aus decoder/ und wird ueber die
+### Proton-Drive-Freigabe verteilt, nicht ueber das Repository. Die einzelnen
+### Vorlagen in decoder/ sind dagegen versioniert - sie sind aus den
+### Hersteller-Anleitungen erarbeitet und sollen nachvollziehbar bleiben.
+decoder.zip

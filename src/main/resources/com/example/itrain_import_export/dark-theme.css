@@ -75,17 +75,72 @@
     -fx-background-color: #2b2b2b;
 }
 
+/*
+ * Dialoge (Alert, TextInputDialog, ChoiceDialog, eigene Dialog-Klassen).
+ * Der Inhaltsbereich ist ein eigener Knoten und wuerde sonst hell bleiben,
+ * ebenso die Kopfzeile mit dem Symbol. Die Schaltflaechenleiste erbt vom
+ * dialog-pane und braucht keine eigene Regel.
+ */
 .dialog-pane {
     -fx-background-color: #2b2b2b;
 }
 
+.dialog-pane > .content,
+.dialog-pane > .button-bar,
+.dialog-pane > .header-panel {
+    -fx-background-color: #2b2b2b;
+}
+
 /*
- * Formatierter Hilfetext (HelpDialog): dort werden echte Text-Knoten in einem
- * TextFlow verwendet, damit einzelne Wörter fett sein können. Text faerbt CSS
- * ueber -fx-fill, nicht ueber -fx-text-fill - deshalb diese eigene Regel,
- * bewusst nur fuer .help-text, damit sonstige Beschriftungen (z.B. das rote
- * "X" der Loeschen-Schaltflaeche) unberuehrt bleiben.
+ * Die Meldung eines Alert ist ein Label im Inhaltsbereich, die Kopfzeile ein
+ * eigenes. Beide ausdruecklich einfaerben: -fx-text-fill vererbt sich nicht
+ * zuverlaessig ueber den header-panel hinweg, und ein Alert ohne diese Regel
+ * zeigte dunkle Schrift auf dunklem Grund.
+ */
+.dialog-pane > .content.label,
+.dialog-pane .header-panel .label {
+    -fx-text-fill: #e0e0e0;
+}
+
+/*
+ * Innenflaeche der Bildlaufbereiche (Hilfe, Hinweise). Ohne diese Regel
+ * schimmert bei manchen JavaFX-Fassungen der helle Standardhintergrund des
+ * Ansichtsfensters durch.
+ */
+.scroll-pane,
+.scroll-pane > .viewport {
+    -fx-background-color: #2b2b2b;
+}
+
+/*
+ * Formatierter Hilfetext (HelpDialog, Hinweise, Decoder-Hinweise).
+ *
+ * ACHTUNG: Diese Regel faerbt den Text NICHT - das erledigt HelpDialog.textFill()
+ * im Java-Code, weil dieser Selektor in der Praxis nicht gegriffen hat: Die
+ * Ueberschriften (echte Label) erschienen weiss, der Fliesstext daneben blieb
+ * schwarz. Ein programmatisch gesetzter Wert hat ohnehin Vorrang vor dem
+ * Stylesheet.
+ *
+ * Die Regel bleibt als Rueckfallebene stehen, falls einmal ein Text-Knoten
+ * hinzukommt, dem die Farbe nicht ausdruecklich gesetzt wird. Wer die
+ * Schriftfarbe des Hilfetexts aendern will, aendert sie in HelpDialog.textFill()
+ * - hier allein wirkt es nicht.
  */
 .help-text .text {
     -fx-fill: #e0e0e0;
+}
+
+/*
+ * Der configuration-Knoten im Daten-Explorer. Hellblau als Hinweis darauf,
+ * dass sich dahinter die Decoder-Einstellungen verbergen - siehe
+ * CategoryEditor.GuideLineTreeCell. Im hellen Schema gilt der dort gesetzte
+ * dunklere Blauton; hier ein aufgehellter, damit er auf dunklem Grund nicht
+ * absaeuft.
+ */
+.tree-cell.configuration-node {
+    -fx-text-fill: #7fbfff;
+}
+
+.tree-cell.configuration-node:selected {
+    -fx-text-fill: #ffffff;
 }

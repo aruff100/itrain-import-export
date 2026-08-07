@@ -1,0 +1,68 @@
+iTrain Import/Export - Lizenzhinweise / Third-party licence notices
+===================================================================
+
+Das Programm iTrain Import/Export selbst ist urheberrechtlich geschuetzt.
+Autor: Andre Ruff. Fuer seine Nutzung fallen keine Lizenzgebuehren an.
+
+Es verwendet die nachfolgend aufgefuehrten freien Komponenten Dritter.
+Deren Lizenzbedingungen sind hier vollstaendig wiedergegeben, wie es die
+jeweilige Lizenz verlangt.
+
+The program iTrain Import/Export itself is protected by copyright.
+Author: Andre Ruff. No licence fees apply for using it. It makes use of
+the third-party components listed below; their licence terms are
+reproduced here in full, as required by the respective licence.
+
+
+-------------------------------------------------------------------
+1. Java (OpenJDK) und JavaFX (OpenJFX)
+-------------------------------------------------------------------
+Mit dem Programm gebuendelt werden eine OpenJDK-Laufzeitumgebung 21
+(derzeit Eclipse Temurin, siehe .github/workflows/release.yml) und die
+Oberflaechenbibliothek JavaFX/OpenJFX 21.
+
+Bundled with the program are an OpenJDK 21 runtime (currently Eclipse
+Temurin, see .github/workflows/release.yml) and the JavaFX/OpenJFX 21
+user interface library.
+
+Lizenz / Licence:
+  GNU General Public License, Version 2, mit "Classpath Exception"
+
+Alle gaengigen OpenJDK-Builds (Temurin, BellSoft Liberica, Zulu, Corretto
+u.a.) stehen unter derselben Lizenz; ein Wechsel des Anbieters aendert an
+den Bedingungen nichts.
+
+All common OpenJDK builds (Temurin, BellSoft Liberica, Zulu, Corretto and
+others) are covered by the same licence; changing the vendor does not
+change the terms.
+
+Fuer die Nutzung fallen keine Lizenzgebuehren an. "Keine Gebuehren"
+bedeutet allerdings nicht "keine Lizenz": Es gelten die Bedingungen der
+GPLv2 mit Classpath Exception. Genau diese Ausnahme erlaubt es
+ausdruecklich, eigene Programme mit diesen Bibliotheken zu buendeln und
+weiterzugeben, ohne den eigenen Quellcode offenlegen zu muessen - sie ist
+die Grundlage dafuer, dass dieses Programm samt Laufzeitumgebung
+weitergegeben werden darf.
+
+No licence fees apply. However, "no fees" does not mean "no licence": the
+terms of the GPLv2 with Classpath Exception apply. It is precisely this
+exception that explicitly permits bundling and distributing independent
+programs together with these libraries without having to disclose one's
+own source code - it is what makes distributing this program together
+with a runtime possible in the first place.
+
+Volltext / full text:
+  https://openjdk.org/legal/gplv2+ce.html
+Quellcode / source code:
+  https://github.com/openjdk/jdk21u
+  https://github.com/adoptium/temurin21-binaries
+
+
+-------------------------------------------------------------------
+Hinweis / Note
+-------------------------------------------------------------------
+Ausser der Laufzeitumgebung und JavaFX bindet das Programm keine
+weiteren fremden Bibliotheken ein.
+
+Apart from the runtime and JavaFX, the program does not bundle any
+further third-party libraries.

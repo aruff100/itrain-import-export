@@ -1,0 +1,55 @@
+# Hinweise zur Decoder-Funktion (Import/Export)
+#
+# Diese Datei kannst du frei bearbeiten. Sie wird zuerst im Arbeitsverzeichnis
+# des Programms gesucht, sonst wird die mitgelieferte Fassung verwendet.
+#
+# Format:
+#   **fett**        hebt eine Stelle hervor
+#   "- " am Anfang  macht aus der Zeile einen Aufzaehlungspunkt
+#   Leerzeile       beginnt einen neuen Absatz
+#   # am Zeilenanfang ist ein Kommentar und wird nicht angezeigt
+#
+# Der Text erscheint beim ersten Aufruf einer Decoder-Bearbeitung. Wieder
+# einschalten laesst er sich unter Voreinstellungen -> Ansicht.
+
+**Was diese Funktion macht**
+
+Decoder-Vorlagen sind CV-Tabellen eines Decoder-Typs. 
+Statt jede CV von Hand einzutippen, uebernimmst du eine Vorlage in eine Lokomotive oder einen Wagen - und passt anschliessend nur noch das an, was bei deinem Fahrzeug abweicht.
+
+Diese Vorlagen sind über ein Sript aus den Hersteller PDF abgeleitet. Der Inhalt muss daher nicht stimmen.
+
+**Die drei Wege**
+
+- **Vorlage einlesen**: uebernimmt eine gespeicherte Vorlage in das markierte Fahrzeug. Vorhandene CV-Werte des Fahrzeugs werden dabei ersetzt.
+- **Vorlage schreiben**: sichert die CV-Werte des markierten Fahrzeugs als neue Vorlage, die du später bei anderen Fahrzeugen wiederverwenden kannst.
+- **Konfiguration bearbeiten**: öffnet die CV-Tabelle des Fahrzeugs zum direkten Ändern, Ergänzen und Löschen einzelner Werte.
+
+**Vorlage einlesen** benutzt Du, wenn Du einer Lokomotive eine bestimmte CV Tabelle zuordnen möchtest und diese dann anschließend in iTrain via Programmiergleis oder POM mit den tatsächlichen werten abgleichst.
+**Vorlage schreiben** benutzt Du, wenn Du bereits Decoder mit Konfigurationen und Texten versehen hast. Diese Vorlage wird als CSV gespeichert.
+Diese CSV Datei kann nicht editiert werden, aber transportiert werden (E-Mail, ec.) und über dieses Import-/Export-Programm überall wieder eingelesen und zugeordnet werden.
+**Konfiguration bearbeiten** lässt zu das der Anwender die Vorlagen in allen Bereichen selbst bearbeitet.
+Dabei können Elemente Aktiv oder Inaktiv werden, der Typ und die Beschreibungen können mit eigenen Texten versehen werden. 
+
+**Die Digital-Adresse oder ein anderer Wert bleibt deine Sache**
+
+Eine Vorlage bringt die Werte des Decoder-Typs mit, nicht die deines Fahrzeugs. **CV 1** (und bei langer Adresse **CV 17/18**) musst du nach dem Einlesen pruefen - sonst fahren nach dem Aufspielen mehrere Loks auf derselben Adresse.
+Das ist, nach Aufruf der Datei, in iTrain zu korrigieren.
+Es empfiehlt sich alle Werte über das Programmiergleis oder mit POM komplett auszulesen und damit zu aktualisieren.
+
+**Nicht jeder Decoder nimmt jede Vorlage**
+
+Massgeblich ist das Protokoll, das beim Fahrzeug unter "decoder" eingetragen ist:
+
+- **DCC, FMZ, CTC, SX2**: alle Parameter werden übernommen.
+- **SX1 und Selectrix**: nur die ersten fünf Parameter - mehr kennt das Format nicht.
+- **Motorola, Multiprotokoll, Analog**: kein Import; hier gibt es keine CVs im Sinne dieser Vorlagen.
+
+**Was das Programm nicht tut**
+
+Es schreibt nichts auf den Decoder. Es liest nichts aus dem Decoder.
+Geändert wird ausschließlich die iTrain-Datei; das Aufspielen auf das Fahrzeug übernimmt weiterhin iTrain oder deine Zentrale.
+
+**Vor dem Ausprobieren**
+
+Leg dir eine Kopie deiner Anlagendatei an. Das Programm sichert zwar vor jedem Öffnen automatisch (Voreinstellungen -> Pfade), aber eine eigene Kopie an einer Stelle, die du kennst, beruhigt beim ersten Mal mehr.

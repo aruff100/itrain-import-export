@@ -1,0 +1,55 @@
+# Notes on the decoder function (import/export)
+#
+# You are free to edit this file. It is looked up in the program's working
+# directory first; otherwise the bundled copy is used.
+#
+# Format:
+#   **bold**          emphasises a passage
+#   "- " at the start turns the line into a bullet point
+#   blank line        starts a new paragraph
+#   # at the start of a line is a comment and is not displayed
+#
+# The text appears the first time you edit a decoder configuration. You can
+# switch it back on under Preferences -> View.
+
+**What this feature does**
+
+Decoder templates are CV tables for a decoder type.
+Instead of typing every CV by hand, you apply a template to a locomotive or wagon - and then only adjust what differs on your particular vehicle.
+
+These templates were derived from the manufacturers' PDFs by a script. Their content is therefore not guaranteed to be correct.
+
+**The three routes**
+
+- **Load template**: applies a stored template to the selected vehicle. Any CV values already on the vehicle are replaced.
+- **Write template**: saves the CV values of the selected vehicle as a new template that you can reuse on other vehicles later.
+- **Edit configuration**: opens the vehicle's CV table so you can change, add and delete individual values directly.
+
+**Load template** is what you use when you want to assign a particular CV table to a locomotive and then reconcile it with the actual values in iTrain, via the programming track or POM.
+**Write template** is what you use once you have already given decoders their configurations and texts. The template is saved as a CSV file.
+That CSV file cannot be edited, but it can be passed around (e-mail and so on) and read back in and assigned anywhere through this import/export program.
+**Edit configuration** lets you work on the templates yourself in every respect.
+Entries can be made active or inactive, and the type and the descriptions can be given texts of your own.
+
+**The digital address - or any other value - stays your job**
+
+A template carries the values of the decoder type, not those of your vehicle. Check **CV 1** (and **CV 17/18** for a long address) after loading - otherwise several locomotives will end up running on the same address.
+That is to be corrected in iTrain once the file has been opened there.
+It is worth reading out all values completely via the programming track or with POM and updating them from that.
+
+**Not every decoder accepts every template**
+
+What matters is the protocol recorded on the vehicle under "decoder":
+
+- **DCC, FMZ, CTC, SX2**: all parameters are applied.
+- **SX1 and Selectrix**: only the first five parameters - the format does not know any more.
+- **Motorola, multi-protocol, analogue**: no import; there are no CVs here in the sense of these templates.
+
+**What the program does not do**
+
+It does not write anything to the decoder. It does not read anything from the decoder.
+Only the iTrain file is changed; transferring the values to the vehicle remains the job of iTrain or your command station.
+
+**Before you experiment**
+
+Make a copy of your layout file. The program does back it up automatically before opening (Preferences -> Paths), but your own copy in a place you know is more reassuring the first time round.

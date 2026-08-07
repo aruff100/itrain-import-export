@@ -10,7 +10,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
-import javafx.scene.Scene;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
@@ -41,10 +40,11 @@ import java.util.function.Consumer;
  * Nutzer das gewählte Farbschema direkt sieht, statt es erst nachträglich in
  * den Voreinstellungen zu entdecken.
  * <p>
- * 3) Je einen Pfadvorschlag für iTrain-/Export-/Backup-Ordner, abhängig vom
- * Betriebssystem unterhalb des Benutzerverzeichnisses
+ * 3) Je einen Pfadvorschlag für iTrain-/Export-/Backup-/Decoder-Ordner,
+ * abhängig vom Betriebssystem unterhalb des Benutzerverzeichnisses
  * ({@code <Benutzerverzeichnis>/iTrain/layouts} bzw. {@code .../export} bzw.
- * {@code .../backup} - unter Windows z.B. {@code C:\Users\<Name>\iTrain\...},
+ * {@code .../backup} bzw. {@code .../Decoder} - unter Windows z.B.
+ * {@code C:\Users\<Name>\iTrain\...},
  * unter Linux {@code /home/<Name>/iTrain/...}, unter macOS
  * {@code /Users/<Name>/iTrain/...}; ermittelt plattformunabhängig über
  * {@code System.getProperty("user.home")}, statt das Betriebssystem selbst
@@ -78,6 +78,7 @@ public final class FirstRunDialog {
         String suggestedTcd = Paths.get(home, "iTrain", "layouts").toString();
         String suggestedExport = Paths.get(home, "iTrain", "export").toString();
         String suggestedBackup = Paths.get(home, "iTrain", "backup").toString();
+        String suggestedDecoder = Paths.get(home, "iTrain", "Decoder").toString();
 
         Dialog<Void> dialog = new Dialog<>();
         dialog.initOwner(owner);
@@ -117,21 +118,19 @@ public final class FirstRunDialog {
         themeCombo.valueProperty().addListener((obs, oldTheme, newTheme) -> {
             if (newTheme != null) {
                 settings.setTheme(newTheme);
-                ThemeManager.apply(owner.getScene(), newTheme);
-                Scene dialogScene = dialog.getDialogPane().getScene();
-                if (dialogScene != null) {
-                    ThemeManager.apply(dialogScene, newTheme);
-                }
+                ThemeManager.applyToAllWindows(newTheme);
             }
         });
 
         Label tcdCaption = new Label(i18n.t("settings.tcdPath"));
         Label exportCaption = new Label(i18n.t("settings.exportPath"));
         Label backupCaption = new Label(i18n.t("settings.backupPath"));
+        Label decoderCaption = new Label(i18n.t("settings.decoderPath"));
 
         PathRow tcdRow = new PathRow(owner, i18n, suggestedTcd);
         PathRow exportRow = new PathRow(owner, i18n, suggestedExport);
         PathRow backupRow = new PathRow(owner, i18n, suggestedBackup);
+        PathRow decoderRow = new PathRow(owner, i18n, suggestedDecoder);
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
@@ -141,6 +140,7 @@ public final class FirstRunDialog {
         grid.addRow(2, tcdCaption, tcdRow.row);
         grid.addRow(3, exportCaption, exportRow.row);
         grid.addRow(4, backupCaption, backupRow.row);
+        grid.addRow(5, decoderCaption, decoderRow.row);
 
         VBox content = new VBox(12, introLabel, grid);
         content.setPadding(new Insets(15));
@@ -172,6 +172,7 @@ public final class FirstRunDialog {
             tcdCaption.setText(i18n.t("settings.tcdPath"));
             exportCaption.setText(i18n.t("settings.exportPath"));
             backupCaption.setText(i18n.t("settings.backupPath"));
+            decoderCaption.setText(i18n.t("settings.decoderPath"));
             tcdRow.refreshText(i18n);
             exportRow.refreshText(i18n);
             backupRow.refreshText(i18n);
@@ -192,6 +193,7 @@ public final class FirstRunDialog {
                 applyPath(owner, i18n, settings, tcdRow.getPath(), settings::setTcdDirectory);
                 applyPath(owner, i18n, settings, exportRow.getPath(), settings::setExportDirectory);
                 applyPath(owner, i18n, settings, backupRow.getPath(), settings::setBackupDirectory);
+                applyPath(owner, i18n, settings, decoderRow.getPath(), settings::setDecoderDirectory);
             }
             return null;
         });

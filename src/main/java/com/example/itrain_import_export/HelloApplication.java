@@ -19,7 +19,7 @@ public class HelloApplication extends Application {
         Parent root = fxmlLoader.load();
         HelloController controller = fxmlLoader.getController();
 
-        Scene scene = new Scene(root, 1200, 750);
+        Scene scene = new Scene(root);
         ThemeManager.apply(scene, AppSettings.getInstance().getTheme());
         stage.setTitle(I18n.getInstance().t("app.title"));
         stage.getIcons().addAll(loadAppIcons());
@@ -27,6 +27,27 @@ public class HelloApplication extends Application {
         // Beim Schließen ggf. das Backup der aktuell offenen Datei
         // aufräumen, falls seither weder geändert noch gespeichert wurde.
         stage.setOnCloseRequest(event -> controller.onAppClosing());
+
+        // Lage und Größe vom letzten Mal übernehmen. Beim allerersten Start
+        // gilt die Vorgabe: doppelte Breite und 30% mehr Höhe gegenüber der
+        // früheren Größe (1200x750) - im Ribbon stehen jetzt mehrere
+        // beschriftete Schaltflächen, und die Kategorie-Tabellen sind breiter
+        // besser lesbar. WindowState begrenzt das auf den tatsächlich
+        // vorhandenen Platz (2400px sind breiter als viele Bildschirme) und
+        // prüft eine gemerkte Lage gegen die heute angeschlossenen Monitore.
+        WindowState.apply(stage, "main", 2400, 975);
+
+        // Ab hier erscheinen alle Dialoge über dem Hauptfenster - auch die,
+        // die keinen Besitzer setzen und sonst auf dem Hauptbildschirm
+        // landeten. Muss vor stage.show() stehen, damit schon der
+        // Ersteinrichtungs-Dialog weiter unten erfasst ist.
+        DialogPlacement.install(stage);
+
+        // Und ab hier bekommt jedes neu geöffnete Fenster das eingestellte
+        // Farbschema, ohne dass die jeweilige Aufrufstelle daran denken muss -
+        // siehe ThemeManager. Ebenfalls vor stage.show(), aus demselben Grund.
+        ThemeManager.install();
+
         stage.show();
 
         // Nur beim allerersten Start (solange noch keiner der drei Pfade

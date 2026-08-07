@@ -99,16 +99,28 @@ public class HelloController {
     private MenuItem redoMenuItem;
 
     @FXML
+    private MenuItem centerWindowsMenuItem;
+
+    @FXML
     private Menu settingsMenu;
 
     @FXML
     private MenuItem preferencesMenuItem;
 
     @FXML
+    private MenuItem decoderInstallMenuItem;
+
+    @FXML
+    private MenuItem decoderTemplatesMenuItem;
+
+    @FXML
     private Menu helpMenu;
 
     @FXML
     private MenuItem helpMenuItem;
+
+    @FXML
+    private MenuItem manualMenuItem;
 
     @FXML
     private MenuItem updateMenuItem;
@@ -133,6 +145,55 @@ public class HelloController {
 
     @FXML
     private Button preferencesToolButton;
+
+    /**
+     * Die vier Import-/Export-Schaltflächen im Ribbon. Sie standen früher in
+     * der Werkzeugleiste jedes Kategorie-Reiters; seit 01.08.2026 liegen sie
+     * zentral im Ribbon (durch einen Trennstrich von den übrigen Symbolen
+     * abgesetzt) und wirken auf den gerade sichtbaren Reiter. Ihr Zustand
+     * wird bei jedem Reiterwechsel nachgeführt, siehe
+     * {@link #updateRibbonState()}.
+     */
+    @FXML
+    private Button exportSelectedToolButton;
+
+    @FXML
+    private Button importCategoryToolButton;
+
+    @FXML
+    private Button decoderExportToolButton;
+
+    @FXML
+    private Button decoderImportToolButton;
+
+    @FXML
+    private Button decoderCaptureToolButton;
+
+    /**
+     * Proton-Drive-Freigabe, unter der das Handbuch als PDF bereitliegt -
+     * dieselbe wie für das Programm und die Decoder-Vorlagen. Bewusst fest
+     * hinterlegt und nicht aus dem Update-Manifest gelesen: Das Handbuch
+     * soll sich auch dann aufrufen lassen, wenn die Update-Prüfung gerade
+     * nicht durchkommt.
+     */
+    private static final String MANUAL_URL = "https://drive.proton.me/urls/3HANAC7AX4#RTiaJCS9vvNM";
+
+    /**
+     * Pastellfarben der vier Schaltflächen (auf Wunsch des Nutzers). Die
+     * Schriftfarbe wird bewusst mitgesetzt: sonst wäre der Text im dunklen
+     * Farbschema hell auf hellem Grund und damit unlesbar.
+     */
+    private static final String STYLE_EXPORT_SELECTED =
+            "-fx-background-color: #c8e6c9; -fx-text-fill: #2b2b2b;";
+    private static final String STYLE_IMPORT_CATEGORY =
+            "-fx-background-color: #f8d3dd; -fx-text-fill: #2b2b2b;";
+    private static final String STYLE_DECODER_EXPORT =
+            "-fx-background-color: #cfe2f7; -fx-text-fill: #2b2b2b;";
+    private static final String STYLE_DECODER_IMPORT =
+            "-fx-background-color: #ded3f0; -fx-text-fill: #2b2b2b;";
+    /** Blassgelb für "Decoder erfassen" - hebt sich von den vier übrigen ab. */
+    private static final String STYLE_DECODER_CAPTURE =
+            "-fx-background-color: #faeec2; -fx-text-fill: #2b2b2b;";
 
     private final I18n i18n = I18n.getInstance();
     private TcdDocument document;
@@ -187,13 +248,23 @@ public class HelloController {
         redoToolButton.setGraphic(loadIcon("icons/redo-icon.png", 22));
         preferencesToolButton.setGraphic(loadIcon("icons/settings-icon.png", 22));
 
+        exportSelectedToolButton.setStyle(STYLE_EXPORT_SELECTED);
+        importCategoryToolButton.setStyle(STYLE_IMPORT_CATEGORY);
+        decoderExportToolButton.setStyle(STYLE_DECODER_EXPORT);
+        decoderImportToolButton.setStyle(STYLE_DECODER_IMPORT);
+        decoderCaptureToolButton.setStyle(STYLE_DECODER_CAPTURE);
+
         // Nur einmal registrieren (nicht in rebuildTabs(), das bei jedem
         // Dateiöffnen/Sprachwechsel erneut läuft) - sonst würde sich bei
         // jedem Aufruf ein weiterer Listener anhäufen.
-        tabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> updateStatusForSelectedTab());
+        tabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
+            updateStatusForSelectedTab();
+            updateRibbonState();
+        });
         i18n.addLanguageChangeListener(this::applyLanguage);
         applyLanguage();
         updateUndoRedoState();
+        updateRibbonState();
     }
 
     private static ImageView loadIcon(String resourcePath, int size) {
@@ -222,10 +293,14 @@ public class HelloController {
         editMenu.setText(i18n.t("menu.edit"));
         undoMenuItem.setText(i18n.t("menu.undo"));
         redoMenuItem.setText(i18n.t("menu.redo"));
+        centerWindowsMenuItem.setText(i18n.t("menu.centerWindows"));
         settingsMenu.setText(i18n.t("menu.settingsMenu"));
         preferencesMenuItem.setText(i18n.t("menu.preferences"));
+        decoderInstallMenuItem.setText(i18n.t("menu.decoderInstall"));
+        decoderTemplatesMenuItem.setText(i18n.t("menu.decoderTemplates"));
         helpMenu.setText(i18n.t("menu.help"));
         helpMenuItem.setText(i18n.t("menu.helpItem"));
+        manualMenuItem.setText(i18n.t("menu.manual"));
         updateMenuItem.setText(i18n.t("menu.updateItem"));
         aboutMenuItem.setText(i18n.t("menu.aboutItem"));
 
@@ -234,6 +309,14 @@ public class HelloController {
         undoToolButton.setTooltip(new Tooltip(i18n.t("menu.undo")));
         redoToolButton.setTooltip(new Tooltip(i18n.t("menu.redo")));
         preferencesToolButton.setTooltip(new Tooltip(i18n.t("menu.preferences")));
+
+        // Die vier Import-/Export-Schaltflächen tragen ihren vollen Text
+        // (kein Symbol), damit ohne Erklärung klar ist, was sie tun.
+        exportSelectedToolButton.setText(i18n.t("editor.exportSelected"));
+        importCategoryToolButton.setText(i18n.t("editor.import"));
+        decoderExportToolButton.setText(i18n.t("editor.decoderExport"));
+        decoderImportToolButton.setText(i18n.t("editor.decoderImport"));
+        decoderCaptureToolButton.setText(i18n.t("menu.decoderCapture"));
 
         if (document == null) {
             fileNameLabel.setText(i18n.t("status.noFileLoaded"));
@@ -632,6 +715,25 @@ public class HelloController {
         restoreState(redoStack.pop());
     }
 
+    /**
+     * Bearbeiten → "Alle Fenster zentrieren": holt sämtliche offenen Fenster
+     * und Dialoge auf den Bildschirm des Hauptfensters zurück. Gedacht als
+     * Rettungsanker, wenn ein Fenster außer Sicht geraten ist - etwa weil es
+     * auf einem inzwischen abgezogenen zweiten Bildschirm lag oder versehentlich
+     * über den Rand geschoben wurde. Die eigentliche Arbeit macht
+     * {@link WindowState#centerAll(Stage)}.
+     */
+    @FXML
+    private void onCenterWindows() {
+        Stage stage = (Stage) tabPane.getScene().getWindow();
+        int moved = WindowState.centerAll(stage);
+        // Auch die gemerkte Verschiebung der Dialoge vergessen: Sonst käme
+        // der nächste Dialog sofort wieder abseits heraus, obwohl der
+        // Anwender gerade um das Gegenteil gebeten hat.
+        DialogPlacement.resetOffset();
+        statusLabel.setText(I18n.getInstance().t("status.windowsCentered", moved));
+    }
+
     private void updateUndoRedoState() {
         boolean canUndo = !undoStack.isEmpty();
         boolean canRedo = !redoStack.isEmpty();
@@ -641,10 +743,119 @@ public class HelloController {
         redoToolButton.setDisable(!canRedo);
     }
 
+    /**
+     * Liefert den Editor des gerade sichtbaren Kategorie-Reiters, oder
+     * {@code null}, wenn keine Datei geöffnet ist. Grundlage für die vier
+     * Ribbon-Schaltflächen, die immer auf den sichtbaren Reiter wirken.
+     */
+    private CategoryEditor currentEditor() {
+        return editorsByTab.get(tabPane.getSelectionModel().getSelectedItem());
+    }
+
+    /**
+     * Schaltet die vier Import-/Export-Schaltflächen im Ribbon passend zum
+     * sichtbaren Reiter: ohne geöffnete Datei sind alle vier gesperrt, die
+     * beiden Decoder-Schaltflächen zusätzlich in allen Kategorien außer
+     * Lokomotiven und Wagen (nur dort gibt es einen
+     * {@code <configuration>}-Knoten).
+     */
+    private void updateRibbonState() {
+        CategoryEditor editor = currentEditor();
+        boolean hasCategory = editor != null;
+        exportSelectedToolButton.setDisable(!hasCategory);
+        importCategoryToolButton.setDisable(!hasCategory);
+        boolean decoder = hasCategory && editor.supportsDecoderConfiguration();
+        decoderExportToolButton.setDisable(!decoder);
+        decoderImportToolButton.setDisable(!decoder);
+    }
+
+    @FXML
+    private void onExportSelected() {
+        CategoryEditor editor = currentEditor();
+        if (editor != null) {
+            editor.triggerExport();
+        }
+    }
+
+    @FXML
+    private void onImportCategory() {
+        CategoryEditor editor = currentEditor();
+        if (editor != null) {
+            editor.triggerImport();
+        }
+    }
+
+    @FXML
+    private void onDecoderExport() {
+        CategoryEditor editor = currentEditor();
+        if (editor != null && editor.supportsDecoderConfiguration()) {
+            editor.triggerDecoderExport();
+        }
+    }
+
+    @FXML
+    private void onDecoderImport() {
+        CategoryEditor editor = currentEditor();
+        if (editor != null && editor.supportsDecoderConfiguration()) {
+            editor.triggerDecoderImport();
+        }
+    }
+
+    /**
+     * "Decoder erfassen": öffnet das eigenständige Fenster zum Anlegen einer
+     * neuen Decoder-Vorlage neben der Hersteller-Anleitung (siehe
+     * {@link DecoderCaptureWindow}). Bewusst UNABHÄNGIG vom geöffneten
+     * Dokument nutzbar - hier wird eine Vorlagen-Datei erstellt, keine
+     * iTrain-Datei verändert.
+     */
+    @FXML
+    private void onDecoderCapture() {
+        Stage stage = (Stage) tabPane.getScene().getWindow();
+        // Auch hier der Hinweistext, solange er nicht abgeschaltet wurde -
+        // "Decoder erfassen" ist für viele der erste Kontakt mit der Funktion.
+        if (!DecoderHintsDialog.confirm(stage)) {
+            return;
+        }
+        DecoderCaptureWindow.show(stage);
+    }
+
+    /** Einstellungen → "Decoder-Vorlagen installieren" (siehe {@link DecoderTemplateInstaller}). */
+    @FXML
+    private void onDecoderInstall() {
+        Stage stage = (Stage) tabPane.getScene().getWindow();
+        DecoderTemplateInstaller.install(stage);
+    }
+
+    /** Einstellungen → "Decoder-Vorlagen": Übersichtsfenster (siehe {@link DecoderTemplateBrowser}). */
+    @FXML
+    private void onDecoderTemplates() {
+        Stage stage = (Stage) tabPane.getScene().getWindow();
+        DecoderTemplateBrowser.show(stage);
+    }
+
     @FXML
     private void onHelp() {
         Stage stage = (Stage) tabPane.getScene().getWindow();
         HelpDialog.show(stage);
+    }
+
+    /**
+     * Menü Hilfe → "Handbuch": öffnet die Proton-Drive-Freigabe im Browser,
+     * in der das Handbuch als PDF liegt.
+     * <p>
+     * Bewusst dieselbe Freigabe wie für das Programm selbst und die
+     * Decoder-Vorlagen: Es gibt nur einen Ort, an dem der Autor Dateien
+     * bereitstellt, und das Handbuch ändert sich mit jeder Version. Ein im
+     * Programm mitgeliefertes PDF wäre dagegen ab der ersten Textänderung
+     * veraltet - und würde das Laufzeitabbild unnötig vergrößern.
+     * <p>
+     * Wie beim Update lädt das Programm selbst nichts herunter und braucht
+     * keinerlei Zugangsdaten; den Rest erledigt der Browser.
+     */
+    @FXML
+    private void onOpenManual() {
+        Stage stage = (Stage) tabPane.getScene().getWindow();
+        UpdateDialog.openDownloadPage(stage, MANUAL_URL);
     }
 
     @FXML
@@ -717,6 +928,7 @@ public class HelloController {
             tabPane.getSelectionModel().select(0);
         }
         updateStatusForSelectedTab();
+        updateRibbonState();
     }
 
     private void addCategoryTab(XmlNode controlItems, String categoryName) {

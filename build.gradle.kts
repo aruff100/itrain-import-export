@@ -8,11 +8,16 @@ plugins {
     application
     id("org.javamodularity.moduleplugin") version "1.8.15"
     id("org.openjfx.javafxplugin") version "0.0.13"
-    id("org.beryx.jlink") version "2.25.0"
+    // 4.1.0 statt der urspruenglichen 2.25.0 (von 2022): Die alte Fassung
+    // kannte Java 21 noch nicht ("Unsupported class file major version 65").
+    // Aufgefallen ist das erst beim Zusammenfassen einer nicht-modularen
+    // Abhängigkeit; die gibt es inzwischen nicht mehr, aber eine aktuelle
+    // Plugin-Fassung ist ohnehin die bessere Grundlage.
+    id("org.beryx.jlink") version "4.1.0"
 }
 
 group = "com.example"
-version = "1.16"
+version = "2.0"
 
 repositories {
     mavenCentral()
@@ -56,6 +61,13 @@ javafx {
     modules = listOf("javafx.controls", "javafx.fxml")
 }
 
+// Das Projekt kommt bewusst ohne Fremdbibliotheken aus (abgesehen von
+// JavaFX und JUnit). Eine PDF-Anzeige über Apache PDFBox war zeitweise
+// eingebaut und wurde wieder entfernt: Sie brachte ein zusammengefasstes
+// Zusatzmodul, mehrere jlink-Sonderregeln und Reflection-Freigaben mit sich
+// - viel Aufwand für eine Anleitung, die sich ebenso gut daneben in einem
+// PDF-Programm öffnen lässt. Vor dem Einbinden einer neuen Abhängigkeit
+// bitte den Abschnitt dazu in STATUS.md lesen.
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
@@ -74,7 +86,12 @@ jlink {
     // sie schlägt jede HTTPS-Verbindung im fertigen Installer fehl, während
     // sie unter "gradle run" (volle JDK) funktioniert - genau der Fall bei der
     // Update-Prüfung (UpdateChecker ruft die Gist-URL per HTTPS ab).
-    options.set(listOf("--strip-debug", "--compress", "2", "--no-header-files", "--no-man-pages", "--bind-services"))
+    // "--compress zip-6" statt des alten "--compress 2": Die Zahlenform ist
+    // seit JDK 21 veraltet ("Das Argument 2 für --compress ist veraltet")
+    // und soll in einer künftigen Java-Version entfallen. zip-6 entspricht
+    // der bisherigen Stufe 2 (ausgewogen zwischen Größe und Geschwindigkeit).
+    options.set(listOf("--strip-debug", "--compress", "zip-6", "--no-header-files", "--no-man-pages", "--bind-services"))
+
     launcher {
         name = "app"
     }
@@ -91,7 +108,7 @@ jlink {
         // Betriebssystem-Kürzel für den Installer-Dateinamen, damit ein
         // Anwender im Proton-Drive-Ordner sofort sieht, welche Datei zu
         // seinem System gehört (nicht nur an der .msi/.dmg/.deb-Endung). Der
-        // fertige Installer heißt dann z.B. "iTrain-Import-Export-Windows-1.15.msi"
+        // fertige Installer heißt dann z.B. "iTrain-Import-Export-Windows-1.18.msi"
         // (jpackage hängt die appVersion automatisch hinten an). Der
         // installierte Programmname selbst bleibt "iTrain-Import-Export"
         // (imageName), nur der Name der Installationsdatei bekommt das Kürzel.
@@ -103,11 +120,11 @@ jlink {
         imageName = "iTrain-Import-Export"
         installerName = "iTrain-Import-Export-$osLabel"
         // Bewusst identisch zu "version" oben (project.version ist jetzt
-        // schon suffixfrei, "1.15") - eigenes Feld bleibt trotzdem
+        // schon suffixfrei, "1.18") - eigenes Feld bleibt trotzdem
         // bestehen, falls App- und Projekt-Version sich künftig einmal
         // unterscheiden sollen; jpackage verlangt ohnehin ein reines
         // Zahlen-/Punkt-Format ohne Suffix wie "-SNAPSHOT".
-        appVersion = "1.16"
+        appVersion = "2.0"
         vendor = "Andre Ruff"
 
         icon = when {

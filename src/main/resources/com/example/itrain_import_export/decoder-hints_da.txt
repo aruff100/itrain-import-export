@@ -1,0 +1,52 @@
+# Bemaerkninger til dekoderfunktionen (import/eksport)
+#
+# Denne fil ma du frit redigere. Der soges forst i programmets arbejdsmappe,
+# ellers bruges den medfolgende kopi.
+#
+# Format:
+#   **fed**             fremhaever et sted
+#   "- " i begyndelsen  goer linjen til et punkt
+#   tom linje           begynder et nyt afsnit
+#   # i linjens start er en kommentar og vises ikke
+
+**Hvad denne funktion goer**
+
+Dekoderskabeloner er CV-tabeller for en dekodertype.
+I stedet for at taste hver CV i hand overfoerer du en skabelon til et lokomotiv eller en vogn - og tilpasser derefter kun det, der afviger pa dit koeretoej.
+
+Disse skabeloner er udledt af fabrikanternes PDF-filer med et script. Indholdet behoever derfor ikke at vaere rigtigt.
+
+**De tre veje**
+
+- **Indlaes skabelon**: overfoerer en gemt skabelon til det markerede koeretoej. Koeretoejets hidtidige CV-vaerdier bliver erstattet.
+- **Skriv skabelon**: gemmer CV-vaerdierne for det markerede koeretoej som ny skabelon, som du senere kan genbruge pa andre koeretoejer.
+- **Rediger konfiguration**: abner koeretoejets CV-tabel, sa du direkte kan aendre, supplere og slette enkelte vaerdier.
+
+**Indlaes skabelon** bruger du, nar du vil tildele et lokomotiv en bestemt CV-tabel og derefter afstemme den i iTrain med de faktiske vaerdier, via programmeringssporet eller med POM.
+**Skriv skabelon** bruger du, nar du allerede har forsynet dekodere med konfigurationer og tekster. Skabelonen gemmes som CSV-fil.
+Den CSV-fil kan ikke redigeres, men den kan sendes videre (e-mail osv.) og overalt indlaeses og tildeles igen via dette import-/eksportprogram.
+**Rediger konfiguration** lader dig selv bearbejde skabelonerne pa alle punkter.
+Poster kan goeres aktive eller inaktive, og type og beskrivelser kan forsynes med dine egne tekster.
+
+**Den digitale adresse - eller en hvilken som helst anden vaerdi - er fortsat din sag**
+
+En skabelon rummer dekodertypens vaerdier, ikke dit koeretoejs. Kontroller **CV 1** (og ved lang adresse **CV 17/18**) efter indlaesningen - ellers koerer flere lokomotiver pa samme adresse.
+Det skal rettes i iTrain, nar filen er abnet der.
+Det anbefales at laese alle vaerdier helt ud via programmeringssporet eller med POM og opdatere ud fra det.
+
+**Ikke enhver dekoder tager enhver skabelon**
+
+Afgoerende er den protokol, der star ved koeretoejet under "decoder":
+
+- **DCC, FMZ, CTC, SX2**: alle parametre overfoeres.
+- **SX1 og Selectrix**: kun de foerste fem parametre - mere kender formatet ikke.
+- **Motorola, multiprotokol, analog**: ingen import; her findes ingen CV'er i disse skabeloners forstand.
+
+**Hvad programmet ikke goer**
+
+Det skriver intet til dekoderen. Det laeser intet fra dekoderen.
+Kun iTrain-filen aendres; overfoerslen til koeretoejet er fortsat iTrains eller din centrals opgave.
+
+**For du proever dig frem**
+
+Lav en kopi af din anlaegsfil. Programmet tager ganske vist automatisk sikkerhedskopi for hver abning (Indstillinger -> Stier), men din egen kopi et sted, du kender, beroliger mere foerste gang.

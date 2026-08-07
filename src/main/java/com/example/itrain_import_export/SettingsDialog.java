@@ -2,20 +2,28 @@ package com.example.itrain_import_export;
 
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Ein einziges "Voreinstellungen"-Fenster mit drei Reitern - Pfade, Sprache,
@@ -42,13 +50,17 @@ public final class SettingsDialog {
         TabPane tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
-        Tab pathsTab = new Tab(i18n.t("menu.settingsPaths"), buildPathsContent(owner, settings, i18n));
-        Tab languageTab = new Tab(i18n.t("menu.settingsLanguage"), buildLanguageContent(i18n));
+        // Reihenfolge: erst "Ansicht" (Sprache, Farbschema, Bildschirm - was
+        // man am ehesten sucht), dann "Pfade". Die Sprache hat keinen eigenen
+        // Reiter mehr; sie gehört sachlich zur Darstellung und stand allein
+        // auf einem fast leeren Reiter.
         Tab viewTab = new Tab(i18n.t("menu.settingsView"), buildViewContent(owner, dialog, settings, i18n));
-        tabPane.getTabs().addAll(pathsTab, languageTab, viewTab);
+        Tab pathsTab = new Tab(i18n.t("menu.settingsPaths"), buildPathsContent(owner, settings, i18n));
+        tabPane.getTabs().addAll(viewTab, pathsTab);
 
         dialog.getDialogPane().setContent(tabPane);
-        dialog.getDialogPane().setPrefSize(560, 320);
+        // Breit genug, dass auch lange Ordnerpfade lesbar bleiben.
+        dialog.getDialogPane().setPrefSize(760, 380);
         applyThemeOnceShown(dialog, settings);
         dialog.showAndWait();
     }
@@ -70,7 +82,7 @@ public final class SettingsDialog {
                 tcdPathLabel.setText(chosen.getAbsolutePath());
             }
         });
-        HBox tcdRow = new HBox(10, tcdPathLabel, tcdBrowseButton);
+        HBox tcdRow = pathRow(tcdPathLabel, tcdBrowseButton);
 
         Label exportPathLabel = new Label(pathOrPlaceholder(settings.getExportDirectory(), i18n));
         Button exportBrowseButton = new Button(i18n.t("settings.browse"));
@@ -87,7 +99,7 @@ public final class SettingsDialog {
                 exportPathLabel.setText(chosen.getAbsolutePath());
             }
         });
-        HBox exportRow = new HBox(10, exportPathLabel, exportBrowseButton);
+        HBox exportRow = pathRow(exportPathLabel, exportBrowseButton);
 
         Label backupPathLabel = new Label(pathOrPlaceholder(settings.getBackupDirectory(), i18n));
         Button backupBrowseButton = new Button(i18n.t("settings.browse"));
@@ -104,7 +116,24 @@ public final class SettingsDialog {
                 backupPathLabel.setText(chosen.getAbsolutePath());
             }
         });
-        HBox backupRow = new HBox(10, backupPathLabel, backupBrowseButton);
+        HBox backupRow = pathRow(backupPathLabel, backupBrowseButton);
+
+        Label decoderPathLabel = new Label(pathOrPlaceholder(settings.getDecoderDirectory(), i18n));
+        Button decoderBrowseButton = new Button(i18n.t("settings.browse"));
+        decoderBrowseButton.setOnAction(e -> {
+            DirectoryChooser chooser = new DirectoryChooser();
+            chooser.setTitle(i18n.t("settings.decoderPath"));
+            File initial = settings.getDecoderDirectory() != null ? new File(settings.getDecoderDirectory()) : null;
+            if (initial != null && initial.isDirectory()) {
+                chooser.setInitialDirectory(initial);
+            }
+            File chosen = chooser.showDialog(owner);
+            if (chosen != null) {
+                settings.setDecoderDirectory(chosen.getAbsolutePath());
+                decoderPathLabel.setText(chosen.getAbsolutePath());
+            }
+        });
+        HBox decoderRow = pathRow(decoderPathLabel, decoderBrowseButton);
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
@@ -113,11 +142,42 @@ public final class SettingsDialog {
         grid.addRow(0, new Label(i18n.t("settings.tcdPath")), tcdRow);
         grid.addRow(1, new Label(i18n.t("settings.exportPath")), exportRow);
         grid.addRow(2, new Label(i18n.t("settings.backupPath")), backupRow);
+        grid.addRow(3, new Label(i18n.t("settings.decoderPath")), decoderRow);
+
+        // Die erste Spalte bekommt nur so viel Platz, wie die Beschriftungen
+        // brauchen; alles Weitere geht an die Pfadzeile. Ohne das teilte sich
+        // das Gitter den Platz gleichmäßig auf, und lange Ordnerpfade waren
+        // abgeschnitten.
+        ColumnConstraints labelColumn = new ColumnConstraints();
+        labelColumn.setHgrow(Priority.NEVER);
+        ColumnConstraints valueColumn = new ColumnConstraints();
+        valueColumn.setHgrow(Priority.ALWAYS);
+        valueColumn.setFillWidth(true);
+        grid.getColumnConstraints().addAll(labelColumn, valueColumn);
         return grid;
     }
 
-    /** Inhalt des Reiters "Sprache": Sprachauswahl mit Flagge je Sprache. */
-    private static javafx.scene.Node buildLanguageContent(I18n i18n) {
+    /**
+     * Eine Pfadzeile: der Pfad selbst nimmt den verfügbaren Platz ein, der
+     * Knopf "Durchsuchen..." steht rechtsbündig am Rand - so stehen alle
+     * vier Knöpfe untereinander auf einer Linie, statt hinter unterschiedlich
+     * langen Pfaden zu verspringen.
+     */
+    private static HBox pathRow(Label pathLabel, Button browseButton) {
+        pathLabel.setWrapText(true);
+        pathLabel.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(pathLabel, Priority.ALWAYS);
+        HBox row = new HBox(10, pathLabel, browseButton);
+        row.setAlignment(Pos.CENTER_LEFT);
+        return row;
+    }
+
+    /**
+     * Inhalt des Reiters "Ansicht": Sprache, Farbschema, Bildschirm sowie
+     * Spalten-/Bereichs-Sichtbarkeit - also alles, was die Darstellung
+     * betrifft.
+     */
+    private static javafx.scene.Node buildViewContent(Stage owner, Dialog<Void> dialog, AppSettings settings, I18n i18n) {
         ComboBox<String> languageCombo = new ComboBox<>(FXCollections.observableArrayList(I18n.LANGUAGE_CODES));
         languageCombo.setValue(i18n.getCurrentLanguage());
         languageCombo.setCellFactory(list -> new LanguageListCell());
@@ -128,16 +188,6 @@ public final class SettingsDialog {
             }
         });
 
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(12);
-        grid.setPadding(new Insets(15));
-        grid.addRow(0, new Label(i18n.t("settings.language")), languageCombo);
-        return grid;
-    }
-
-    /** Inhalt des Reiters "Ansicht": Farbschema sowie Spalten-/Bereichs-Sichtbarkeit. */
-    private static javafx.scene.Node buildViewContent(Stage owner, Dialog<Void> dialog, AppSettings settings, I18n i18n) {
         ComboBox<String> themeCombo = new ComboBox<>(FXCollections.observableArrayList(
                 AppSettings.THEME_LIGHT, AppSettings.THEME_DARK));
         themeCombo.setValue(settings.getTheme());
@@ -146,8 +196,10 @@ public final class SettingsDialog {
         themeCombo.valueProperty().addListener((obs, oldTheme, newTheme) -> {
             if (newTheme != null) {
                 settings.setTheme(newTheme);
-                ThemeManager.apply(owner.getScene(), newTheme);
-                ThemeManager.apply(dialog.getDialogPane().getScene(), newTheme);
+                // Alle offenen Fenster, nicht nur Hauptfenster und dieser
+                // Dialog: Ein nebenher offenes Erfassungsfenster
+                // ("Decoder-Konfiguration") blieb sonst im alten Schema stehen.
+                ThemeManager.applyToAllWindows(newTheme);
             }
         });
 
@@ -167,16 +219,88 @@ public final class SettingsDialog {
         autoUpdateCheckBox.setSelected(settings.getAutoUpdateCheckEnabled());
         autoUpdateCheckBox.selectedProperty().addListener((obs, oldV, newV) -> settings.setAutoUpdateCheckEnabled(newV));
 
+        // Gegenstück zum Ankreuzfeld "Hinweise nicht mehr anzeigen" im
+        // Hinweis-Dialog selbst: dieselbe Einstellung, hier nur mit
+        // umgekehrter Aussage - dort wird abgeschaltet, hier eingeschaltet.
+        CheckBox decoderHintsBox = new CheckBox();
+        decoderHintsBox.setSelected(settings.getShowDecoderHints());
+        decoderHintsBox.selectedProperty().addListener((obs, oldV, newV) -> settings.setShowDecoderHints(newV));
+
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(12);
         grid.setPadding(new Insets(15));
-        grid.addRow(0, new Label(i18n.t("settings.theme")), themeCombo);
-        grid.addRow(1, new Label(i18n.t("settings.showType")), showTypeBox);
-        grid.addRow(2, new Label(i18n.t("settings.showSelectionCheckbox")), showSelectionBox);
-        grid.addRow(3, new Label(i18n.t("settings.showDataEditor")), showDataEditorBox);
-        grid.addRow(4, new Label(i18n.t("settings.autoUpdateCheck")), autoUpdateCheckBox);
+        grid.addRow(0, new Label(i18n.t("settings.language")), languageCombo);
+        grid.addRow(1, new Label(i18n.t("settings.theme")), themeCombo);
+        grid.addRow(2, new Label(i18n.t("settings.screen")), buildScreenChooser(settings, i18n));
+        grid.addRow(3, new Label(i18n.t("settings.showType")), showTypeBox);
+        grid.addRow(4, new Label(i18n.t("settings.showSelectionCheckbox")), showSelectionBox);
+        grid.addRow(5, new Label(i18n.t("settings.showDataEditor")), showDataEditorBox);
+        grid.addRow(6, new Label(i18n.t("settings.autoUpdateCheck")), autoUpdateCheckBox);
+        grid.addRow(7, new Label(i18n.t("settings.showDecoderHints")), decoderHintsBox);
         return grid;
+    }
+
+    /**
+     * Auswahl des Bildschirms für neu geöffnete Fenster. Voreinstellung ist
+     * "wie zuletzt": Jedes Fenster merkt sich seine Lage selbst (siehe
+     * {@link WindowState}), und Zusatzfenster erscheinen dort, wo das Fenster
+     * steht, aus dem sie aufgerufen wurden. Ein fester Bildschirm ist für
+     * den Fall gedacht, dass die Anwendung immer auf demselben Monitor
+     * starten soll.
+     * <p>
+     * Bei nur einem angeschlossenen Bildschirm bleibt die Auswahl deaktiviert -
+     * sie hätte dort nichts zu entscheiden.
+     */
+    private static javafx.scene.Node buildScreenChooser(AppSettings settings, I18n i18n) {
+        List<Screen> screens = Screen.getScreens();
+        List<String> options = new ArrayList<>();
+        options.add(AppSettings.SCREEN_REMEMBER);
+        for (int i = 0; i < screens.size(); i++) {
+            options.add(String.valueOf(i));
+        }
+
+        ComboBox<String> combo = new ComboBox<>(FXCollections.observableArrayList(options));
+        combo.setCellFactory(list -> screenCell(screens, i18n));
+        combo.setButtonCell(screenCell(screens, i18n));
+        String current = settings.getPreferredScreen();
+        combo.setValue(options.contains(current) ? current : AppSettings.SCREEN_REMEMBER);
+        combo.valueProperty().addListener((obs, oldV, newV) -> {
+            if (newV != null) {
+                settings.setPreferredScreen(newV);
+            }
+        });
+        if (screens.size() < 2) {
+            combo.setDisable(true);
+            Label hint = new Label(i18n.t("settings.screenSingle"));
+            hint.setStyle("-fx-opacity: 0.8;");
+            HBox row = new HBox(10, combo, hint);
+            row.setAlignment(Pos.CENTER_LEFT);
+            return row;
+        }
+        return combo;
+    }
+
+    /** Zeigt "wie zuletzt" bzw. "Bildschirm 1 (1920x1080)" statt der rohen Kennung. */
+    private static ListCell<String> screenCell(List<Screen> screens, I18n i18n) {
+        return new ListCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    return;
+                }
+                if (AppSettings.SCREEN_REMEMBER.equals(item)) {
+                    setText(i18n.t("settings.screenRemember"));
+                    return;
+                }
+                int index = Integer.parseInt(item);
+                Rectangle2D bounds = screens.get(index).getBounds();
+                setText(i18n.t("settings.screenNumber", index + 1,
+                        (int) bounds.getWidth(), (int) bounds.getHeight()));
+            }
+        };
     }
 
     /**

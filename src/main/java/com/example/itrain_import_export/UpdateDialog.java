@@ -99,6 +99,15 @@ public final class UpdateDialog {
      * wird der Link stattdessen in einer Fehlermeldung angezeigt, damit er
      * von Hand kopiert werden kann.
      */
+    /**
+     * Wie {@link #openInBrowser}, aber auch von außerhalb nutzbar - etwa für
+     * den Menüpunkt Hilfe → "Handbuch", der dieselbe Proton-Drive-Freigabe
+     * öffnet (siehe {@code HelloController.onOpenManual}).
+     */
+    static void openDownloadPage(Stage owner, String url) {
+        openInBrowser(owner, url);
+    }
+
     private static void openInBrowser(Stage owner, String url) {
         I18n i18n = I18n.getInstance();
         try {

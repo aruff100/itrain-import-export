@@ -2,13 +2,17 @@ package com.example.itrain_import_export;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.awt.Desktop;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -37,7 +41,16 @@ public final class AboutDialog {
         licenseLabel.setMaxWidth(320);
         licenseLabel.setStyle("-fx-font-size: 11px; -fx-opacity: 0.8;");
 
-        VBox content = new VBox(6, nameLabel, authorLabel, contactLink, versionLabel, licenseLabel);
+        // Die Lizenztexte der mitgelieferten fremden Komponenten sind über
+        // einen eigenen Knopf einsehbar. Die Apache-Lizenz verlangt, dass
+        // Empfänger eine Kopie der Lizenz erhalten - das ist damit erfüllt
+        // und für den Anwender leichter zugänglich als eine Datei irgendwo
+        // im Installationsordner.
+        Button licenseButton = new Button(i18n.t("about.licenseDetails"));
+        licenseButton.setOnAction(e -> showLicenses(owner));
+
+        VBox content = new VBox(6, nameLabel, authorLabel, contactLink, versionLabel,
+                licenseLabel, licenseButton);
         content.setPadding(new Insets(15));
 
         Alert dialog = new Alert(Alert.AlertType.INFORMATION);
@@ -49,6 +62,38 @@ public final class AboutDialog {
         // Die Scene existiert erst, sobald der Dialog tatsächlich angezeigt
         // wird - deshalb das Farbschema erst dann anwenden (siehe
         // SettingsDialog.applyThemeOnceShown für dasselbe Muster).
+        dialog.getDialogPane().sceneProperty().addListener((obs, oldScene, newScene) ->
+                ThemeManager.apply(newScene, AppSettings.getInstance().getTheme()));
+        dialog.showAndWait();
+    }
+
+    /**
+     * Zeigt die vollständigen Lizenzhinweise der mitgelieferten fremden
+     * Komponenten (Java-Laufzeitumgebung und JavaFX) aus der Ressourcendatei
+     * {@code third-party-licenses.txt} in einem eigenen, scrollbaren
+     * Fenster.
+     */
+    private static void showLicenses(Stage owner) {
+        I18n i18n = I18n.getInstance();
+        String text;
+        try (InputStream in = AboutDialog.class.getResourceAsStream("third-party-licenses.txt")) {
+            text = in == null ? "" : new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (Exception ex) {
+            text = String.valueOf(ex.getMessage());
+        }
+
+        TextArea area = new TextArea(text);
+        area.setEditable(false);
+        area.setWrapText(false);
+        area.setStyle("-fx-font-family: 'monospaced'; -fx-font-size: 11px;");
+        area.setPrefSize(700, 520);
+
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.initOwner(owner);
+        dialog.setTitle(i18n.t("about.licenseDetails"));
+        dialog.setResizable(true);
+        dialog.getDialogPane().setContent(area);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
         dialog.getDialogPane().sceneProperty().addListener((obs, oldScene, newScene) ->
                 ThemeManager.apply(newScene, AppSettings.getInstance().getTheme()));
         dialog.showAndWait();

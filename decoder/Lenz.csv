@@ -1,0 +1,57 @@
+﻿"Kategorie";"Typ";"Name";"Beschreibung";"XML"
+"decoder-configuration";"configuration";"Lenz";"Lenz SILVER+ / GOLD+ - CV-Tabelle aus der Betriebsanleitung (Information SILVER+ / GOLD+ Decoder), Seiten 16-18";"<configuration count=""18"">
+  <parameter nr=""1"" value=""3"">
+    <description>Basis – Lokadresse | Dies ist die Nummer, mit der Sie die Loks im Digital plus by Lenz® | System aufrufen. Für die Verwendung mit Digital plus by Lenz® | Geräten ist nur der Bereich 1-99 zugelassen. Beim Schreiben | dieser CV wird im Decoder automatisch CV19 | (Mehrfachtraktionsadresse) und in CV29 das Bit 6 (Verwendung | der erweiterten Adresse) gelöscht.</description>
+  </parameter>
+  <parameter nr=""2"" value=""1"">
+    <description>Mindestanfahrspannung Vmin</description>
+  </parameter>
+  <parameter nr=""3"" value=""6"">
+    <description>Anfahrverzögerung</description>
+  </parameter>
+  <parameter nr=""4"" value=""5"">
+    <description>Bremsverzögerung</description>
+  </parameter>
+  <parameter nr=""5"" value=""254"">
+    <description>Maximalgeschwindigkeit Vmax</description>
+  </parameter>
+  <parameter nr=""6"" value=""48"">
+    <description>mittlere Geschwindigkeit Vmid</description>
+  </parameter>
+  <parameter nr=""7"">
+    <description>Versionsnummer | 95: SILVER+ (Art.Nr. 10331-01) | 99: SILVER21+ (Art.Nr. 10321-01) | 98: SILVERdirect+ (Art.Nr. 10330-01) | 91: GOLD+ (Art.Nr. 10433-01)</description>
+  </parameter>
+  <parameter nr=""8"" value=""99"">
+    <description>Herstellerkennung</description>
+  </parameter>
+  <parameter nr=""17"" value=""192"">
+    <description>erweiterte Lokadresse, höherwertiges Byte</description>
+  </parameter>
+  <parameter nr=""18"" value=""100"">
+    <description>erweiterte Lokadresse, niederwertiges Byte</description>
+  </parameter>
+  <parameter nr=""19"" value=""0"">
+    <description>Mehrfachtraktionsadresse | Für die Verwendung mit Digital plus by Lenz® Geräten ist nur der | Bereich 1-99 zugelassen.</description>
+  </parameter>
+  <parameter nr=""28"" value=""3"">
+    <description>RailCom Konfiguration | Bit 1 (0) = 1: 1 Kanal 1 freigegeben für Adress-Broadcast | Bit 2 (1) = 1: 1 Kanal 2 freigegeben für Daten und Acknowledge</description>
+  </parameter>
+  <parameter nr=""29"" value=""14"">
+    <description>Einstellungen 1 | Bit 1 (0) = 0: Richtung der Lok | 0 normal: Lok fährt nach vorne, wenn der Pfeil auf dem | Handregler nach oben zeigt. | 1 vertauscht: Lok fährt nach vorne, wenn der Pfeil auf dem | Handregler nach unten zeigt. | Bit 2 (1) = 1: Fahrstufenmodus: | 0 Betrieb mit 14 oder 27 Fahrstufen. Diese Einstellung wählen | Sie bei Verwendung des Decoders mit Digitalsystemen, die | den 28/128-Fahrstufenmodus nicht unterstützen. | 1 Betrieb mit 28 oder 128 Fahrstufen. Diese Einstellung wählen | Sie bei Verwendung des Decoders mit Digitalsystemen, die | den 28/128-Fahrstufenmodus unterstützen. | Bit 3 (2) = 1: Betriebsart: | 0 Lok fährt nur im Digitalbetrieb | 1 Lok fährt im konventionellen als auch im digitalen Betrieb, | fliegender Wechsel ist möglich. | Bit 4 (3) = 0: 0 RailCom Senden ausgeschaltet | 1 RailCom Senden eingeschaltet | Bit 5 (4): 0 Decoder verwendet Werkskennlinie | 1 Decoder verwendet selbstprogrammierte Kennlinie | Bit 6 (5) = 0: 0 Decoder verwendet Basisadresse (aus CV1) | 1 Decoder verwendet erweiterte Adresse (aus CV17 u. CV18) | Bit 7-8(6-7) = 0: nicht verwendet</description>
+  </parameter>
+  <parameter nr=""51"" value=""0"">
+    <description>Brems – Konfiguration | Bit 1 (0) = 0: 1 konstanter Bremsweg bei ABC-Betrieb aktiviert | Bit 2 (1) = 0: 1 ABC aktiviert | Bit 3 (2) = 0: 1 Richtungsabhängigkeit von ABC ist ausgeschaltet | Bit 4 (3) = 0: 1 Pendelbetrieb ohne Zwischenhalt aktivieren | Bit 5 (4) = 0: 1 Pendelbetrieb mit Zwischenhalt aktivieren | Bit 6 (5) = 0: 1 mit Gleichspannung polaritätsunabhängig anhalten (wird nur | beachtet, wenn in CV29 Bit 3 gelöscht ist) | Bit 7 (6): nicht benutzt | Bit 8 (7) = 0: konstanter Bremsweg über Fahrstufe 0 aktiviert</description>
+  </parameter>
+  <parameter nr=""52"" value=""50"">
+    <description>Bremsweg bei aktiviertem konstanten Bremsweg</description>
+  </parameter>
+  <parameter nr=""53"" value=""48"">
+    <description>Langsamfahrt bei ABC</description>
+  </parameter>
+  <parameter nr=""54"" value=""4"">
+    <description>Aufenthaltsdauer bei Pendelbetrieb, 1 bis 256 Sekunden</description>
+  </parameter>
+  <parameter nr=""128"">
+    <description>Servicenummer (aktuelle Nummer bitte auslesen)</description>
+  </parameter>
+</configuration>"
