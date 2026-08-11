@@ -6,7 +6,7 @@
 // In IntelliJ fiel das bisher nicht auf, weil dort ein JDK konfiguriert ist;
 // beim Aufruf über gradlew von der Kommandozeile sucht Gradle selbst.
 plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
 rootProject.name = "iTrain_import_export"

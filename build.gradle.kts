@@ -6,14 +6,14 @@ import org.gradle.internal.os.OperatingSystem
 plugins {
     java
     application
-    id("org.javamodularity.moduleplugin") version "1.8.15"
-    id("org.openjfx.javafxplugin") version "0.0.13"
+    id("org.javamodularity.moduleplugin") version "2.0.1"
+    id("org.openjfx.javafxplugin") version "0.1.0"
     // 4.1.0 statt der urspruenglichen 2.25.0 (von 2022): Die alte Fassung
     // kannte Java 21 noch nicht ("Unsupported class file major version 65").
     // Aufgefallen ist das erst beim Zusammenfassen einer nicht-modularen
     // Abhängigkeit; die gibt es inzwischen nicht mehr, aber eine aktuelle
     // Plugin-Fassung ist ohnehin die bessere Grundlage.
-    id("org.beryx.jlink") version "4.1.0"
+    id("org.beryx.jlink") version "4.1.1"
 }
 
 group = "com.example"
