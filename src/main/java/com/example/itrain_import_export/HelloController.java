@@ -169,14 +169,13 @@ public class HelloController {
     @FXML
     private Button decoderCaptureToolButton;
 
-    /**
-     * Proton-Drive-Freigabe, unter der das Handbuch als PDF bereitliegt -
-     * dieselbe wie für das Programm und die Decoder-Vorlagen. Bewusst fest
-     * hinterlegt und nicht aus dem Update-Manifest gelesen: Das Handbuch
-     * soll sich auch dann aufrufen lassen, wenn die Update-Prüfung gerade
-     * nicht durchkommt.
-     */
-    private static final String MANUAL_URL = "https://drive.proton.me/urls/3HANAC7AX4#RTiaJCS9vvNM";
+    // Die Adresse des Handbuchs stand hier früher fest im Quelltext. Sie
+    // kommt jetzt zur Laufzeit aus dem Update-Manifest (siehe UpdateChecker)
+    // und wird nach dem ersten Abruf gemerkt, sodass das Handbuch auch ohne
+    // Netz erreichbar bleibt. Grund: Eine einkompilierte Freigabe-Adresse
+    // der Form ".../urls/TOKEN#SCHLUESSEL" liess Windows Defender die
+    // fertige .msi als "Trojan:Win32/MalUri.A!cl" blockieren - ausführlich
+    // in STATUS.md. An der Verteilung ändert sich dadurch nichts.
 
     /**
      * Pastellfarben der vier Schaltflächen (auf Wunsch des Nutzers). Die
@@ -855,7 +854,19 @@ public class HelloController {
     @FXML
     private void onOpenManual() {
         Stage stage = (Stage) tabPane.getScene().getWindow();
-        UpdateDialog.openDownloadPage(stage, MANUAL_URL);
+        UpdateChecker.resolveLinkAsync(UpdateChecker.Link.MANUAL, url -> {
+            if (url == null) {
+                // Beim allerersten Aufruf ohne Netz gibt es noch keine
+                // gemerkte Adresse - dann wenigstens sagen, woran es liegt,
+                // statt kommentarlos nichts zu tun.
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, i18n.t("update.linkUnavailable"));
+                alert.initOwner(stage);
+                alert.setHeaderText(null);
+                alert.showAndWait();
+                return;
+            }
+            UpdateDialog.openDownloadPage(stage, url);
+        });
     }
 
     @FXML

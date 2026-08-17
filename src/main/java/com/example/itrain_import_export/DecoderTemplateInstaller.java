@@ -50,12 +50,13 @@ public final class DecoderTemplateInstaller {
     /** Name der optionalen Versionsdatei im Archiv. */
     private static final String VERSION_ENTRY = "version.txt";
 
-    /**
-     * Proton-Drive-Freigabe, unter der die {@code decoder.zip} bereitliegt -
-     * dieselbe wie für das Programm selbst. Wird vom Knopf "Herunterladen"
-     * in der Eingangsrückfrage geöffnet.
-     */
-    private static final String DOWNLOAD_URL = "https://drive.proton.me/urls/3HANAC7AX4#RTiaJCS9vvNM";
+    // Die Adresse der decoder.zip stand hier früher fest im Quelltext. Sie
+    // kommt jetzt zur Laufzeit aus dem Update-Manifest (siehe UpdateChecker)
+    // und wird nach dem ersten Abruf gemerkt. Grund: Eine einkompilierte
+    // Freigabe-Adresse der Form ".../urls/TOKEN#SCHLUESSEL" liess Windows
+    // Defender die fertige .msi als "Trojan:Win32/MalUri.A!cl" blockieren -
+    // ausführlich in STATUS.md. Die Dateien liegen unverändert auf
+    // derselben Freigabe; nur die Adresse steht nicht mehr im Programm.
 
     private DecoderTemplateInstaller() {
     }
@@ -291,9 +292,25 @@ public final class DecoderTemplateInstaller {
      * keine Zugangsdaten.
      */
     private static void openDownloadPage(Stage owner, I18n i18n) {
+        // Adresse aus dem Manifest holen (beim ersten Mal über das Netz,
+        // danach aus dem gemerkten Wert - siehe UpdateChecker).
+        UpdateChecker.resolveLinkAsync(UpdateChecker.Link.DECODER, url -> {
+            if (url == null) {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, i18n.t("update.linkUnavailable"));
+                alert.initOwner(owner);
+                alert.setHeaderText(null);
+                applyThemeOnceShown(alert);
+                alert.showAndWait();
+                return;
+            }
+            browseTo(owner, i18n, url);
+        });
+    }
+
+    private static void browseTo(Stage owner, I18n i18n, String url) {
         try {
             if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                Desktop.getDesktop().browse(new URI(DOWNLOAD_URL));
+                Desktop.getDesktop().browse(new URI(url));
                 return;
             }
         } catch (Exception ex) {
@@ -302,7 +319,7 @@ public final class DecoderTemplateInstaller {
         // Kein Browser verfügbar: Adresse wenigstens anzeigen, damit sie von
         // Hand aufgerufen werden kann (gleiches Muster wie im UpdateDialog).
         Alert fallback = new Alert(Alert.AlertType.INFORMATION,
-                i18n.t("update.openLinkManually", DOWNLOAD_URL));
+                i18n.t("update.openLinkManually", url));
         fallback.initOwner(owner);
         fallback.setHeaderText(null);
         applyThemeOnceShown(fallback);

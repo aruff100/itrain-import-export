@@ -26,6 +26,8 @@ import java.util.regex.Pattern;
  * {
  *   "version": "1.12",
  *   "url": "https://drive.proton.me/urls/DEIN-FREIGABELINK",
+ *   "manualUrl": "https://drive.proton.me/urls/DEIN-FREIGABELINK",
+ *   "decoderUrl": "https://drive.proton.me/urls/DEIN-FREIGABELINK",
  *   "notes": "Kurze Beschreibung der Neuerungen (optional, darf fehlen)"
  * }
  * </pre>
@@ -34,6 +36,26 @@ import java.util.regex.Pattern;
  * am Proton-Drive-Freigabelink selbst ändert sich nichts, der Anwender lädt
  * die neue Version weiterhin ganz normal über den Browser herunter, die App
  * öffnet dafür nur den Link.
+ *
+ * <h2>Warum auch Handbuch und Decoder-Vorlagen hierüber laufen</h2>
+ *
+ * {@code "manualUrl"} und {@code "decoderUrl"} sind neu und beide optional -
+ * fehlen sie, wird ersatzweise {@code "url"} verwendet. Bis Version 2.0
+ * standen diese beiden Adressen FEST im Programm
+ * ({@code HelloController.MANUAL_URL}, {@code DecoderTemplateInstaller.DOWNLOAD_URL}).
+ * Windows Defender hat die fertige .msi deshalb nach einem Update als
+ * "Trojan:Win32/MalUri.A!cl" blockiert ("MalUri" = malicious URI): Eine
+ * einkompilierte Cloud-Freigabe der Form {@code .../urls/TOKEN#SCHLUESSEL} -
+ * Datei auf einer verschlüsselten Freigabe, Schlüssel im Anker der Adresse -
+ * ist genau das Muster, mit dem auch Schadsoftware ihre Nutzlast nachlädt.
+ * Blockiert wurde die Datei unabhängig davon, woher sie heruntergeladen
+ * wurde; ausführlich in STATUS.md.
+ * <p>
+ * An der Verteilung ändert das nichts - die Dateien liegen weiterhin auf
+ * derselben Proton-Drive-Freigabe. Im Programm selbst steht jetzt nur noch
+ * die Gist-Adresse, die Freigabe-Adresse kommt zur Laufzeit von dort.
+ * Damit Handbuch und Vorlagen auch ohne Netz erreichbar bleiben, wird die
+ * zuletzt gelesene Adresse gemerkt (siehe {@link AppSettings#getCachedManualUrl()}).
  */
 public final class UpdateChecker {
 
@@ -101,6 +123,49 @@ public final class UpdateChecker {
         thread.start();
     }
 
+    /** Welche Adresse aus dem Manifest gebraucht wird, siehe {@link #resolveLinkAsync}. */
+    public enum Link {
+        /** Handbuch als PDF (Menü Hilfe → "Handbuch"). */
+        MANUAL,
+        /** Sammelarchiv der Decoder-Vorlagen (Knopf "Herunterladen"). */
+        DECODER
+    }
+
+    /**
+     * Ermittelt die Adresse für Handbuch bzw. Decoder-Vorlagen und übergibt
+     * sie an {@code onResolved} - immer auf dem JavaFX-Anwendungs-Thread.
+     * Bei {@code null} konnte keine Adresse ermittelt werden; der Aufrufer
+     * sollte dann eine Meldung zeigen statt kommentarlos nichts zu tun.
+     * <p>
+     * Zwei Wege, in dieser Reihenfolge:
+     * <ol>
+     * <li>Ist eine Adresse aus einem früheren Abruf gemerkt, wird sie SOFORT
+     * verwendet - kein Warten aufs Netz, funktioniert auch offline.</li>
+     * <li>Sonst wird das Manifest im Hintergrund geholt; der Abruf legt die
+     * Adressen nebenbei für künftige Aufrufe ab (siehe {@link #checkNow}).</li>
+     * </ol>
+     * Beim allerersten Aufruf auf einem frischen Rechner wird also einmal
+     * das Netz gebraucht - danach nie wieder zwingend.
+     */
+    public static void resolveLinkAsync(Link link, Consumer<String> onResolved) {
+        AppSettings settings = AppSettings.getInstance();
+        String cached = link == Link.MANUAL ? settings.getCachedManualUrl() : settings.getCachedDecoderUrl();
+        if (cached != null && !cached.isBlank()) {
+            Platform.runLater(() -> onResolved.accept(cached));
+            return;
+        }
+        checkAsync(result -> {
+            String resolved = link == Link.MANUAL
+                    ? settings.getCachedManualUrl() : settings.getCachedDecoderUrl();
+            if ((resolved == null || resolved.isBlank()) && result.success) {
+                // Manifest gelesen, aber ohne verwertbare Adresse - dann
+                // wenigstens die allgemeine Download-Adresse anbieten.
+                resolved = result.downloadUrl;
+            }
+            onResolved.accept(resolved != null && !resolved.isBlank() ? resolved : null);
+        });
+    }
+
     /** Blockierende Prüfung - nur aus einem Hintergrund-Thread aufrufen, siehe {@link #checkAsync}. */
     private static UpdateResult checkNow() {
         String currentVersion = AppInfo.getVersion();
@@ -129,6 +194,17 @@ public final class UpdateChecker {
             if (latestVersion == null || downloadUrl == null) {
                 return UpdateResult.error(currentVersion, "Ungültiges Antwortformat (version/url fehlen)");
             }
+
+            // Adressen für Handbuch und Decoder-Vorlagen merken, damit beide
+            // auch dann erreichbar bleiben, wenn das Manifest später einmal
+            // nicht abrufbar ist (siehe Klassenkommentar). Beide Felder sind
+            // optional - fehlen sie, gilt die allgemeine Download-Adresse.
+            String manualUrl = extractJsonString(body, "manualUrl");
+            String decoderUrl = extractJsonString(body, "decoderUrl");
+            AppSettings settings = AppSettings.getInstance();
+            settings.setCachedManualUrl(manualUrl != null ? manualUrl : downloadUrl);
+            settings.setCachedDecoderUrl(decoderUrl != null ? decoderUrl : downloadUrl);
+
             return UpdateResult.ok(currentVersion, latestVersion, downloadUrl, notes);
         } catch (Exception ex) {
             return UpdateResult.error(currentVersion, ex.getMessage() != null ? ex.getMessage() : ex.toString());

@@ -30,6 +30,8 @@ public final class AppSettings {
     private static final String KEY_DECODER_PACK_INSTALLED = "decoderPackInstalled";
     private static final String KEY_PREFERRED_SCREEN = "preferredScreen";
     private static final String KEY_DIALOG_OFFSET = "dialogOffset";
+    private static final String KEY_CACHED_MANUAL_URL = "cachedManualUrl";
+    private static final String KEY_CACHED_DECODER_URL = "cachedDecoderUrl";
 
     /**
      * Vorsatz für die gemerkte Fensterlage. Je Fenster ein eigener Eintrag
@@ -227,6 +229,42 @@ public final class AppSettings {
      * {@link DecoderTemplateInstaller}). Fehlt sie im Archiv, bleibt der Wert
      * leer; angezeigt wird dann nur das Installationsdatum.
      */
+    /**
+     * Zuletzt aus dem Update-Manifest gelesene Adresse des Handbuchs, oder
+     * {@code null}, solange noch nie eine abgerufen wurde.
+     * <p>
+     * <b>Warum gemerkt:</b> Die Adressen für Handbuch und Decoder-Vorlagen
+     * stehen bewusst NICHT mehr fest im Programm, sondern im Manifest
+     * (siehe {@link UpdateChecker}) - eine Freigabe-Adresse im Programm
+     * liess Windows Defender die fertige .msi blockieren. Damit Handbuch und
+     * Vorlagen trotzdem erreichbar bleiben, wenn das Manifest gerade nicht
+     * abrufbar ist, wird die zuletzt gelesene Adresse hier behalten.
+     */
+    public String getCachedManualUrl() {
+        return prefs.get(KEY_CACHED_MANUAL_URL, null);
+    }
+
+    public void setCachedManualUrl(String url) {
+        if (url == null || url.isBlank()) {
+            prefs.remove(KEY_CACHED_MANUAL_URL);
+        } else {
+            prefs.put(KEY_CACHED_MANUAL_URL, url);
+        }
+    }
+
+    /** Zuletzt aus dem Update-Manifest gelesene Adresse der Decoder-Vorlagen, siehe {@link #getCachedManualUrl()}. */
+    public String getCachedDecoderUrl() {
+        return prefs.get(KEY_CACHED_DECODER_URL, null);
+    }
+
+    public void setCachedDecoderUrl(String url) {
+        if (url == null || url.isBlank()) {
+            prefs.remove(KEY_CACHED_DECODER_URL);
+        } else {
+            prefs.put(KEY_CACHED_DECODER_URL, url);
+        }
+    }
+
     public String getDecoderPackVersion() {
         return prefs.get(KEY_DECODER_PACK_VERSION, null);
     }
