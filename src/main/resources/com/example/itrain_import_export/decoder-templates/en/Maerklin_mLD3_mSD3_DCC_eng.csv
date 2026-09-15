@@ -1,0 +1,354 @@
+﻿"Kategorie";"Typ";"Name";"Beschreibung";"XML"
+"decoder-configuration";"configuration";"Maerklin mLD3 / mSD3 (DCC)";"Maerklin decoders mLD3 and mSD3 - CV table from the supplementary instructions 07/2016, pages 6-10, column 'DCC value'. The indexed CV ranges 257-512 (pages 11-13, switched via CV 31/32) are not included";"<configuration count=""117"">
+  <parameter nr=""1"">
+    <description>Address (CV 29/bit 5 = 0)</description>
+  </parameter>
+  <parameter nr=""2"">
+    <description>Minimum speed</description>
+  </parameter>
+  <parameter nr=""3"">
+    <description>Acceleration delay</description>
+  </parameter>
+  <parameter nr=""4"">
+    <description>Braking delay</description>
+  </parameter>
+  <parameter nr=""5"">
+    <description>Maximum speed</description>
+  </parameter>
+  <parameter nr=""7"" value=""77"">
+    <description>Calibration run / version number</description>
+  </parameter>
+  <parameter nr=""8"" value=""8"">
+    <description>Factory reset / manufacturer ID</description>
+  </parameter>
+  <parameter nr=""13"">
+    <description>Functions F1 - F8 in analogue operation (no sounds)</description>
+  </parameter>
+  <parameter nr=""14"">
+    <description>Functions F9 - F15 and lights in analogue operation (no sounds)</description>
+  </parameter>
+  <parameter nr=""17"">
+    <description>Extended address (upper part, CV 29 bit 5 = 1)</description>
+  </parameter>
+  <parameter nr=""18"">
+    <description>Extended address (lower part, CV 29 bit 5 = 1)</description>
+  </parameter>
+  <parameter nr=""19"">
+    <description>Consist address</description>
+  </parameter>
+  <parameter nr=""21"">
+    <description>Functions F1 - F8 in a consist</description>
+  </parameter>
+  <parameter nr=""22"">
+    <description>Functions F9 - F15 and lights in a consist</description>
+  </parameter>
+  <parameter nr=""27"">
+    <description>Bit 4 = normal braking behaviour Bit 5 = inverse braking behaviour</description>
+  </parameter>
+  <parameter nr=""29"">
+    <description>Bit 0: reverse direction of travel Bit 1: number of speed steps 14 or 28/128 Bit 2: DCC operation with braking section Bit 5: address range 7 bit / 14 bit</description>
+  </parameter>
+  <parameter nr=""31"">
+    <description>Topics (selection for CV 257 to 512)</description>
+  </parameter>
+  <parameter nr=""32"">
+    <description>Page (selection for CV 257 to 512)</description>
+  </parameter>
+  <parameter nr=""33"">
+    <description>Mapping: read row</description>
+  </parameter>
+  <parameter nr=""34"">
+    <description>Mapping: trigger</description>
+  </parameter>
+  <parameter nr=""35"">
+    <description>Mapping: condition</description>
+  </parameter>
+  <parameter nr=""36"">
+    <description>Mapping: function</description>
+  </parameter>
+  <parameter nr=""37"">
+    <description>Mapping: write row</description>
+  </parameter>
+  <parameter nr=""47"">
+    <description>Motor control in analogue mode, 1 = on, 0 = off</description>
+  </parameter>
+  <parameter nr=""48"">
+    <description>Motor control: controller selection 0 = classic 1 = auto PI 2 = PID controller</description>
+  </parameter>
+  <parameter nr=""50"">
+    <description>Alternative formats Bit 0: analogue AC Bit 1: analogue DC Bit 2: MM Bit 3: mfx Bit 4: mfx+</description>
+  </parameter>
+  <parameter nr=""51"">
+    <description>Swap connections Bit 0: motor connection Bit 1: light connection Bit 2: track connection Bit 3: AUX 3, 0 = amplified, 8 = logic Bit 4: AUX 4, 0 = amplified, 8 = logic</description>
+  </parameter>
+  <parameter nr=""52"">
+    <description>Setting for the motor output 0 = function outputs AUX 5 &amp; 6 1 = Softdrive Sinus 2 = unregulated 3 = high-performance drive C90 4 = coreless motor 5 = DC soft 6 = DC hard 7 = DC gauge 1</description>
+  </parameter>
+  <parameter nr=""53"" value=""40"">
+    <description>Motor control - control reference</description>
+  </parameter>
+  <parameter nr=""54"" value=""80"">
+    <description>Motor control - controller K</description>
+  </parameter>
+  <parameter nr=""55"" value=""60"">
+    <description>Motor control - controller I</description>
+  </parameter>
+  <parameter nr=""56"">
+    <description>Motor control - control influence</description>
+  </parameter>
+  <parameter nr=""57"">
+    <description>Sound interval of the steam chuffs at speed step 1 (0 = with wheel sensor)</description>
+  </parameter>
+  <parameter nr=""58"">
+    <description>Sound interval of the steam chuffs at speed step &gt; 1 (0 = with wheel sensor)</description>
+  </parameter>
+  <parameter nr=""60"">
+    <description>Multiple station announcements Bit 0 - 3 = number of stations Bit 4 = the last station reverses the order Bit 5 = the loco direction determines the order Bit 6 = order default setting</description>
+  </parameter>
+  <parameter nr=""61"">
+    <description>Random sound interval min.</description>
+  </parameter>
+  <parameter nr=""62"">
+    <description>Random sound interval max.</description>
+  </parameter>
+  <parameter nr=""63"">
+    <description>Overall volume</description>
+  </parameter>
+  <parameter nr=""64"">
+    <description>Threshold for brake squeal</description>
+  </parameter>
+  <parameter nr=""66"">
+    <description>Forward trim (value / 128 = factor by which the speed step is multiplied)</description>
+  </parameter>
+  <parameter nr=""67"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""68"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""69"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""70"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""71"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""72"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""73"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""74"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""75"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""76"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""77"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""78"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""79"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""80"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""81"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""82"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""83"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""84"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""85"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""86"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""87"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""88"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""89"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""90"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""91"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""92"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""93"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""94"">
+    <description>Speed table / speed curve</description>
+  </parameter>
+  <parameter nr=""95"">
+    <description>Reverse trim (value / 128 = factor by which the speed step is multiplied)</description>
+  </parameter>
+  <parameter nr=""112"">
+    <description>Front light mode</description>
+  </parameter>
+  <parameter nr=""113"">
+    <description>Front light dimmer, 0 = off</description>
+  </parameter>
+  <parameter nr=""114"">
+    <description>Front light period, e.g. flashing frequency</description>
+  </parameter>
+  <parameter nr=""115"">
+    <description>Front light delay, switch-on/switch-off delay</description>
+  </parameter>
+  <parameter nr=""116"">
+    <description>Rear light mode</description>
+  </parameter>
+  <parameter nr=""117"">
+    <description>Rear light dimmer</description>
+  </parameter>
+  <parameter nr=""118"">
+    <description>Rear light period</description>
+  </parameter>
+  <parameter nr=""119"">
+    <description>Rear light delay</description>
+  </parameter>
+  <parameter nr=""120"">
+    <description>AUX 1 mode</description>
+  </parameter>
+  <parameter nr=""121"">
+    <description>AUX 1 dimmer</description>
+  </parameter>
+  <parameter nr=""122"">
+    <description>AUX 1 period</description>
+  </parameter>
+  <parameter nr=""123"">
+    <description>AUX 1 delay</description>
+  </parameter>
+  <parameter nr=""124"">
+    <description>AUX 2 mode</description>
+  </parameter>
+  <parameter nr=""125"">
+    <description>AUX 2 dimmer</description>
+  </parameter>
+  <parameter nr=""126"">
+    <description>AUX 2 period</description>
+  </parameter>
+  <parameter nr=""127"">
+    <description>AUX 2 delay</description>
+  </parameter>
+  <parameter nr=""128"">
+    <description>AUX 3 mode</description>
+  </parameter>
+  <parameter nr=""129"">
+    <description>AUX 3 dimmer</description>
+  </parameter>
+  <parameter nr=""130"">
+    <description>AUX 3 period</description>
+  </parameter>
+  <parameter nr=""131"">
+    <description>AUX 3 delay</description>
+  </parameter>
+  <parameter nr=""132"">
+    <description>AUX 4 mode</description>
+  </parameter>
+  <parameter nr=""133"">
+    <description>AUX 4 dimmer</description>
+  </parameter>
+  <parameter nr=""134"">
+    <description>AUX 4 period</description>
+  </parameter>
+  <parameter nr=""135"">
+    <description>AUX 4 delay</description>
+  </parameter>
+  <parameter nr=""136"">
+    <description>AUX 5 mode</description>
+  </parameter>
+  <parameter nr=""137"">
+    <description>AUX 5 dimmer</description>
+  </parameter>
+  <parameter nr=""138"">
+    <description>AUX 5 period</description>
+  </parameter>
+  <parameter nr=""139"">
+    <description>AUX 5 delay</description>
+  </parameter>
+  <parameter nr=""140"">
+    <description>AUX 6 mode</description>
+  </parameter>
+  <parameter nr=""141"">
+    <description>AUX 6 dimmer</description>
+  </parameter>
+  <parameter nr=""142"">
+    <description>AUX 6 period</description>
+  </parameter>
+  <parameter nr=""143"">
+    <description>AUX 6 delay</description>
+  </parameter>
+  <parameter nr=""145"">
+    <description>Shunting mode factor</description>
+  </parameter>
+  <parameter nr=""146"">
+    <description>Volume of the brake squeal</description>
+  </parameter>
+  <parameter nr=""165"">
+    <description>Motor control, controller D</description>
+  </parameter>
+  <parameter nr=""166"">
+    <description>Motor control, slow limit, 0 = no ""slow"" range, 1 - 255 = upper limit of ""slow""</description>
+  </parameter>
+  <parameter nr=""167"">
+    <description>Motor control, slow K, 0 = no proportional component</description>
+  </parameter>
+  <parameter nr=""168"">
+    <description>Motor control, slow I, 0 = no integral component</description>
+  </parameter>
+  <parameter nr=""169"">
+    <description>Motor control, slow D, 0 = no derivative component</description>
+  </parameter>
+  <parameter nr=""170"">
+    <description>Motor control, PWM start, 0 = max., 255 = min.</description>
+  </parameter>
+  <parameter nr=""171"" value=""16"">
+    <description>Motor control, back-EMF maximum</description>
+  </parameter>
+  <parameter nr=""172"">
+    <description>Motor control, PWM offset, 0 = no correction</description>
+  </parameter>
+  <parameter nr=""173"">
+    <description>State memory Bit 0 = function states Bit 1 = speeds Bit 2 = start after reset with/without ABV</description>
+  </parameter>
+  <parameter nr=""174"">
+    <description>State memory direction of travel</description>
+  </parameter>
+  <parameter nr=""176"">
+    <description>Analogue DC minimum speed</description>
+  </parameter>
+  <parameter nr=""177"">
+    <description>Analogue DC maximum speed</description>
+  </parameter>
+  <parameter nr=""178"">
+    <description>Analogue AC minimum speed</description>
+  </parameter>
+  <parameter nr=""179"">
+    <description>Analogue AC maximum speed</description>
+  </parameter>
+</configuration>"

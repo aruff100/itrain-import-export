@@ -4,10 +4,12 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -32,6 +34,14 @@ public final class AboutDialog {
 
         Label nameLabel = new Label(APP_NAME);
         nameLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+        // Programm-Icon vor dem Namen, in Textgroesse - dieselbe app-icon.png
+        // wie ueberall sonst (siehe HelloController.loadIcon).
+        ImageView nameIcon = HelloController.loadIcon("app-icon.png", 16);
+        if (nameIcon != null) {
+            nameLabel.setGraphic(nameIcon);
+            nameLabel.setContentDisplay(ContentDisplay.LEFT);
+            nameLabel.setGraphicTextGap(6);
+        }
         Label authorLabel = new Label(AUTHOR);
         Hyperlink contactLink = new Hyperlink(i18n.t("about.contactLabel"));
         contactLink.setOnAction(e -> openContactMail());

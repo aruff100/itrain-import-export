@@ -45,11 +45,22 @@ bin/
 ### Lokale Werkzeug-Einstellungen (kein Projekt-Quellcode) ###
 
 ### Lokale Arbeits-/Hilfsdateien (kein Projekt-Quellcode) ###
-Hilfetext-bearbeiten.txt
+### Hilfetext-*.txt deckt auch die beiden veralteten Duplikate im
+### Projektstamm (Decoder/Systeme) ab - die eigentlichen, gepflegten
+### Bearbeitungsdateien liegen seit dieser Version unter hilfetexte/.
+Hilfetext-*.txt
+hilfetexte/
 iTrain-ImportExport-Einstellungen-zuruecksetzen-*.reg
 iTrain-ImportExport-Einstellungen-zuruecksetzen-*.sh
 iTrain-ImportExport-Einstellungen-zuruecksetzen-*.command
 LIESMICH-*.txt
+Readme_LIESMICH-*.txt
+
+### Lokale Test-/Protokolldateien aus BiDiB-/ECoS-Sitzungen (kein
+### Projekt-Quellcode, analog zu decoder/ oben) ###
+bidib_*_log.txt
+bidib/
+ecos/
 
 ### Sicherungskopien des Handbuch-Generators (tools/manual_build.py) ###
 *.odt.bak
@@ -57,9 +68,13 @@ LIESMICH-*.txt
 ### Python-Zwischenstaende der Hilfswerkzeuge ###
 tools/__pycache__/
 
-### Decoder-Vorlagen und das daraus gepackte Archiv gehen ueber die
-### Proton-Drive-Freigabe an die Anwender, nicht ueber das Repository.
+### Seit 2.5 liegen die mitgelieferten Decoder-Vorlagen als Ressourcen
+### unter src/main/resources/.../decoder-templates/<sprache>/ und sind
+### damit versioniert. decoder/ im Projektstamm ist nur noch Arbeitsablage
+### (eigene Testvorlagen); decoder_internet/ enthaelt die Aktualisierungen,
+### die ueber die Proton-Drive-Freigabe bereitgestellt werden.
 decoder/
+decoder_internet/
 decoder.zip
 
 ### -------------------------------------------------------------------

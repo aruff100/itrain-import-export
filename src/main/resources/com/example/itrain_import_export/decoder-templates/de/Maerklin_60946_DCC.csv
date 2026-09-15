@@ -1,0 +1,137 @@
+﻿"Kategorie";"Typ";"Name";"Beschreibung";"XML"
+"decoder-configuration";"configuration";"Maerklin 60946 (DCC)";"Maerklin Nachruestdecoder 60946 - CV-Tabelle DCC aus der Anleitung (Art. 60945/60946/60947), Seiten 18-22; Vorgabewerte fuer Artikel 60946";"<configuration count=""48"">
+  <parameter nr=""1"" value=""3"" type=""Hauptadresse"">
+    <description>Kurze Adresse 1 - 127 Wenn CV29 / Bit 5 = 0</description>
+  </parameter>
+  <parameter nr=""2"" value=""5"" type=""Minimalgeschwindigkeit (Vmin)"">
+    <description>Wert muss kleiner sein als Vmax, CV 5. (siehe CV 67)</description>
+  </parameter>
+  <parameter nr=""3"" value=""25"" type=""Anfahrverzögerung (AV)"">
+    <description>CV-Wert multipliziert mit 0,9 ergibt die Zeit vom Stillstand bis Maximalgeschwin- digkeit.</description>
+  </parameter>
+  <parameter nr=""4"" value=""16"" type=""Bremsverzögerung (BV)"">
+    <description>CV-Wert multipliziert mit 0,9 ergibt die Zeit von Maximalgeschwindigkeit bis Stillstand.</description>
+  </parameter>
+  <parameter nr=""5"" value=""255"" type=""Maximalgeschwindigkeit (Vmax)"">
+    <description>Geschwindigkeit bei höchster Fahrstufe. Wert muss größer sein als Vmin, CV 2. (siehe auch CV 94)</description>
+  </parameter>
+  <parameter nr=""7"" type=""Hersteller Versionsnummer (Softwareversion)"">
+    <description>Nur lesen</description>
+  </parameter>
+  <parameter nr=""8"" value=""131"" type=""Hersteller Kennung / ID Decoder-Reset (Default- oder Werkseinstellung)"">
+    <description>Nur lesen Wert kann nicht gelesen werden</description>
+  </parameter>
+  <parameter nr=""13"" value=""0"" type=""Funktionen F1 - F8 bei alternativem Gleissignal"">
+    <description>0 = Fkt. MM oder Analog aus 1 = Fkt. MM oder Analog ein Bit 7-0 [ F8 F7 F6 F5 F4 F3 F2 F1 ]</description>
+  </parameter>
+  <parameter nr=""14"" value=""1"" type=""Funktionen FL, F9 - F15 bei alternativem Gleissignal"">
+    <description>0 = Fkt. MM oder Analog aus 1 = Fkt. MM oder Analog ein Bit 7-0 [ F15 F14 F13 F12 F11 F10 F9 FL ]</description>
+  </parameter>
+  <parameter nr=""17"" value=""192"" type=""Erweiterte Adresse, höherwertige Byte"">
+    <description>Lange Adresse 1 - 10239 (128) Wenn CV29 / Bit 5 = 1</description>
+  </parameter>
+  <parameter nr=""18"" value=""128"" type=""Erweiterte Adresse, niederwertige Byte""/>
+  <parameter nr=""19"" value=""0"" type=""Traktionsadresse"">
+    <description>1 - 127 = Traktionsadresse 0 = keine Traktion +128, Bit 7 = Richtung umpolen bei Traktion</description>
+  </parameter>
+  <parameter nr=""21"" value=""0"" type=""Funktionen F1 - F8 bei Traktion"">
+    <description>0 = Fkt. # nur für Lokadresse 1 = Fkt. # auch für Traktionsadresse Bit 7-0 = [ F8 F7 F6 F5 F4 F3 F2 F1 ]</description>
+  </parameter>
+  <parameter nr=""22"" value=""0"" type=""Funktionen FL, F9 - F15 bei Traktion"">
+    <description>0 = Fkt. # nur für Lokadresse 1 = Fkt. # auch für Traktionsadresse Bit 7-0 = [ F15 F14 F13 F12 F11 F10 F9 FL ]</description>
+  </parameter>
+  <parameter nr=""27"" value=""48"" type=""Bremsmodus: Bit 0 - 3 : immer 0, Bit 4 : DC, Polarität entgegen der Fahrtrichtung Bit 5 : DC, Polarität mit der Fahrtrichtung Bit 6 - 7 : immer 0"">
+    <description>Bremsen richtungsabhängig: - 16 normales DCC-Verhalten - 32 inverses DCC-Verhalten Bremsen richtungsunabhängig: - 48 : fx/mfx - Verhalten</description>
+  </parameter>
+  <parameter nr=""29"" value=""6"" type=""Konfiguration: Bit 0 : Richtungsverhalten der Lok umkehren 0 = Richtung normal, 1 = Richtung umkehren Bit 1 : Fahrstufen 14 oder 28/128 wählen 0 = 14 Fahrstufen, 1 = 28/128 Fahrstufen Bit 2 : Analogbetrieb aus-/einschalten 0 = Analog aus, 1 = Analog ein Bit 5 : Kurze / Lange Adresse wählen 0 = kurze Adresse, 1 = lange Adresse"">
+    <description>Das Richtungsverhalten bezieht sich auf die Fahrtrichtung und auf das Licht. Die Anzahl der Fahrstufen und das Lichtbit sind vom Fahrgerät abhängig. Als Lokadresse entweder die kurze Hauptadresse oder die lange erweiterte Adresse.</description>
+  </parameter>
+  <parameter nr=""50"" value=""15"" type=""Alternative Formate: Bit 0 : Analog AC aus = 0 / Analog AC ein = 1 Bit 1 : Analog DC aus = 0 / Analog DC ein = 1 Bit 2 : fx (MM) aus = 0 / fx (MM) ein = 1 Bit 3 : mfx aus = 0 / mfx ein = 1"">
+    <description>Hinweis: DCC kann sich selber nicht deaktivieren.</description>
+  </parameter>
+  <parameter nr=""52"" value=""3"" type=""Motortyp ... (Bit 0-4) ... Aux - Funktionsausgänge 5 und 6 ... Motor - Softdrive Sinus ... Motor - ungeregelt ... Motor - Hochleistungsantrieb C90 ... Motor - Glockenanker ... Motor - Gleichstrom DC weich ... Motor - Gleichstrom DC hart ... Motor - Gleichstrom DC Spur1 auch Analog geregelt ... (Bit 5) ... 0 : mit Analog geregelt ... 1 : ohne Analog geregelt"">
+    <description>Auswahl eines Motortyps zur weiteren Einstellung für die Motorregelung oder Auswahl zusätzlicher Funktionsausgänge bei einem H0-Decoder. Funktionsweise der Motorausgänge als weitere Auxe, siehe extra Tabelle.</description>
+  </parameter>
+  <parameter nr=""53"" value=""150"" type=""Motorregelung - Regelreferenz"">
+    <description>Absolutes Vmax für Motorkennlinie</description>
+  </parameter>
+  <parameter nr=""54"" value=""64"" type=""Motorregelung - Regelparameter K"">
+    <description>Regelanteil P</description>
+  </parameter>
+  <parameter nr=""55"" value=""64"" type=""Motorregelung - Regelparameter I"">
+    <description>Regelanteil I</description>
+  </parameter>
+  <parameter nr=""56"" value=""24"" type=""Motorregelung - Regeleinfluss"">
+    <description>0 = ungeregelte PWM für Sinus (siehe auch CV 52 Motortyp)</description>
+  </parameter>
+  <parameter nr=""57"" value=""46"" type=""Dampflok Soundabstand der Dampfstöße bei Fahrstufe 1""/>
+  <parameter nr=""58"" value=""95"" type=""Dampflok Soundabstand der Dampfstöße ab Fahrstufe 2""/>
+  <parameter nr=""63"" value=""255"" type=""Lautstärke gesamt"">
+    <description>Gesamtlautstärke für alle Sounds. 0 = keine Sounds</description>
+  </parameter>
+  <parameter nr=""64"" value=""55"" type=""Bremsenquietschen Schwelle"">
+    <description>Das Quietschen beginnt, je größer der Wert ist um so früher, je kleiner der Wert ist um so später. Ist der Wert zu klein, wird kein Quietschen ausgelöst.</description>
+  </parameter>
+  <parameter nr=""66"" value=""128"" type=""Vorwärts Trimm"">
+    <description>CV-Wert dividiert durch 128 ergibt den Faktor, mit dem die Fahrstufe bei Vorwärtsfahrt multipliziert wird.</description>
+  </parameter>
+  <parameter nr=""67"" type=""Geschwindigkeitstabelle Fahrstufe 1 (Vmin) bis Geschwindigkeitstabelle Fahrstufe 28 (Vmax)""/>
+  <parameter nr=""94"" type=""Geschwindigkeitstabelle Fahrstufe 1 (Vmin) bis Geschwindigkeitstabelle Fahrstufe 28 (Vmax)""/>
+  <parameter nr=""95"" value=""128"" type=""Rückwärts Trimm"">
+    <description>CV-Wert dividiert durch 128 ergibt den Faktor, mit dem die Fahrstufe bei Rückwärtsfahrt multipliziert wird.</description>
+  </parameter>
+  <parameter nr=""112"" value=""1"" type=""physikalischer Ausgang (Mapping): Licht vorne Modus physikalischer Ausgang (Mapping): Licht vorne Dimmer physikalischer Ausgang (Mapping): Licht vorne Periode"">
+    <description>Siehe Tabelle*</description>
+  </parameter>
+  <parameter nr=""113"" value=""255"" type=""physikalischer Ausgang (Mapping): Licht vorne Modus physikalischer Ausgang (Mapping): Licht vorne Dimmer physikalischer Ausgang (Mapping): Licht vorne Periode"">
+    <description>Siehe Tabelle*</description>
+  </parameter>
+  <parameter nr=""114"" value=""20"" type=""physikalischer Ausgang (Mapping): Licht vorne Modus physikalischer Ausgang (Mapping): Licht vorne Dimmer physikalischer Ausgang (Mapping): Licht vorne Periode"">
+    <description>Siehe Tabelle* - fortlaufend bis 135PoM: physikalischer Ausgang (Mapping): Licht hinten , Aux 1 bis Aux 6 (jeweils im 3er Block)</description>
+  </parameter>
+  <parameter nr=""137"" value=""128"" type=""Rangiergang"">
+    <description>128 = 50% Fahrstufe, 64 = 25% Fahrstufe</description>
+  </parameter>
+  <parameter nr=""138"" value=""180"" type=""Sound Ausgang: Bremsenquietschen (Lautstärke) Sound Ausgang: Lautstärke Fahrgeräusch Sound Ausgang: Lautstärke Sound 1 bis Sound Ausgang: Lautstärke Sound 16"">
+    <description>0 = kein Sound</description>
+  </parameter>
+  <parameter nr=""139"" value=""180"" type=""Sound Ausgang: Bremsenquietschen (Lautstärke) Sound Ausgang: Lautstärke Fahrgeräusch Sound Ausgang: Lautstärke Sound 1 bis Sound Ausgang: Lautstärke Sound 16"">
+    <description>0 = kein Sound</description>
+  </parameter>
+  <parameter nr=""140"" value=""180"" type=""Sound Ausgang: Bremsenquietschen (Lautstärke) Sound Ausgang: Lautstärke Fahrgeräusch Sound Ausgang: Lautstärke Sound 1 bis Sound Ausgang: Lautstärke Sound 16"">
+    <description>0 = kein Sound</description>
+  </parameter>
+  <parameter nr=""155"" value=""180"" type=""Sound Ausgang: Bremsenquietschen (Lautstärke) Sound Ausgang: Lautstärke Fahrgeräusch Sound Ausgang: Lautstärke Sound 1 bis Sound Ausgang: Lautstärke Sound 16"">
+    <description>0 = kein Sound</description>
+  </parameter>
+  <parameter nr=""173"" value=""7"" type=""Verschiedene Funktionszustände speichern: Bit 0 : Funktionszustände speichern Bit 1 : Geschwindigkeit speichern Bit 2 : Nach Reset mit/ohne ABV anfahren Bit 3 - 7 : immer 0,"">
+    <description>0 = nicht speichern, Wert = speichern, einzelne Werte müssen addiert werden.</description>
+  </parameter>
+  <parameter nr=""174"" value=""1"" type=""Verschiedene Zustände speichern: Bit 0 : Fahrtrichtung speichern Bit 1 - 7 : immer 0"">
+    <description>0 = nicht speichern 1 = speichern</description>
+  </parameter>
+  <parameter nr=""176"" value=""100"" type=""Vmin Analog DC"">
+    <description>muss kleiner CV 177 sein</description>
+  </parameter>
+  <parameter nr=""177"" value=""255"" type=""Vmax Analog DC"">
+    <description>muss größer CV 176 sein</description>
+  </parameter>
+  <parameter nr=""178"" value=""100"" type=""Vmin Analog AC"">
+    <description>muss kleiner CV 179 sein</description>
+  </parameter>
+  <parameter nr=""179"" type=""Vmax Analog AC"">
+    <description>muss größer CV 178 sein</description>
+  </parameter>
+  <parameter nr=""257"" value=""1"" type=""Funktionszuordnung (Mapping): Funktion FL vorw.A Funktionszuordnung (Mapping): Funktion FL vorw.A Funktionszuordnung (Mapping): Funktion FL vorw.A Funktionszuordnung (Mapping): Funktion FL vorw.A"">
+    <description>Siehe Tabelle*</description>
+  </parameter>
+  <parameter nr=""258"" value=""0"" type=""Funktionszuordnung (Mapping): Funktion FL vorw.A Funktionszuordnung (Mapping): Funktion FL vorw.A Funktionszuordnung (Mapping): Funktion FL vorw.A Funktionszuordnung (Mapping): Funktion FL vorw.A"">
+    <description>Siehe Tabelle*</description>
+  </parameter>
+  <parameter nr=""259"" value=""0"" type=""Funktionszuordnung (Mapping): Funktion FL vorw.A Funktionszuordnung (Mapping): Funktion FL vorw.A Funktionszuordnung (Mapping): Funktion FL vorw.A Funktionszuordnung (Mapping): Funktion FL vorw.A"">
+    <description>Siehe Tabelle*</description>
+  </parameter>
+  <parameter nr=""260"" value=""0"" type=""Funktionszuordnung (Mapping): Funktion FL vorw.A Funktionszuordnung (Mapping): Funktion FL vorw.A Funktionszuordnung (Mapping): Funktion FL vorw.A Funktionszuordnung (Mapping): Funktion FL vorw.A"">
+    <description>Siehe Tabelle* - fortlaufend bis 445: Funktionszuordnung (Mapping): Fahrt vorwärts</description>
+  </parameter>
+</configuration>"

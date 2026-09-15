@@ -9,10 +9,15 @@ import javafx.stage.Stage;
 
 import java.awt.Desktop;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Bereitet den Versand einer Decoder-Vorlage per E-Mail vor.
@@ -50,8 +55,24 @@ public final class MailSender {
      * @param file die gespeicherte Vorlagen-Datei
      * @param templateName Bezeichnung der Vorlage (steht in Betreff und Text)
      */
-    public static void sendDecoderTemplate(Stage owner, File file, String templateName) {
+    public static void sendDecoderTemplate(Stage owner, File templateFile, String templateName) {
         I18n i18n = I18n.getInstance();
+
+        // Seit 2.5 wird nicht die .csv selbst angehängt, sondern eine .zip
+        // mit der .csv darin - Mailfilter und Foren nehmen .csv oft nicht
+        // an. Die Vorlage im Decoder-Ordner bleibt unverändert die .csv;
+        // die .zip entsteht daneben im Export-Ordner (oder, falls keiner
+        // eingestellt ist, im temporären Ordner des Systems).
+        File file;
+        try {
+            file = zipForSending(templateFile);
+        } catch (IOException ex) {
+            Alert failed = new Alert(Alert.AlertType.ERROR, String.valueOf(ex.getMessage()));
+            failed.initOwner(owner);
+            failed.setHeaderText(i18n.t("editor.exportErrorTitle"));
+            failed.showAndWait();
+            return;
+        }
 
         // Dateipfad in die Zwischenablage - damit lässt er sich im
         // Anhang-Dialog des Mailprogramms direkt einfügen.
@@ -76,6 +97,28 @@ public final class MailSender {
         done.getDialogPane().sceneProperty().addListener((obs, oldScene, newScene) ->
                 ThemeManager.apply(newScene, AppSettings.getInstance().getTheme()));
         done.showAndWait();
+    }
+
+    /**
+     * Packt die Vorlage als {@code <name>.zip} mit genau {@code <name>.csv}
+     * darin. Ablage im Export-Ordner, sonst im temporären Ordner - nicht im
+     * Decoder-Ordner, der soll nur die Vorlagen selbst enthalten.
+     */
+    private static File zipForSending(File templateFile) throws IOException {
+        String exportDir = AppSettings.getInstance().getExportDirectory();
+        File folder = exportDir != null && new File(exportDir).isDirectory()
+                ? new File(exportDir)
+                : Files.createTempDirectory("itrain-decoder").toFile();
+        String csvName = templateFile.getName();
+        String baseName = csvName.toLowerCase().endsWith(".csv")
+                ? csvName.substring(0, csvName.length() - 4) : csvName;
+        File zipFile = new File(folder, baseName + ".zip");
+        try (ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(zipFile))) {
+            zip.putNextEntry(new ZipEntry(csvName));
+            Files.copy(templateFile.toPath(), zip);
+            zip.closeEntry();
+        }
+        return zipFile;
     }
 
     private static boolean openMailClient(String subject, String body) {

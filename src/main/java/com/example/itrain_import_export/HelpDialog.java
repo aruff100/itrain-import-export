@@ -48,6 +48,7 @@ public final class HelpDialog {
     private HelpDialog() {
     }
 
+    /** Hilfe des Hauptfensters - alles ausser den Decoder-Abschnitten, siehe {@link #showDecoder}. */
     public static void show(Stage owner) {
         I18n i18n = I18n.getInstance();
 
@@ -55,6 +56,10 @@ public final class HelpDialog {
         content.setPadding(new Insets(15));
 
         addParagraph(content, null, i18n.t("help.introText"));
+        // Direkt nach der Einleitung: Seit 2.5 gibt es drei Fenster, und
+        // alle folgenden Abschnitte setzen voraus, dass man weiß, welches
+        // gemeint ist.
+        addParagraph(content, i18n.t("help.threeWindowsTitle"), i18n.t("help.threeWindowsText"));
         addParagraph(content, i18n.t("help.fileMenuTitle"), i18n.t("help.fileMenuText"));
         addParagraph(content, i18n.t("help.editMenuTitle"), i18n.t("help.editMenuText"));
         addParagraph(content, i18n.t("help.settingsMenuTitle"), i18n.t("help.settingsMenuText"));
@@ -65,9 +70,8 @@ public final class HelpDialog {
         addParagraph(content, i18n.t("help.selectionTitle"), i18n.t("help.selectionText"));
         addParagraph(content, i18n.t("help.categoryViewTitle"), i18n.t("help.categoryViewText"));
         addParagraph(content, i18n.t("help.explorerTitle"), i18n.t("help.explorerText"));
-        addParagraph(content, i18n.t("help.decoderTitle"), i18n.t("help.decoderText"));
-        addParagraph(content, i18n.t("help.decoderHintsTitle"), i18n.t("help.decoderHintsText"));
-        addParagraph(content, i18n.t("help.captureTitle"), i18n.t("help.captureText"));
+        // Die Decoder-Abschnitte stehen seit 2.5 in der Hilfe des
+        // Decoder-Fensters (showDecoder), nicht mehr hier.
         // Fensterverwaltung am Ende der Bedienabschnitte: Sie betrifft alle
         // Fenster gleichermaßen und ist erst verständlich, wenn man weiß,
         // welche es überhaupt gibt.
@@ -75,6 +79,38 @@ public final class HelpDialog {
         addParagraph(content, i18n.t("help.referenceRenameTitle"), i18n.t("help.referenceRenameText"));
         addParagraph(content, i18n.t("help.statusBarTitle"), i18n.t("help.statusBarText"));
 
+        showDialog(owner, content);
+    }
+
+    /**
+     * Hilfe des Decoder-Fensters: die drei Abschnitte rund um Decoder
+     * (CV-Informationen/Vorlagen, Hinweisfenster, Decoder erfassen), die bis
+     * 2.5 Teil der Hauptfenster-Hilfe waren.
+     */
+    public static void showDecoder(Stage owner) {
+        I18n i18n = I18n.getInstance();
+
+        VBox content = new VBox(4);
+        content.setPadding(new Insets(15));
+        addParagraph(content, i18n.t("help.decoderTitle"), i18n.t("help.decoderText"));
+        addParagraph(content, i18n.t("help.decoderHintsTitle"), i18n.t("help.decoderHintsText"));
+        addParagraph(content, i18n.t("help.captureTitle"), i18n.t("help.captureText"));
+        showDialog(owner, content);
+    }
+
+    /** Hilfe des Systeme-Fensters. */
+    public static void showSystems(Stage owner) {
+        I18n i18n = I18n.getInstance();
+
+        VBox content = new VBox(4);
+        content.setPadding(new Insets(15));
+        addParagraph(content, i18n.t("help.systemsTitle"), i18n.t("help.systemsText"));
+        addParagraph(content, i18n.t("help.bidibTitle"), i18n.t("help.bidibText"));
+        showDialog(owner, content);
+    }
+
+    private static void showDialog(Stage owner, VBox content) {
+        I18n i18n = I18n.getInstance();
         ScrollPane scrollPane = new ScrollPane(content);
         scrollPane.setFitToWidth(true);
         scrollPane.setPrefSize(560, 480);
@@ -266,8 +302,9 @@ public final class HelpDialog {
      * während eines davon offen steht.
      */
     private static Color textFill() {
-        return AppSettings.THEME_DARK.equals(AppSettings.getInstance().getTheme())
-                ? Color.web("#e0e0e0")
-                : Color.BLACK;
+        // Wirksame Textfarbe der Farbkombination (bzw. Hell/Dunkel als
+        // Rueckfall) - nicht mehr an THEME_DARK festgemacht, sonst blieb der
+        // Hilfetext nach Wahl einer hellen Kombination hell auf hell.
+        return ThemeManager.textColor();
     }
 }

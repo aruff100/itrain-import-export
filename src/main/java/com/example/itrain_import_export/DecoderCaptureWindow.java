@@ -1485,13 +1485,13 @@ public final class DecoderCaptureWindow {
         // die Farben hier einmal passend zum eingestellten Schema gewählt.
         // Mit fest hellen Farben verschwanden Rahmen und Beschriftungen im
         // dunklen Schema nahezu vollständig.
-        boolean dark = AppSettings.THEME_DARK.equals(AppSettings.getInstance().getTheme());
+        boolean dark = ThemeManager.isDark();
         Color frame = Color.web(dark ? "#9aa0a6" : "#8a8a8a");
         Color line = Color.web(dark ? "#6e7479" : "#b4b4b4");
         Color accent = Color.web(dark ? "#6ba4e8" : "#2f6fb5");
         Color leftTitle = Color.web(dark ? "#31506e" : "#cfe2f7");
         Color rightTitle = Color.web(dark ? "#6b5a2e" : "#ffe3a3");
-        Color textColor = Color.web(dark ? "#e0e0e0" : "#000000");
+        Color textColor = ThemeManager.textColor();
 
         // Linkes Fenster: unsere Konfigurations-Tabelle.
         canvas.getChildren().add(caption(10, 4, i18n.t("capture.hintsPictureLeft"), textColor));

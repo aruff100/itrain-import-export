@@ -1,0 +1,137 @@
+﻿"Kategorie";"Typ";"Name";"Beschreibung";"XML"
+"decoder-configuration";"configuration";"Maerklin 60946 (DCC)";"Maerklin retrofit decoder 60946 - DCC CV table from the instructions (items 60945/60946/60947), pages 18-22; default values for item 60946";"<configuration count=""48"">
+  <parameter nr=""1"" value=""3"" type=""Main address"">
+    <description>Short address 1 - 127 if CV29 / bit 5 = 0</description>
+  </parameter>
+  <parameter nr=""2"" value=""5"" type=""Minimum speed (Vmin)"">
+    <description>The value must be lower than Vmax, CV 5. (see CV 67)</description>
+  </parameter>
+  <parameter nr=""3"" value=""25"" type=""Acceleration delay (AV)"">
+    <description>The CV value multiplied by 0.9 gives the time from standstill to maximum speed.</description>
+  </parameter>
+  <parameter nr=""4"" value=""16"" type=""Deceleration (BV)"">
+    <description>The CV value multiplied by 0.9 gives the time from maximum speed to standstill.</description>
+  </parameter>
+  <parameter nr=""5"" value=""255"" type=""Maximum speed (Vmax)"">
+    <description>Speed at the highest speed step. The value must be greater than Vmin, CV 2. (see also CV 94)</description>
+  </parameter>
+  <parameter nr=""7"" type=""Manufacturer version number (software version)"">
+    <description>Read only</description>
+  </parameter>
+  <parameter nr=""8"" value=""131"" type=""Manufacturer ID; decoder reset (default or factory setting)"">
+    <description>Read only. The value cannot be read</description>
+  </parameter>
+  <parameter nr=""13"" value=""0"" type=""Functions F1 - F8 with alternative track signal"">
+    <description>0 = function MM or analogue off 1 = function MM or analogue on Bit 7-0 [ F8 F7 F6 F5 F4 F3 F2 F1 ]</description>
+  </parameter>
+  <parameter nr=""14"" value=""1"" type=""Functions FL, F9 - F15 with alternative track signal"">
+    <description>0 = function MM or analogue off 1 = function MM or analogue on Bit 7-0 [ F15 F14 F13 F12 F11 F10 F9 FL ]</description>
+  </parameter>
+  <parameter nr=""17"" value=""192"" type=""Extended address, high byte"">
+    <description>Long address 1 - 10239 (128) if CV29 / bit 5 = 1</description>
+  </parameter>
+  <parameter nr=""18"" value=""128"" type=""Extended address, low byte""/>
+  <parameter nr=""19"" value=""0"" type=""Multiple traction address"">
+    <description>1 - 127 = consist address 0 = no consist +128, bit 7 = reverse direction in the consist</description>
+  </parameter>
+  <parameter nr=""21"" value=""0"" type=""Functions F1 - F8 in multiple traction"">
+    <description>0 = function # for the loco address only 1 = function # also for the consist address Bit 7-0 = [ F8 F7 F6 F5 F4 F3 F2 F1 ]</description>
+  </parameter>
+  <parameter nr=""22"" value=""0"" type=""Functions FL, F9 - F15 in multiple traction"">
+    <description>0 = function # for the loco address only 1 = function # also for the consist address Bit 7-0 = [ F15 F14 F13 F12 F11 F10 F9 FL ]</description>
+  </parameter>
+  <parameter nr=""27"" value=""48"" type=""Brake mode: bits 0 - 3: always 0; bit 4: DC, polarity against the direction of travel; bit 5: DC, polarity with the direction of travel; bits 6 - 7: always 0"">
+    <description>Direction-dependent braking: - 16 normal DCC behaviour - 32 inverse DCC behaviour Direction-independent braking: - 48 : fx/mfx behaviour</description>
+  </parameter>
+  <parameter nr=""29"" value=""6"" type=""Configuration: bit 0: reverse the direction behaviour of the locomotive, 0 = direction normal, 1 = direction reversed; bit 1: select 14 or 28/128 speed steps, 0 = 14 speed steps, 1 = 28/128 speed steps; bit 2: switch analogue operation off/on, 0 = analogue off, 1 = analogue on; bit 5: select short / long address, 0 = short address, 1 = long address"">
+    <description>The direction behaviour relates to the direction of travel and to the lights. The number of speed steps and the light bit depend on the controller. As the loco address, either the short main address or the long extended address.</description>
+  </parameter>
+  <parameter nr=""50"" value=""15"" type=""Alternative formats: bit 0: analogue AC off = 0 / analogue AC on = 1; bit 1: analogue DC off = 0 / analogue DC on = 1; bit 2: fx (MM) off = 0 / fx (MM) on = 1; bit 3: mfx off = 0 / mfx on = 1"">
+    <description>Note: DCC cannot deactivate itself.</description>
+  </parameter>
+  <parameter nr=""52"" value=""3"" type=""Motor type ... (bits 0-4) ... Aux - function outputs 5 and 6 ... motor - Softdrive Sinus ... motor - unregulated ... motor - high-performance drive C90 ... motor - coreless ... motor - DC soft ... motor - DC hard ... motor - DC gauge 1, also regulated in analogue ... (bit 5) ... 0: regulated in analogue ... 1: not regulated in analogue"">
+    <description>Selection of a motor type for further settings of the motor control, or selection of additional function outputs on an H0 decoder. For how the motor outputs work as further AUX outputs, see the separate table.</description>
+  </parameter>
+  <parameter nr=""53"" value=""150"" type=""Motor control - control reference"">
+    <description>Absolute Vmax for the motor characteristic</description>
+  </parameter>
+  <parameter nr=""54"" value=""64"" type=""Motor control - control parameter K"">
+    <description>Control component P</description>
+  </parameter>
+  <parameter nr=""55"" value=""64"" type=""Motor control - control parameter I"">
+    <description>Control component I</description>
+  </parameter>
+  <parameter nr=""56"" value=""24"" type=""Motor control - control influence"">
+    <description>0 = unregulated PWM for sine (see also CV 52 motor type)</description>
+  </parameter>
+  <parameter nr=""57"" value=""46"" type=""Steam loco chuff interval at speed step 1""/>
+  <parameter nr=""58"" value=""95"" type=""Steam loco chuff interval from speed step 2""/>
+  <parameter nr=""63"" value=""255"" type=""Overall volume"">
+    <description>Master volume for all sounds. 0 = no sounds</description>
+  </parameter>
+  <parameter nr=""64"" value=""55"" type=""Brake squeal threshold"">
+    <description>The squealing starts earlier the greater the value is and later the smaller the value is. If the value is too small, no squealing is triggered.</description>
+  </parameter>
+  <parameter nr=""66"" value=""128"" type=""Forward trim"">
+    <description>The CV value divided by 128 gives the factor by which the speed step is multiplied when running forwards.</description>
+  </parameter>
+  <parameter nr=""67"" type=""Speed table, speed step 1 (Vmin) to speed table, speed step 28 (Vmax)""/>
+  <parameter nr=""94"" type=""Speed table, speed step 1 (Vmin) to speed table, speed step 28 (Vmax)""/>
+  <parameter nr=""95"" value=""128"" type=""Reverse trim"">
+    <description>The CV value divided by 128 gives the factor by which the speed step is multiplied when running backwards.</description>
+  </parameter>
+  <parameter nr=""112"" value=""1"" type=""Physical output (mapping): front light mode; physical output (mapping): front light dimmer; physical output (mapping): front light period"">
+    <description>See table*</description>
+  </parameter>
+  <parameter nr=""113"" value=""255"" type=""Physical output (mapping): front light mode; physical output (mapping): front light dimmer; physical output (mapping): front light period"">
+    <description>See table*</description>
+  </parameter>
+  <parameter nr=""114"" value=""20"" type=""Physical output (mapping): front light mode; physical output (mapping): front light dimmer; physical output (mapping): front light period"">
+    <description>See table* - continuing up to 135 PoM: physical output (mapping): rear light, AUX 1 to AUX 6 (each in a block of three)</description>
+  </parameter>
+  <parameter nr=""137"" value=""128"" type=""Shunting mode"">
+    <description>128 = 50% speed step, 64 = 25% speed step</description>
+  </parameter>
+  <parameter nr=""138"" value=""180"" type=""Sound output: brake squeal (volume); sound output: driving sound volume; sound output: volume sound 1 through sound output: volume sound 16"">
+    <description>0 = no sound</description>
+  </parameter>
+  <parameter nr=""139"" value=""180"" type=""Sound output: brake squeal (volume); sound output: driving sound volume; sound output: volume sound 1 through sound output: volume sound 16"">
+    <description>0 = no sound</description>
+  </parameter>
+  <parameter nr=""140"" value=""180"" type=""Sound output: brake squeal (volume); sound output: driving sound volume; sound output: volume sound 1 through sound output: volume sound 16"">
+    <description>0 = no sound</description>
+  </parameter>
+  <parameter nr=""155"" value=""180"" type=""Sound output: brake squeal (volume); sound output: driving sound volume; sound output: volume sound 1 through sound output: volume sound 16"">
+    <description>0 = no sound</description>
+  </parameter>
+  <parameter nr=""173"" value=""7"" type=""Store various function states: bit 0: store function states; bit 1: store speed; bit 2: start with/without ABV after reset; bits 3 - 7: always 0"">
+    <description>0 = do not store, value = store, individual values must be added up.</description>
+  </parameter>
+  <parameter nr=""174"" value=""1"" type=""Store various states: bit 0: store direction of travel; bits 1 - 7: always 0"">
+    <description>0 = do not store 1 = store</description>
+  </parameter>
+  <parameter nr=""176"" value=""100"" type=""Vmin analogue DC"">
+    <description>must be lower than CV 177</description>
+  </parameter>
+  <parameter nr=""177"" value=""255"" type=""Vmax analogue DC"">
+    <description>must be greater than CV 176</description>
+  </parameter>
+  <parameter nr=""178"" value=""100"" type=""Vmin analogue AC"">
+    <description>must be lower than CV 179</description>
+  </parameter>
+  <parameter nr=""179"" type=""Vmax analogue AC"">
+    <description>must be greater than CV 178</description>
+  </parameter>
+  <parameter nr=""257"" value=""1"" type=""Function assignment (mapping): function FL forward A (repeated four times)"">
+    <description>See table*</description>
+  </parameter>
+  <parameter nr=""258"" value=""0"" type=""Function assignment (mapping): function FL forward A (repeated four times)"">
+    <description>See table*</description>
+  </parameter>
+  <parameter nr=""259"" value=""0"" type=""Function assignment (mapping): function FL forward A (repeated four times)"">
+    <description>See table*</description>
+  </parameter>
+  <parameter nr=""260"" value=""0"" type=""Function assignment (mapping): function FL forward A (repeated four times)"">
+    <description>See table* - continuing up to 445: function mapping: running forwards</description>
+  </parameter>
+</configuration>"

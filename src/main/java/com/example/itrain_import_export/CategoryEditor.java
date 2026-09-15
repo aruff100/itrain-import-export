@@ -271,14 +271,26 @@ public class CategoryEditor {
         return newCategoryNode;
     }
 
+    /** Nur nachsehen, nichts anlegen - fuer die Kollisionspruefung vor dem Import. */
+    private XmlNode findCategoryNodeGeneric(String category) {
+        return controlItemsNode.findChild(category);
+    }
+
     /** Prüft, ob eine Kategorie bereits einen direkten Eintrag mit diesem Tag-Namen + "name"-Attribut hat. */
     private static boolean categoryHasEntry(XmlNode category, String tag, String name) {
-        for (XmlNode entry : category.getChildren()) {
+        return indexOfEntry(category, tag, name) >= 0;
+    }
+
+    /** Position des direkten Eintrags mit diesem Tag-Namen + "name"-Attribut, oder -1. */
+    private static int indexOfEntry(XmlNode category, String tag, String name) {
+        List<XmlNode> children = category.getChildren();
+        for (int i = 0; i < children.size(); i++) {
+            XmlNode entry = children.get(i);
             if (entry.getTagName().equals(tag) && name.equals(entry.getAttribute("name"))) {
-                return true;
+                return i;
             }
         }
-        return false;
+        return -1;
     }
 
     /**
@@ -498,7 +510,15 @@ public class CategoryEditor {
             });
             row.setOnMouseClicked(event -> {
                 if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2 && !row.isEmpty()) {
-                    deleteEntry(row.getItem());
+                    // Bei Lokomotiven und Wagen oeffnet ein Doppelklick das
+                    // Bearbeitungsfenster (siehe onEditEntry/VehicleFieldsDialog)
+                    // statt den Eintrag zu loeschen - fuer alle anderen
+                    // Kategorien bleibt es beim bisherigen Verhalten.
+                    if (supportsDecoderConfiguration()) {
+                        onEditEntry();
+                    } else {
+                        deleteEntry(row.getItem());
+                    }
                 }
             });
             row.setContextMenu(rowContextMenu);
@@ -681,11 +701,16 @@ public class CategoryEditor {
         if (nameResult.isEmpty() || nameResult.get().isBlank()) {
             return;
         }
-        String fileName = nameResult.get().trim();
-        if (!fileName.toLowerCase().endsWith(".csv")) {
-            fileName = fileName + ".csv";
+        // Seit 2.5 als ZIP: <name>.zip mit genau <name>.csv darin - eine
+        // .csv nehmen viele Foren nicht als Anhang an, eine .zip schon. Wer
+        // aus Gewohnheit ".csv" eintippt, bekommt trotzdem eine .zip.
+        String baseName = nameResult.get().trim();
+        String lower = baseName.toLowerCase();
+        if (lower.endsWith(".csv") || lower.endsWith(".zip")) {
+            baseName = baseName.substring(0, baseName.length() - 4);
         }
-        File target = new File(exportDir, fileName);
+        String csvEntryName = baseName + ".csv";
+        File target = new File(exportDir, baseName + ".zip");
 
         try {
             List<String> header = List.of("Kategorie",
@@ -729,7 +754,7 @@ public class CategoryEditor {
                 renameReferencedChildren(copy, renameMap);
                 rows.add(toExportRow(linked.getValue(), copy));
             }
-            CsvUtil.write(target, header, rows);
+            CsvUtil.writeZipped(target, csvEntryName, header, rows);
             new Alert(Alert.AlertType.INFORMATION,
                     i18n.t("editor.exportSuccess", rows.size(), target.getAbsolutePath()))
                     .showAndWait();
@@ -854,7 +879,12 @@ public class CategoryEditor {
     private void onImport() {
         FileChooser chooser = new FileChooser();
         chooser.setTitle(i18n.t("editor.import"));
+        // .zip (seit 2.5) und .csv (Exporte bis 2.0.1) im selben Filter -
+        // der Anwender soll nicht wissen müssen, aus welcher Version ein
+        // Export stammt.
         chooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter(i18n.t("editor.importFilterExports"), "*.zip", "*.csv"),
+                new FileChooser.ExtensionFilter("ZIP (*.zip)", "*.zip"),
                 new FileChooser.ExtensionFilter("CSV (*.csv)", "*.csv"),
                 new FileChooser.ExtensionFilter("*.*", "*.*"));
         String exportDir = AppSettings.getInstance().getExportDirectory();
@@ -867,7 +897,7 @@ public class CategoryEditor {
         }
 
         try {
-            List<List<String>> rows = CsvUtil.read(source);
+            List<List<String>> rows = CsvUtil.readAny(source);
             List<List<String>> dataRows = rows.size() > 1 ? rows.subList(1, rows.size()) : List.of();
 
             // Format-Check: unsere Exporte haben immer 5 Spalten, die erste
@@ -897,13 +927,6 @@ public class CategoryEditor {
             // eigenen Kategorie-Spalte einsortiert, statt (wie früher) eine
             // einheitliche Kategorie über die ganze Datei zu verlangen. Der
             // aktuell geöffnete Reiter spielt für das Ziel keine Rolle mehr.
-            if (!dataRows.isEmpty()) {
-                // Ein Import gilt als EIN Rückgängig-Schritt, nicht einer je
-                // Zeile - der Nutzer will einen kompletten Import mit einem
-                // "Rückgängig" wieder loswerden können.
-                beforeChange.run();
-            }
-
             // Erst ALLE Zeilen zu XmlNode parsen (statt Zeile für Zeile sofort
             // einzufügen) - nur so lässt sich vor dem eigentlichen Einfügen
             // eine session-weite Nummerierung auf bereits verknüpfte ("~"-)
@@ -918,8 +941,46 @@ public class CategoryEditor {
                 renameLinkedEntriesForThisImport(parsedNodes);
             }
 
+            // iTrain verlangt pro Kategorie eindeutige Namen (siehe
+            // "Duplicate ... elements"-Fehler). Für jede Zeile, deren Name
+            // im Ziel bereits existiert, entscheidet der Nutzer in einer
+            // Tabelle (siehe ImportCollisionDialog): den vorhandenen Eintrag
+            // durch den neuen ersetzen ("synchronisieren", Voreinstellung),
+            // den neuen unter freiem Namen zusätzlich anlegen, oder ihn
+            // überspringen (das alte Verhalten). Abbrechen lässt die Datei
+            // unverändert - deshalb VOR beforeChange. Einträge ohne
+            // name-Attribut haben keinen eindeutigen Schlüssel und werden
+            // immer angehängt.
+            List<ImportCollisionDialog.Collision> collisions = new ArrayList<>();
+            for (int i = 0; i < dataRows.size(); i++) {
+                XmlNode node = parsedNodes.get(i);
+                String rowCategory = dataRows.get(i).get(0);
+                XmlNode existingCategory = rowCategory.equals(categoryName)
+                        ? this.categoryNode : findCategoryNodeGeneric(rowCategory);
+                String nodeName = node.getName();
+                if (existingCategory != null && !nodeName.isBlank()
+                        && categoryHasEntry(existingCategory, node.getTagName(), nodeName)) {
+                    collisions.add(new ImportCollisionDialog.Collision(i, rowCategory, node.getTagName(), nodeName));
+                }
+            }
+            if (!collisions.isEmpty() && !ImportCollisionDialog.show(getWindow(), i18n, collisions)) {
+                return;
+            }
+            Map<Integer, ImportCollisionDialog.Decision> decisions = new HashMap<>();
+            for (ImportCollisionDialog.Collision collision : collisions) {
+                decisions.put(collision.rowIndex(), collision.getDecision());
+            }
+
+            if (!dataRows.isEmpty()) {
+                // Ein Import gilt als EIN Rückgängig-Schritt, nicht einer je
+                // Zeile - der Nutzer will einen kompletten Import mit einem
+                // "Rückgängig" wieder loswerden können.
+                beforeChange.run();
+            }
+
             boolean touchesOtherCategories = false;
             int imported = 0;
+            int replaced = 0;
             int skippedDuplicates = 0;
             for (int i = 0; i < dataRows.size(); i++) {
                 List<String> row = dataRows.get(i);
@@ -930,21 +991,42 @@ public class CategoryEditor {
                 if (!rowCategory.equals(categoryName)) {
                     touchesOtherCategories = true;
                 }
-                // iTrain verlangt pro Kategorie eindeutige Namen (siehe
-                // "Duplicate ... elements"-Fehler) - ein per Verknüpfung
-                // mit-exportierter Eintrag, der im Ziel bereits existiert
-                // (z.B. weil er dort schon vorhanden war), wird daher nicht
-                // ein zweites Mal eingefügt. Einträge ohne name-Attribut
-                // werden davon nicht betroffen (kein eindeutiger Schlüssel).
-                String nodeName = node.getName();
-                if (!nodeName.isBlank() && categoryHasEntry(categoryTarget, node.getTagName(), nodeName)) {
-                    skippedDuplicates++;
+                ImportCollisionDialog.Decision decision = decisions.get(i);
+                if (decision == null) {
+                    categoryTarget.getChildren().add(node);
+                    imported++;
                     continue;
                 }
-                categoryTarget.getChildren().add(node);
-                imported++;
+                switch (decision) {
+                    case SKIP:
+                        skippedDuplicates++;
+                        break;
+                    case CREATE_NEW:
+                        // Freien Namen suchen: "Name (2)", "Name (3)", ...
+                        String base = node.getName();
+                        int n = 2;
+                        while (categoryHasEntry(categoryTarget, node.getTagName(), base + " (" + n + ")")) {
+                            n++;
+                        }
+                        node.setAttribute("name", base + " (" + n + ")");
+                        categoryTarget.getChildren().add(node);
+                        imported++;
+                        break;
+                    default:
+                        // Synchronisieren: an der Stelle des vorhandenen
+                        // Eintrags ersetzen - Reihenfolge und damit alle
+                        // Verweise anderer Einträge bleiben erhalten.
+                        int index = indexOfEntry(categoryTarget, node.getTagName(), node.getName());
+                        if (index >= 0) {
+                            categoryTarget.getChildren().set(index, node);
+                        } else {
+                            categoryTarget.getChildren().add(node);
+                        }
+                        replaced++;
+                        break;
+                }
             }
-            if (imported > 0) {
+            if (imported > 0 || replaced > 0) {
                 onModified.run();
             }
             if (touchesOtherCategories) {
@@ -956,6 +1038,9 @@ public class CategoryEditor {
             String successMessage = skippedDuplicates > 0
                     ? i18n.t("editor.importSuccessWithSkipped", imported, skippedDuplicates)
                     : i18n.t("editor.importSuccess", imported);
+            if (replaced > 0) {
+                successMessage += "\n" + i18n.t("editor.importReplaced", replaced);
+            }
             new Alert(Alert.AlertType.INFORMATION, successMessage).showAndWait();
         } catch (Exception ex) {
             Alert alert = new Alert(Alert.AlertType.ERROR, String.valueOf(ex.getMessage()));
@@ -1380,6 +1465,14 @@ public class CategoryEditor {
     }
 
     private void onAddEntry() {
+        // Lokomotiven und Wagen: statt der generischen Vorlagenauswahl +
+        // Namensabfrage direkt das ausfuehrliche Bearbeitungsfenster mit
+        // allen wichtigen Feldern (siehe VehicleFieldsDialog) - der Eintrag
+        // wird nur bei "Uebernehmen" tatsaechlich angehaengt.
+        if (supportsDecoderConfiguration()) {
+            addVehicle();
+            return;
+        }
         ObservableList<String> options = FXCollections.observableArrayList();
         options.add(i18n.t("editor.newEntryChoiceEmpty"));
         if (categoryNode != null) {
@@ -1428,6 +1521,69 @@ public class CategoryEditor {
         onModified.run();
         entryTable.getSelectionModel().select(newNode);
         entryTable.scrollTo(newNode);
+    }
+
+    /**
+     * "+" bei Lokomotiven/Wagen: ein neues, noch nicht eingehaengtes Element
+     * mit ein paar sinnvollen Grundattributen (an echten Dateien abgelesen)
+     * im {@link VehicleFieldsDialog} zeigen - nur bei "Uebernehmen" (Name
+     * ist dort Pflicht) wird es tatsaechlich an die Kategorie angehaengt.
+     */
+    private void addVehicle() {
+        boolean wagon = "wagons".equals(categoryName);
+        XmlNode newNode = new XmlNode(wagon ? "wagon" : "locomotive");
+        newNode.setAttribute("gauge", "n");
+        newNode.setAttribute("direction", "forward");
+        if (!wagon) {
+            newNode.setAttribute("cabin", "both");
+            newNode.setAttribute("polarity", "normal");
+        }
+        boolean[] added = {false};
+        boolean applied = VehicleFieldsDialog.show(getWindow(), newNode, wagon, existingInterfaceNames(), true,
+                () -> {
+                    beforeChange.run();
+                    added[0] = true;
+                });
+        if (!applied || !added[0]) {
+            return;
+        }
+        ensureCategoryNode().getChildren().add(newNode);
+        onModified.run();
+        entryTable.getSelectionModel().select(newNode);
+        entryTable.scrollTo(newNode);
+    }
+
+    /** Doppelklick / Rechtsklick "Bearbeiten" bei Lokomotiven/Wagen - siehe {@link #onEditEntry}. */
+    private void editVehicle(XmlNode entry) {
+        boolean wagon = "wagons".equals(categoryName);
+        boolean applied = VehicleFieldsDialog.show(getWindow(), entry, wagon, existingInterfaceNames(), true,
+                beforeChange);
+        if (!applied) {
+            return;
+        }
+        onModified.run();
+        entryTable.refresh();
+        showDetail(entry);
+        updateLinkedCount();
+    }
+
+    /** Namen der im Dokument vorhandenen Schnittstellen, fuer die Auswahlbox "Schnittstelle" im {@link VehicleFieldsDialog}. */
+    private List<String> existingInterfaceNames() {
+        List<String> names = new ArrayList<>();
+        if (controlItemsNode == null) {
+            return names;
+        }
+        for (XmlNode category : controlItemsNode.getChildren()) {
+            if ("interfaces".equals(category.getTagName())) {
+                for (XmlNode iface : category.getChildren()) {
+                    String name = iface.getName();
+                    if (!name.isBlank()) {
+                        names.add(name);
+                    }
+                }
+            }
+        }
+        return names;
     }
 
     private void deleteEntry(XmlNode node) {
@@ -1715,17 +1871,26 @@ public class CategoryEditor {
     // ---------------------------------------------------------------
 
     /**
-     * Bearbeitet Name und Beschreibung des in der Liste markierten Eintrags.
+     * Bearbeitet den in der Liste markierten Eintrag - bei Lokomotiven und
+     * Wagen im ausfuehrlichen {@link VehicleFieldsDialog} (siehe
+     * {@link #editVehicle}), sonst weiterhin im kleinen Name/Beschreibung-
+     * Dialog hier.
      * <p>
-     * Bewusst als kleiner Dialog (Eingabetaste = OK) statt als Bearbeitung
+     * Bewusst als eigener Dialog (Eingabetaste = OK) statt als Bearbeitung
      * direkt in der Tabellenzelle: Ein Doppelklick auf eine Zeile löscht den
-     * Eintrag (mit Rückfrage), und genau dieser Doppelklick ist in JavaFX auch
-     * die Standard-Geste, um eine Tabellenzelle in den Bearbeitungsmodus zu
-     * schalten - beides zusammen würde sich in die Quere kommen.
+     * Eintrag (mit Rückfrage) - ausser bei Lokomotiven/Wagen, siehe
+     * {@code entryTable.setRowFactory} - und genau dieser Doppelklick ist in
+     * JavaFX auch die Standard-Geste, um eine Tabellenzelle in den
+     * Bearbeitungsmodus zu schalten - beides zusammen würde sich in die
+     * Quere kommen.
      */
     private void onEditEntry() {
         XmlNode entry = entryTable.getSelectionModel().getSelectedItem();
         if (entry == null) {
+            return;
+        }
+        if (supportsDecoderConfiguration()) {
+            editVehicle(entry);
             return;
         }
         String oldName = entry.getName();
@@ -2235,8 +2400,7 @@ public class CategoryEditor {
             getStyleClass().remove(CONFIG_STYLE_CLASS);
             if (isConfiguration) {
                 getStyleClass().add(CONFIG_STYLE_CLASS);
-                setStyle(AppSettings.THEME_DARK.equals(AppSettings.getInstance().getTheme())
-                        ? "" : CONFIG_STYLE_LIGHT);
+                setStyle(ThemeManager.isDark() ? "" : CONFIG_STYLE_LIGHT);
             } else {
                 setStyle("");
             }

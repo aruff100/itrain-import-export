@@ -1,0 +1,83 @@
+﻿"Kategorie";"Typ";"Name";"Beschreibung";"XML"
+"decoder-configuration";"configuration";"Maerklin 60945 (MM)";"Maerklin retrofit decoder 60945 - fx (MM) CV table from the instructions (items 60945/60946/60947), pages 14-17; default values for item 60945";"<configuration count=""28"">
+  <parameter nr=""1"" value=""78"" type=""Address 1 (main address)"">
+    <description>The address is always active and does not depend on CV 49.</description>
+  </parameter>
+  <parameter nr=""2"" value=""5"" type=""Minimum speed (Vmin)"">
+    <description>Speed at the lowest speed step. The value must be lower than Vmax, CV 5.</description>
+  </parameter>
+  <parameter nr=""3"" value=""25"" type=""Acceleration delay (AV)"">
+    <description>The CV value multiplied by 0.25 gives the time from standstill to maximum speed.</description>
+  </parameter>
+  <parameter nr=""4"" value=""16"" type=""Deceleration (BV)"">
+    <description>The CV value multiplied by 0.25 gives the time from maximum speed to standstill.</description>
+  </parameter>
+  <parameter nr=""5"" value=""255"" type=""Maximum speed (Vmax)"">
+    <description>Speed at the highest speed step. The value must be greater than CV 2.</description>
+  </parameter>
+  <parameter nr=""8"" type=""Decoder reset (default or factory setting)"">
+    <description>The value is not written.</description>
+  </parameter>
+  <parameter nr=""17"" value=""254"" type=""Address 3 (2nd consecutive address)"">
+    <description>The address can be activated/deactivated, depending on CV 49.</description>
+  </parameter>
+  <parameter nr=""18"" value=""253"" type=""Address 4 (3rd consecutive address)"">
+    <description>The address can be activated/deactivated, depending on CV 49.</description>
+  </parameter>
+  <parameter nr=""27"" value=""48"" type=""Brake mode: bits 0 - 3: always 0; bit 4: DC voltage, polarity against the direction of travel; bit 5: DC voltage, polarity with the direction of travel; bits 6 - 7: always 0"">
+    <description>Direction-dependent braking: - 16 normal DCC behaviour - 32 inverse DCC behaviour Direction-independent braking: - 48 : fx/mfx behaviour</description>
+  </parameter>
+  <parameter nr=""29"" value=""6"" type=""Configuration: bit 0: reverse the direction behaviour of the locomotive, 0 = direction normal, 1 = direction reversed; bit 1: number of speed steps, half steps 14 or 27, 0 = 14 speed steps, 1 = 27 speed steps/half steps; bit 2: switch analogue operation off/on, 0 = analogue off, 1 = analogue on"">
+    <description>The direction behaviour relates to the direction of travel and to the lights. The number of speed steps and half steps depends on the controller. Digital operation only, or conventional operation as well. Changing over on the move is possible during operation.</description>
+  </parameter>
+  <parameter nr=""49"" value=""5"" type=""Extended configuration: bit 0: number of addresses, LSB; bit 1: number of addresses, MSB; bit 2: automatic consecutive addressing (0 = on / 1 = off)"">
+    <description>0 = one | 1 = two | 0 = three | 1 = four 0 addr. | 0 addr. | 1 addr. | 1 addr. 0 = automatic sequence on / 1 = automatic sequence off</description>
+  </parameter>
+  <parameter nr=""50"" value=""15"" type=""Alternative formats: bit 0: analogue AC off = 0 / analogue AC on = 1; bit 1: analogue DC off = 0 / analogue DC on = 1; bit 2: DCC off = 0 / DCC on = 1; bit 3: mfx off = 0 / mfx on = 1"">
+    <description>Note: fx (MM) cannot deactivate itself.</description>
+  </parameter>
+  <parameter nr=""52"" value=""3"" type=""Motor type ... (bits 0-4) ... Aux - function outputs 5 and 6 ... motor - Softdrive Sinus ... motor - unregulated ... motor - high-performance drive C90 ... motor - coreless ... motor - DC soft ... motor - DC hard ... motor - DC gauge 1, also regulated in analogue ... (bit 5) ... 0: regulated in analogue ... 1: not regulated in analogue"">
+    <description>Selection of a motor type for further settings of the motor control, or selection of additional function outputs on an H0 decoder. For how the motor outputs work as further AUX outputs, see the separate table 1.</description>
+  </parameter>
+  <parameter nr=""53"" value=""150"" type=""Motor control - control reference"">
+    <description>Absolute Vmax for the motor characteristic</description>
+  </parameter>
+  <parameter nr=""54"" value=""64"" type=""Motor control - control parameter K"">
+    <description>Control component P</description>
+  </parameter>
+  <parameter nr=""55"" value=""64"" type=""Motor control - control parameter I"">
+    <description>Control component I</description>
+  </parameter>
+  <parameter nr=""56"" value=""24"" type=""Motor control - control influence"">
+    <description>0 = unregulated PWM for sine (see also CV 52 motor type)</description>
+  </parameter>
+  <parameter nr=""57"" value=""46"" type=""Steam loco chuff interval at speed step 1"">
+    <description>without wheel sensor</description>
+  </parameter>
+  <parameter nr=""58"" value=""95"" type=""Steam loco chuff interval from speed step 2"">
+    <description>without wheel sensor</description>
+  </parameter>
+  <parameter nr=""63"" value=""255"" type=""Overall volume"">
+    <description>Master volume for all sounds. 0 = no sounds</description>
+  </parameter>
+  <parameter nr=""64"" value=""55"" type=""Brake squeal threshold"">
+    <description>The squealing starts earlier the greater the value and later the smaller the value. If the value is too small, no squealing is triggered.</description>
+  </parameter>
+  <parameter nr=""73"" value=""7"" type=""Store various states: bit 0: store function states; bit 1: store speed; bit 2: start with/without ABV after reset"">
+    <description>0 = do not store / 1 = store 0 = do not store / 2 = store 0 = without ABV / 4 = with ABV</description>
+  </parameter>
+  <parameter nr=""74"" value=""1"" type=""Store various states: bit 0: store direction of travel"">
+    <description>0 = do not store / 1 = store</description>
+  </parameter>
+  <parameter nr=""75"" value=""79"" type=""Address 2 (1st consecutive address)"">
+    <description>The address can be activated/deactivated, depending on CV 49.</description>
+  </parameter>
+  <parameter nr=""76"" value=""100"" type=""Analogue DC starting voltage"">
+    <description>Note for the CS1: (140) The CS1 shows the value inverted.</description>
+  </parameter>
+  <parameter nr=""77"" value=""255"" type=""Analogue DC maximum speed""/>
+  <parameter nr=""78"" value=""100"" type=""Analogue AC starting voltage"">
+    <description>Note for the CS1: (140) The CS1 shows the value inverted.</description>
+  </parameter>
+  <parameter nr=""79"" value=""255"" type=""Analogue AC maximum speed""/>
+</configuration>"

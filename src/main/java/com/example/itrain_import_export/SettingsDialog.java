@@ -135,6 +135,24 @@ public final class SettingsDialog {
         });
         HBox decoderRow = pathRow(decoderPathLabel, decoderBrowseButton);
 
+        Label systemFilesPathLabel = new Label(pathOrPlaceholder(settings.getSystemFilesDirectory(), i18n));
+        Button systemFilesBrowseButton = new Button(i18n.t("settings.browse"));
+        systemFilesBrowseButton.setOnAction(e -> {
+            DirectoryChooser chooser = new DirectoryChooser();
+            chooser.setTitle(i18n.t("settings.systemFilesPath"));
+            File initial = settings.getSystemFilesDirectory() != null
+                    ? new File(settings.getSystemFilesDirectory()) : null;
+            if (initial != null && initial.isDirectory()) {
+                chooser.setInitialDirectory(initial);
+            }
+            File chosen = chooser.showDialog(owner);
+            if (chosen != null) {
+                settings.setSystemFilesDirectory(chosen.getAbsolutePath());
+                systemFilesPathLabel.setText(chosen.getAbsolutePath());
+            }
+        });
+        HBox systemFilesRow = pathRow(systemFilesPathLabel, systemFilesBrowseButton);
+
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(12);
@@ -143,6 +161,7 @@ public final class SettingsDialog {
         grid.addRow(1, new Label(i18n.t("settings.exportPath")), exportRow);
         grid.addRow(2, new Label(i18n.t("settings.backupPath")), backupRow);
         grid.addRow(3, new Label(i18n.t("settings.decoderPath")), decoderRow);
+        grid.addRow(4, new Label(i18n.t("settings.systemFilesPath")), systemFilesRow);
 
         // Die erste Spalte bekommt nur so viel Platz, wie die Beschriftungen
         // brauchen; alles Weitere geht an die Pfadzeile. Ohne das teilte sich
@@ -188,20 +207,12 @@ public final class SettingsDialog {
             }
         });
 
-        ComboBox<String> themeCombo = new ComboBox<>(FXCollections.observableArrayList(
-                AppSettings.THEME_LIGHT, AppSettings.THEME_DARK));
-        themeCombo.setValue(settings.getTheme());
-        themeCombo.setCellFactory(list -> new ThemeListCell());
-        themeCombo.setButtonCell(new ThemeListCell());
-        themeCombo.valueProperty().addListener((obs, oldTheme, newTheme) -> {
-            if (newTheme != null) {
-                settings.setTheme(newTheme);
-                // Alle offenen Fenster, nicht nur Hauptfenster und dieser
-                // Dialog: Ein nebenher offenes Erfassungsfenster
-                // ("Decoder-Konfiguration") blieb sonst im alten Schema stehen.
-                ThemeManager.applyToAllWindows(newTheme);
-            }
-        });
+        // Farbschema: keine Hell/Dunkel-Auswahl mehr, sondern ein Knopf, der
+        // das Fenster "Farbkombination" oeffnet (Hintergrund- und Textfarbe
+        // frei waehlbar, Hell/Dunkel dort als Vorbelegung). Siehe
+        // CustomColorDialog/ThemeManager.
+        Button customColorButton = new Button(i18n.t("settings.customColor"));
+        customColorButton.setOnAction(e -> CustomColorDialog.show(owner));
 
         CheckBox showTypeBox = new CheckBox();
         showTypeBox.setSelected(settings.getShowTypeColumn());
@@ -231,7 +242,7 @@ public final class SettingsDialog {
         grid.setVgap(12);
         grid.setPadding(new Insets(15));
         grid.addRow(0, new Label(i18n.t("settings.language")), languageCombo);
-        grid.addRow(1, new Label(i18n.t("settings.theme")), themeCombo);
+        grid.addRow(1, new Label(i18n.t("settings.theme")), customColorButton);
         grid.addRow(2, new Label(i18n.t("settings.screen")), buildScreenChooser(settings, i18n));
         grid.addRow(3, new Label(i18n.t("settings.showType")), showTypeBox);
         grid.addRow(4, new Label(i18n.t("settings.showSelectionCheckbox")), showSelectionBox);

@@ -1,0 +1,540 @@
+﻿"Kategorie";"Typ";"Name";"Beschreibung";"XML"
+"decoder-configuration";"configuration";"Uhlenbrock H0-Lokdecoder 74 155 / 34 520 / 33 210";"Uhlenbrock H0 loco decoders & Next18 decoders - common CV table for the items 74 155, 34 520 and 33 210 (identical operating manual), pages 13-16; banks 1-4 not included. For the sound decoders 34 520 and 33 210 there are additional separate templates with the SUSI sound CVs.";"<configuration count=""179"">
+  <parameter nr=""1"" value=""3"">
+    <description>Loco address</description>
+  </parameter>
+  <parameter nr=""2"" value=""1"">
+    <description>Minimum speed (change it until the loco just runs at speed step 1)</description>
+  </parameter>
+  <parameter nr=""3"" value=""5"">
+    <description>Acceleration delay. / 1 means that the current internal speed is increased by 1 every 5 ms / If the internal maximum speed is, for example, 200 (CV 5 = 50 or / CV 94 = 200), the acceleration time from 0 to Fmax is 1 second</description>
+  </parameter>
+  <parameter nr=""4"" value=""5"">
+    <description>Braking delay (time factor as in CV 3)</description>
+  </parameter>
+  <parameter nr=""5"" value=""48"">
+    <description>Maximum speed (must be greater than CV 2)</description>
+  </parameter>
+  <parameter nr=""6"" value=""24"">
+    <description>Medium speed (must be greater than CV 2 and lower than CV 5)</description>
+  </parameter>
+  <parameter nr=""7"">
+    <description>Software version (the processor used can be updated)</description>
+  </parameter>
+  <parameter nr=""8"" value=""85"">
+    <description>Manufacturer ID. Decoder reset, values as in CV 59</description>
+  </parameter>
+  <parameter nr=""12"" value=""255"">
+    <description>Modes of operation / Bit 0=1 DC (analogue operation, direct current) on / Bit 1=1 AC (analogue operation, alternating current) on / Bit 2=1 DCC data format on / Bit 3=1 Motorola data format on / Bit 4=1 Selectrix data format on / Bit 5=1 mfx data format on (mfx® variants only) / Caution: if all data formats are switched off, the decoder can only be / programmed in digital operation.</description>
+  </parameter>
+  <parameter nr=""13"" value=""0"">
+    <description>Enable function keys in analogue operation / Bit 0-7 -&gt; F1 to F8; bit = 0 function off, bit = 1 function on</description>
+  </parameter>
+  <parameter nr=""14"" value=""1"">
+    <description>Enable function keys in analogue operation / Bit 0 and bits 4-7 -&gt; F0 and F9 to F12; bit = 0 function off, bit = 1 function on</description>
+  </parameter>
+  <parameter nr=""15"" value=""1"">
+    <description>Decoder programming lock</description>
+  </parameter>
+  <parameter nr=""16"" value=""1"">
+    <description>Decoder programming lock index number</description>
+  </parameter>
+  <parameter nr=""17"" value=""2000"">
+    <description>Long loco address / 17 = high byte / 18 = low byte</description>
+  </parameter>
+  <parameter nr=""18"" value=""2000"">
+    <description>Long loco address / 17 = high byte / 18 = low byte</description>
+  </parameter>
+  <parameter nr=""19"" value=""0"">
+    <description>Consist address (double heading) / 0 = consist address (CADR) is not active / If bit 7 = 1 the direction of travel is reversed, / i.e. desired CADR + 128 = reversed direction of travel</description>
+  </parameter>
+  <parameter nr=""27"" value=""0"">
+    <description>Brake signal settings (automatic stopping) / Bit 0 = 1 -&gt; ABC right-hand rail more positive / Bit 1 = 1 -&gt; ABC left-hand rail more positive / Bit 4 = 1 -&gt; DC with opposite direction of travel / Bit 5 = 1 -&gt; DC with the same direction of travel / Bit 7 = 0 -&gt; ABC direction of travel forwards only, if bit 0 = 1 or bit 1 = 1 / Bit 7 = 1 -&gt; ABC direction of travel backwards only, if bit 0 = 1 or bit 1 = 1</description>
+  </parameter>
+  <parameter nr=""28"" value=""131"">
+    <description>RailCom® configuration / Bit 0 = 1 -&gt; channel 1 on / Bit 1 = 1 -&gt; channel 2 on / Bit 7 = 1 -&gt; RailCom Plus® on</description>
+  </parameter>
+  <parameter nr=""29"" value=""14"">
+    <description>Configuration according to the DCC standard / Bit 0=0 normal direction of travel / Bit 0=1 opposite direction of travel / Bit 1=0 14 speed steps / Bit 1=1 28 speed steps / Bit 2=0 digital operation only / Bit 2=1 automatic analogue/digital changeover / Bit 3=0 RailCom® switched off / Bit 3=1 RailCom® switched on / Bit 4=0 speed steps via CV 2, 5 and 6 / Bit 4=1 use the speed curve from CV 67 - 94 / Bit 5=0 short address (CV 1) / Bit 5=1 long address (CV 17/18)</description>
+  </parameter>
+  <parameter nr=""30"" value=""0"">
+    <description>Fault memory for the function outputs, motor and temperature monitoring / 1 = fault at the function outputs, 2 = motor fault, 4 = temperature exceeded</description>
+  </parameter>
+  <parameter nr=""31"" value=""0"">
+    <description>1st pointer CV for CV banks</description>
+  </parameter>
+  <parameter nr=""32"" value=""255"">
+    <description>2nd pointer CV for CV banks</description>
+  </parameter>
+  <parameter nr=""33"" value=""1"">
+    <description>Simple function mapping / Assignment of the function outputs to the CVs / CV 33 light function key (F0) when running forwards / CV 34 light function key (F0) when running backwards / CV 35 function key F1 / CV 36 function key F2 / CV 37 function key F3 / CV 38 function key F4 / CV 39 function key F5 / CV 40 function key F6 / CV 41 function key F7 / CV 42 function key F8 / CV 43 function key F9 / CV 44 function key F10 / CV 45 function key F11 / CV 46 function key F12 / Meaning of the individual bits (with CV100/101 bit x = 0, standard) Value / Bit 0 front light output 1 / Bit 1 rear light output 2 / Bit 2 function output A1 4 / Bit 3 function output A2 8 / Bit 4 function output A3 16 / Bit 5 function output A4 32 / Bit 6 shunting mode 64 / Bit 7 acceleration/braking delay 128 / Meaning of the individual bits (with CV100/101 bit x = 1, function mapping shift) Value / Bit 0 function output A2 1 / Bit 1 function output A3 2 / Bit 2 function output A4 4 / Bit 3 shunting mode 8 / Bit 4 acceleration/braking delay 16 / Bit 5 function output A5 32 / Bit 6 function output A6 64 / Bit 7 function output A7 128</description>
+  </parameter>
+  <parameter nr=""34"" value=""1"">
+    <description>Simple function mapping / Assignment of the function outputs to the CVs / CV 33 light function key (F0) when running forwards / CV 34 light function key (F0) when running backwards / CV 35 function key F1 / CV 36 function key F2 / CV 37 function key F3 / CV 38 function key F4 / CV 39 function key F5 / CV 40 function key F6 / CV 41 function key F7 / CV 42 function key F8 / CV 43 function key F9 / CV 44 function key F10 / CV 45 function key F11 / CV 46 function key F12 / Meaning of the individual bits (with CV100/101 bit x = 0, standard) Value / Bit 0 front light output 1 / Bit 1 rear light output 2 / Bit 2 function output A1 4 / Bit 3 function output A2 8 / Bit 4 function output A3 16 / Bit 5 function output A4 32 / Bit 6 shunting mode 64 / Bit 7 acceleration/braking delay 128 / Meaning of the individual bits (with CV100/101 bit x = 1, function mapping shift) Value / Bit 0 function output A2 1 / Bit 1 function output A3 2 / Bit 2 function output A4 4 / Bit 3 shunting mode 8 / Bit 4 acceleration/braking delay 16 / Bit 5 function output A5 32 / Bit 6 function output A6 64 / Bit 7 function output A7 128</description>
+  </parameter>
+  <parameter nr=""35"" value=""1"">
+    <description>Simple function mapping / Assignment of the function outputs to the CVs / CV 33 light function key (F0) when running forwards / CV 34 light function key (F0) when running backwards / CV 35 function key F1 / CV 36 function key F2 / CV 37 function key F3 / CV 38 function key F4 / CV 39 function key F5 / CV 40 function key F6 / CV 41 function key F7 / CV 42 function key F8 / CV 43 function key F9 / CV 44 function key F10 / CV 45 function key F11 / CV 46 function key F12 / Meaning of the individual bits (with CV100/101 bit x = 0, standard) Value / Bit 0 front light output 1 / Bit 1 rear light output 2 / Bit 2 function output A1 4 / Bit 3 function output A2 8 / Bit 4 function output A3 16 / Bit 5 function output A4 32 / Bit 6 shunting mode 64 / Bit 7 acceleration/braking delay 128 / Meaning of the individual bits (with CV100/101 bit x = 1, function mapping shift) Value / Bit 0 function output A2 1 / Bit 1 function output A3 2 / Bit 2 function output A4 4 / Bit 3 shunting mode 8 / Bit 4 acceleration/braking delay 16 / Bit 5 function output A5 32 / Bit 6 function output A6 64 / Bit 7 function output A7 128</description>
+  </parameter>
+  <parameter nr=""36"" value=""1"">
+    <description>Simple function mapping / Assignment of the function outputs to the CVs / CV 33 light function key (F0) when running forwards / CV 34 light function key (F0) when running backwards / CV 35 function key F1 / CV 36 function key F2 / CV 37 function key F3 / CV 38 function key F4 / CV 39 function key F5 / CV 40 function key F6 / CV 41 function key F7 / CV 42 function key F8 / CV 43 function key F9 / CV 44 function key F10 / CV 45 function key F11 / CV 46 function key F12 / Meaning of the individual bits (with CV100/101 bit x = 0, standard) Value / Bit 0 front light output 1 / Bit 1 rear light output 2 / Bit 2 function output A1 4 / Bit 3 function output A2 8 / Bit 4 function output A3 16 / Bit 5 function output A4 32 / Bit 6 shunting mode 64 / Bit 7 acceleration/braking delay 128 / Meaning of the individual bits (with CV100/101 bit x = 1, function mapping shift) Value / Bit 0 function output A2 1 / Bit 1 function output A3 2 / Bit 2 function output A4 4 / Bit 3 shunting mode 8 / Bit 4 acceleration/braking delay 16 / Bit 5 function output A5 32 / Bit 6 function output A6 64 / Bit 7 function output A7 128</description>
+  </parameter>
+  <parameter nr=""37"" value=""1"">
+    <description>Simple function mapping / Assignment of the function outputs to the CVs / CV 33 light function key (F0) when running forwards / CV 34 light function key (F0) when running backwards / CV 35 function key F1 / CV 36 function key F2 / CV 37 function key F3 / CV 38 function key F4 / CV 39 function key F5 / CV 40 function key F6 / CV 41 function key F7 / CV 42 function key F8 / CV 43 function key F9 / CV 44 function key F10 / CV 45 function key F11 / CV 46 function key F12 / Meaning of the individual bits (with CV100/101 bit x = 0, standard) Value / Bit 0 front light output 1 / Bit 1 rear light output 2 / Bit 2 function output A1 4 / Bit 3 function output A2 8 / Bit 4 function output A3 16 / Bit 5 function output A4 32 / Bit 6 shunting mode 64 / Bit 7 acceleration/braking delay 128 / Meaning of the individual bits (with CV100/101 bit x = 1, function mapping shift) Value / Bit 0 function output A2 1 / Bit 1 function output A3 2 / Bit 2 function output A4 4 / Bit 3 shunting mode 8 / Bit 4 acceleration/braking delay 16 / Bit 5 function output A5 32 / Bit 6 function output A6 64 / Bit 7 function output A7 128</description>
+  </parameter>
+  <parameter nr=""38"" value=""1"">
+    <description>Simple function mapping / Assignment of the function outputs to the CVs / CV 33 light function key (F0) when running forwards / CV 34 light function key (F0) when running backwards / CV 35 function key F1 / CV 36 function key F2 / CV 37 function key F3 / CV 38 function key F4 / CV 39 function key F5 / CV 40 function key F6 / CV 41 function key F7 / CV 42 function key F8 / CV 43 function key F9 / CV 44 function key F10 / CV 45 function key F11 / CV 46 function key F12 / Meaning of the individual bits (with CV100/101 bit x = 0, standard) Value / Bit 0 front light output 1 / Bit 1 rear light output 2 / Bit 2 function output A1 4 / Bit 3 function output A2 8 / Bit 4 function output A3 16 / Bit 5 function output A4 32 / Bit 6 shunting mode 64 / Bit 7 acceleration/braking delay 128 / Meaning of the individual bits (with CV100/101 bit x = 1, function mapping shift) Value / Bit 0 function output A2 1 / Bit 1 function output A3 2 / Bit 2 function output A4 4 / Bit 3 shunting mode 8 / Bit 4 acceleration/braking delay 16 / Bit 5 function output A5 32 / Bit 6 function output A6 64 / Bit 7 function output A7 128</description>
+  </parameter>
+  <parameter nr=""39"" value=""1"">
+    <description>Simple function mapping / Assignment of the function outputs to the CVs / CV 33 light function key (F0) when running forwards / CV 34 light function key (F0) when running backwards / CV 35 function key F1 / CV 36 function key F2 / CV 37 function key F3 / CV 38 function key F4 / CV 39 function key F5 / CV 40 function key F6 / CV 41 function key F7 / CV 42 function key F8 / CV 43 function key F9 / CV 44 function key F10 / CV 45 function key F11 / CV 46 function key F12 / Meaning of the individual bits (with CV100/101 bit x = 0, standard) Value / Bit 0 front light output 1 / Bit 1 rear light output 2 / Bit 2 function output A1 4 / Bit 3 function output A2 8 / Bit 4 function output A3 16 / Bit 5 function output A4 32 / Bit 6 shunting mode 64 / Bit 7 acceleration/braking delay 128 / Meaning of the individual bits (with CV100/101 bit x = 1, function mapping shift) Value / Bit 0 function output A2 1 / Bit 1 function output A3 2 / Bit 2 function output A4 4 / Bit 3 shunting mode 8 / Bit 4 acceleration/braking delay 16 / Bit 5 function output A5 32 / Bit 6 function output A6 64 / Bit 7 function output A7 128</description>
+  </parameter>
+  <parameter nr=""40"" value=""1"">
+    <description>Simple function mapping / Assignment of the function outputs to the CVs / CV 33 light function key (F0) when running forwards / CV 34 light function key (F0) when running backwards / CV 35 function key F1 / CV 36 function key F2 / CV 37 function key F3 / CV 38 function key F4 / CV 39 function key F5 / CV 40 function key F6 / CV 41 function key F7 / CV 42 function key F8 / CV 43 function key F9 / CV 44 function key F10 / CV 45 function key F11 / CV 46 function key F12 / Meaning of the individual bits (with CV100/101 bit x = 0, standard) Value / Bit 0 front light output 1 / Bit 1 rear light output 2 / Bit 2 function output A1 4 / Bit 3 function output A2 8 / Bit 4 function output A3 16 / Bit 5 function output A4 32 / Bit 6 shunting mode 64 / Bit 7 acceleration/braking delay 128 / Meaning of the individual bits (with CV100/101 bit x = 1, function mapping shift) Value / Bit 0 function output A2 1 / Bit 1 function output A3 2 / Bit 2 function output A4 4 / Bit 3 shunting mode 8 / Bit 4 acceleration/braking delay 16 / Bit 5 function output A5 32 / Bit 6 function output A6 64 / Bit 7 function output A7 128</description>
+  </parameter>
+  <parameter nr=""41"" value=""1"">
+    <description>Simple function mapping / Assignment of the function outputs to the CVs / CV 33 light function key (F0) when running forwards / CV 34 light function key (F0) when running backwards / CV 35 function key F1 / CV 36 function key F2 / CV 37 function key F3 / CV 38 function key F4 / CV 39 function key F5 / CV 40 function key F6 / CV 41 function key F7 / CV 42 function key F8 / CV 43 function key F9 / CV 44 function key F10 / CV 45 function key F11 / CV 46 function key F12 / Meaning of the individual bits (with CV100/101 bit x = 0, standard) Value / Bit 0 front light output 1 / Bit 1 rear light output 2 / Bit 2 function output A1 4 / Bit 3 function output A2 8 / Bit 4 function output A3 16 / Bit 5 function output A4 32 / Bit 6 shunting mode 64 / Bit 7 acceleration/braking delay 128 / Meaning of the individual bits (with CV100/101 bit x = 1, function mapping shift) Value / Bit 0 function output A2 1 / Bit 1 function output A3 2 / Bit 2 function output A4 4 / Bit 3 shunting mode 8 / Bit 4 acceleration/braking delay 16 / Bit 5 function output A5 32 / Bit 6 function output A6 64 / Bit 7 function output A7 128</description>
+  </parameter>
+  <parameter nr=""42"" value=""1"">
+    <description>Simple function mapping / Assignment of the function outputs to the CVs / CV 33 light function key (F0) when running forwards / CV 34 light function key (F0) when running backwards / CV 35 function key F1 / CV 36 function key F2 / CV 37 function key F3 / CV 38 function key F4 / CV 39 function key F5 / CV 40 function key F6 / CV 41 function key F7 / CV 42 function key F8 / CV 43 function key F9 / CV 44 function key F10 / CV 45 function key F11 / CV 46 function key F12 / Meaning of the individual bits (with CV100/101 bit x = 0, standard) Value / Bit 0 front light output 1 / Bit 1 rear light output 2 / Bit 2 function output A1 4 / Bit 3 function output A2 8 / Bit 4 function output A3 16 / Bit 5 function output A4 32 / Bit 6 shunting mode 64 / Bit 7 acceleration/braking delay 128 / Meaning of the individual bits (with CV100/101 bit x = 1, function mapping shift) Value / Bit 0 function output A2 1 / Bit 1 function output A3 2 / Bit 2 function output A4 4 / Bit 3 shunting mode 8 / Bit 4 acceleration/braking delay 16 / Bit 5 function output A5 32 / Bit 6 function output A6 64 / Bit 7 function output A7 128</description>
+  </parameter>
+  <parameter nr=""43"" value=""1"">
+    <description>Simple function mapping / Assignment of the function outputs to the CVs / CV 33 light function key (F0) when running forwards / CV 34 light function key (F0) when running backwards / CV 35 function key F1 / CV 36 function key F2 / CV 37 function key F3 / CV 38 function key F4 / CV 39 function key F5 / CV 40 function key F6 / CV 41 function key F7 / CV 42 function key F8 / CV 43 function key F9 / CV 44 function key F10 / CV 45 function key F11 / CV 46 function key F12 / Meaning of the individual bits (with CV100/101 bit x = 0, standard) Value / Bit 0 front light output 1 / Bit 1 rear light output 2 / Bit 2 function output A1 4 / Bit 3 function output A2 8 / Bit 4 function output A3 16 / Bit 5 function output A4 32 / Bit 6 shunting mode 64 / Bit 7 acceleration/braking delay 128 / Meaning of the individual bits (with CV100/101 bit x = 1, function mapping shift) Value / Bit 0 function output A2 1 / Bit 1 function output A3 2 / Bit 2 function output A4 4 / Bit 3 shunting mode 8 / Bit 4 acceleration/braking delay 16 / Bit 5 function output A5 32 / Bit 6 function output A6 64 / Bit 7 function output A7 128</description>
+  </parameter>
+  <parameter nr=""44"" value=""1"">
+    <description>Simple function mapping / Assignment of the function outputs to the CVs / CV 33 light function key (F0) when running forwards / CV 34 light function key (F0) when running backwards / CV 35 function key F1 / CV 36 function key F2 / CV 37 function key F3 / CV 38 function key F4 / CV 39 function key F5 / CV 40 function key F6 / CV 41 function key F7 / CV 42 function key F8 / CV 43 function key F9 / CV 44 function key F10 / CV 45 function key F11 / CV 46 function key F12 / Meaning of the individual bits (with CV100/101 bit x = 0, standard) Value / Bit 0 front light output 1 / Bit 1 rear light output 2 / Bit 2 function output A1 4 / Bit 3 function output A2 8 / Bit 4 function output A3 16 / Bit 5 function output A4 32 / Bit 6 shunting mode 64 / Bit 7 acceleration/braking delay 128 / Meaning of the individual bits (with CV100/101 bit x = 1, function mapping shift) Value / Bit 0 function output A2 1 / Bit 1 function output A3 2 / Bit 2 function output A4 4 / Bit 3 shunting mode 8 / Bit 4 acceleration/braking delay 16 / Bit 5 function output A5 32 / Bit 6 function output A6 64 / Bit 7 function output A7 128</description>
+  </parameter>
+  <parameter nr=""45"" value=""1"">
+    <description>Simple function mapping / Assignment of the function outputs to the CVs / CV 33 light function key (F0) when running forwards / CV 34 light function key (F0) when running backwards / CV 35 function key F1 / CV 36 function key F2 / CV 37 function key F3 / CV 38 function key F4 / CV 39 function key F5 / CV 40 function key F6 / CV 41 function key F7 / CV 42 function key F8 / CV 43 function key F9 / CV 44 function key F10 / CV 45 function key F11 / CV 46 function key F12 / Meaning of the individual bits (with CV100/101 bit x = 0, standard) Value / Bit 0 front light output 1 / Bit 1 rear light output 2 / Bit 2 function output A1 4 / Bit 3 function output A2 8 / Bit 4 function output A3 16 / Bit 5 function output A4 32 / Bit 6 shunting mode 64 / Bit 7 acceleration/braking delay 128 / Meaning of the individual bits (with CV100/101 bit x = 1, function mapping shift) Value / Bit 0 function output A2 1 / Bit 1 function output A3 2 / Bit 2 function output A4 4 / Bit 3 shunting mode 8 / Bit 4 acceleration/braking delay 16 / Bit 5 function output A5 32 / Bit 6 function output A6 64 / Bit 7 function output A7 128</description>
+  </parameter>
+  <parameter nr=""46"" value=""1"">
+    <description>Simple function mapping / Assignment of the function outputs to the CVs / CV 33 light function key (F0) when running forwards / CV 34 light function key (F0) when running backwards / CV 35 function key F1 / CV 36 function key F2 / CV 37 function key F3 / CV 38 function key F4 / CV 39 function key F5 / CV 40 function key F6 / CV 41 function key F7 / CV 42 function key F8 / CV 43 function key F9 / CV 44 function key F10 / CV 45 function key F11 / CV 46 function key F12 / Meaning of the individual bits (with CV100/101 bit x = 0, standard) Value / Bit 0 front light output 1 / Bit 1 rear light output 2 / Bit 2 function output A1 4 / Bit 3 function output A2 8 / Bit 4 function output A3 16 / Bit 5 function output A4 32 / Bit 6 shunting mode 64 / Bit 7 acceleration/braking delay 128 / Meaning of the individual bits (with CV100/101 bit x = 1, function mapping shift) Value / Bit 0 function output A2 1 / Bit 1 function output A3 2 / Bit 2 function output A4 4 / Bit 3 shunting mode 8 / Bit 4 acceleration/braking delay 16 / Bit 5 function output A5 32 / Bit 6 function output A6 64 / Bit 7 function output A7 128</description>
+  </parameter>
+  <parameter nr=""47"" value=""12"">
+    <description>Motorola 1st trinary address (directly only with the Motorola programming procedure)</description>
+  </parameter>
+  <parameter nr=""48"" value=""0"">
+    <description>Motorola 2nd trinary address (only with the Motorola programming procedure)</description>
+  </parameter>
+  <parameter nr=""49"" value=""0"">
+    <description>Motorola 3rd trinary address (only with the Motorola programming procedure)</description>
+  </parameter>
+  <parameter nr=""50"" value=""0"">
+    <description>Decoder configuration 1 / Bit 0=0 do not use Motorola 2nd address / Bit 0=1 use Motorola 2nd address / Bit 1=0 do not use Motorola 3rd address / Bit 1=1 use Motorola 3rd address / Bit 2=0 do not swap light outputs / Bit 2=1 swap light outputs / Bit 3=0 frequency of lights, A1 to A7 = 156 Hz / Bit 3=1 frequency of lights, A1 to A5 = 24 kHz / Bit 4=0 SUSI = SUSI / Bit 4=1 SUSI = A3/A4 output, function mapping table / Bit 5=0 SUSI = SUSI / Bit 5=1 SUSI DATA = input 1, CLK = input 2 / Bit 6=0 A8 = output with logic level / Bit 6=1 A8 = input 3 / Bit 7=0 Intellimatic = OFF / Bit 7=1 Intellimatic = ON</description>
+  </parameter>
+  <parameter nr=""51"" value=""3"">
+    <description>Decoder configuration 2 / Bit 0=0 motor control off / Bit 0=1 motor control on / Bit 1=0 motor control PID controller / Bit 1=1 motor control SX controller / Bit 2=0 no dynamic period for the motor control / Bit 2=1 dynamic period for the motor control</description>
+  </parameter>
+  <parameter nr=""53"" value=""40"">
+    <description>Period of the motor control in steps of 100 µs</description>
+  </parameter>
+  <parameter nr=""54"" value=""100"">
+    <description>Motor control P constant of the PID controller</description>
+  </parameter>
+  <parameter nr=""55"" value=""40"">
+    <description>Motor control I constant of the PID controller</description>
+  </parameter>
+  <parameter nr=""56"" value=""32"">
+    <description>Motor control D constant of the PID controller</description>
+  </parameter>
+  <parameter nr=""57"" value=""6"">
+    <description>Controller offset</description>
+  </parameter>
+  <parameter nr=""58"" value=""8"">
+    <description>Measuring gap for the back-EMF measurement in steps of 100 µs</description>
+  </parameter>
+  <parameter nr=""59"" value=""0"">
+    <description>Reset to the factory settings (also possible via CV8) / 1 = CV 0 - 256, and CV257 - 512 (RailCom® bank 7) / 2 = CV 257 - 512 (RailCom Plus® banks 5 &amp; 6) / 3 = CV 257 - 512 (extended function mapping banks 1 &amp; 2) / 4 = CV 257 - 512 (PWM modulation of the function outputs banks 3 &amp; 4) / 5 = CV 257 - 512 (Intellimatic bank 8)</description>
+  </parameter>
+  <parameter nr=""60"">
+    <description>Short-circuit monitoring of the motor and function outputs, temperature monitoring / Switched on (do not change)</description>
+  </parameter>
+  <parameter nr=""61"">
+    <description>Constant for the temperature cut-out</description>
+  </parameter>
+  <parameter nr=""62"">
+    <description>Constant for short-circuit detection at the function outputs (do not change)</description>
+  </parameter>
+  <parameter nr=""63"">
+    <description>Constant for short-circuit detection at the motor output (do not change)</description>
+  </parameter>
+  <parameter nr=""64"" value=""0"">
+    <description>Page register / for CV programming with a Motorola command station</description>
+  </parameter>
+  <parameter nr=""65"" value=""0"">
+    <description>Offset register / for CV programming with a Motorola command station</description>
+  </parameter>
+  <parameter nr=""66"" value=""0"">
+    <description>Speed correction forwards</description>
+  </parameter>
+  <parameter nr=""67"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""68"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""69"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""70"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""71"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""72"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""73"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""74"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""75"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""76"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""77"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""78"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""79"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""80"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""81"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""82"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""83"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""84"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""85"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""86"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""87"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""88"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""89"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""90"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""91"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""92"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""93"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""94"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""95"" value=""0"">
+    <description>Speed correction backwards</description>
+  </parameter>
+  <parameter nr=""96"" value=""0"">
+    <description>Type of function mapping / 0 = simple function mapping, 1 = extended function mapping</description>
+  </parameter>
+  <parameter nr=""97"" value=""8"">
+    <description>ABC braking / The voltage difference for the diode section is approximately the CV value * 0.12 V</description>
+  </parameter>
+  <parameter nr=""98"" value=""30"">
+    <description>Speed in the ABC slow-running section</description>
+  </parameter>
+  <parameter nr=""100"" value=""0"">
+    <description>Function mapping shift (F0 - F4) Value / Bit 0 change of the assignment in CV35 (F1) 1 / Bit 1 change of the assignment in CV36 (F2) 2 / Bit 2 change of the assignment in CV37 (F3) 4 / Bit 3 change of the assignment in CV38 (F4) 8 / Bit 4 change of the assignment in CV33 (F0f) 16 / Bit 5 change of the assignment in CV34 (F0r) 32</description>
+  </parameter>
+  <parameter nr=""101"" value=""0"">
+    <description>Function mapping shift (F5 - F12) Value / Bit 0 change of the assignment in CV39 (F5) 1 / Bit 1 change of the assignment in CV40 (F6) 2 / Bit 2 change of the assignment in CV41 (F7) 4 / Bit 3 change of the assignment in CV42 (F8) 8 / Bit 4 change of the assignment in CV43 (F9) 16 / Bit 5 change of the assignment in CV44 (F10) 32 / Bit 6 change of the assignment in CV45 (F11) 64 / Bit 7 change of the assignment in CV46 (F12) 128</description>
+  </parameter>
+  <parameter nr=""102"" value=""30"">
+    <description>Analogue operation configuration Value / Bit 0/1 00 = max. speed, no control 0 / 01 = max. speed as CV106 1 / 10 = measure transformer voltage and use CV103 and CV104 2* / Bit 2 0 = controller OFF, 1 = controller ON 4* / Bit 3 0 = PID controller, 1 = SX controller 8* / Bit 4 1 = dynamic repetition rate 16*</description>
+  </parameter>
+  <parameter nr=""103"" value=""150"">
+    <description>Analogue: minimum transformer voltage for target speed = 0</description>
+  </parameter>
+  <parameter nr=""104"" value=""180"">
+    <description>Analogue: maximum transformer voltage for target speed = Fmax</description>
+  </parameter>
+  <parameter nr=""105"" value=""30"">
+    <description>Analogue: hysteresis</description>
+  </parameter>
+  <parameter nr=""106"" value=""200"">
+    <description>Analogue: Fmax</description>
+  </parameter>
+  <parameter nr=""107"" value=""0"">
+    <description>Switch off the front lighting</description>
+  </parameter>
+  <parameter nr=""108"" value=""0"">
+    <description>Switch off the rear lighting</description>
+  </parameter>
+  <parameter nr=""109"" value=""0"">
+    <description>Flashing generator, assignment of phase 1 to the outputs / Bit 0-7 -&gt; A0 to A7; bit = 0 -&gt; flashing phase 1 off, bit = 1 -&gt; flashing phase 1 on</description>
+  </parameter>
+  <parameter nr=""110"" value=""0"">
+    <description>Flashing generator, assignment of phase 2 to the outputs / Bit 0-7 -&gt; A0 to A7; bit = 0 -&gt; flashing phase 2 off, bit = 1 -&gt; flashing phase 2 on</description>
+  </parameter>
+  <parameter nr=""111"" value=""5"">
+    <description>Flashing generator, on time in steps of 100 ms</description>
+  </parameter>
+  <parameter nr=""112"" value=""5"">
+    <description>Flashing generator, off time in steps of 100 ms</description>
+  </parameter>
+  <parameter nr=""113"" value=""0"">
+    <description>Switching off the function outputs A1 - A7 when running forwards / Bit 1-7 -&gt; A1 - A7; bit = 0 -&gt; output on, bit = 1 -&gt; output off</description>
+  </parameter>
+  <parameter nr=""114"" value=""0"">
+    <description>Switching off the function outputs A1 - A7 when running backwards / Bit 1-7 -&gt; A1 - A7; bit = 0 -&gt; output on, bit = 1 -&gt; output off</description>
+  </parameter>
+  <parameter nr=""115"" value=""1"">
+    <description>Setting of the train category for LISSY</description>
+  </parameter>
+  <parameter nr=""116"" value=""63"">
+    <description>Dimming of the light and function outputs A1 - A7 / 0 = output off, 63 = output 100%</description>
+  </parameter>
+  <parameter nr=""117"" value=""63"">
+    <description>Dimming of the light and function outputs A1 - A7 / 0 = output off, 63 = output 100%</description>
+  </parameter>
+  <parameter nr=""118"" value=""63"">
+    <description>Dimming of the light and function outputs A1 - A7 / 0 = output off, 63 = output 100%</description>
+  </parameter>
+  <parameter nr=""119"" value=""63"">
+    <description>Dimming of the light and function outputs A1 - A7 / 0 = output off, 63 = output 100%</description>
+  </parameter>
+  <parameter nr=""120"" value=""63"">
+    <description>Dimming of the light and function outputs A1 - A7 / 0 = output off, 63 = output 100%</description>
+  </parameter>
+  <parameter nr=""121"" value=""63"">
+    <description>Dimming of the light and function outputs A1 - A7 / 0 = output off, 63 = output 100%</description>
+  </parameter>
+  <parameter nr=""122"" value=""63"">
+    <description>Dimming of the light and function outputs A1 - A7 / 0 = output off, 63 = output 100%</description>
+  </parameter>
+  <parameter nr=""123"" value=""63"">
+    <description>Dimming of the light and function outputs A1 - A7 / 0 = output off, 63 = output 100%</description>
+  </parameter>
+  <parameter nr=""124"" value=""1"">
+    <description>Coupling repetitions for electric couplers on A1 - A7 / 0 = no coupler</description>
+  </parameter>
+  <parameter nr=""125"" value=""10"">
+    <description>On time of the coupler, value * 100 ms (with the PWM from CV117 - 123)</description>
+  </parameter>
+  <parameter nr=""126"" value=""20"">
+    <description>Hold time of the coupler, value * 100 ms</description>
+  </parameter>
+  <parameter nr=""127"" value=""10"">
+    <description>Pause time of the coupler, value * 100 ms</description>
+  </parameter>
+  <parameter nr=""128"" value=""30"">
+    <description>Holding PWM</description>
+  </parameter>
+  <parameter nr=""129"" value=""0"">
+    <description>Assignment of the outputs A1 - A7 to electric couplers (0 = no coupler) / Bit 1-7 -&gt; A1 - A7</description>
+  </parameter>
+  <parameter nr=""130"" value=""0"">
+    <description>Dynamic smoke generator control on A1 - A7 Value / 0 = no smoke generator operation 0* / Bit 0-3 -&gt; 1=A1, 2=A2, 3=A3, 4=A4, 5=A5, 6=A6, 7=A7 1-7 / Bit 4-7 = 1 -&gt; start-up time = value * 200 ms 16-240</description>
+  </parameter>
+  <parameter nr=""131"" value=""5"">
+    <description>Dynamic smoke generator control, load threshold</description>
+  </parameter>
+  <parameter nr=""132"" value=""16"">
+    <description>Dynamic smoke generator control, PWM in normal operation</description>
+  </parameter>
+  <parameter nr=""133"" value=""2"">
+    <description>Dynamic smoke generator control, PWM when idling (stationary)</description>
+  </parameter>
+  <parameter nr=""134"" value=""30"">
+    <description>Dynamic smoke generator control, start-up time in steps of 100 ms</description>
+  </parameter>
+  <parameter nr=""135"" value=""0"">
+    <description>Shunting tango (automatic uncoupling run), speed step (0 = off)</description>
+  </parameter>
+  <parameter nr=""136"" value=""10"">
+    <description>Shunting tango, push-up time T1 * 100 ms</description>
+  </parameter>
+  <parameter nr=""137"" value=""10"">
+    <description>Shunting tango, pull-away time T2 * 100 ms</description>
+  </parameter>
+  <parameter nr=""138"" value=""0"">
+    <description>Constant braking distance in cm, speed step threshold / Only above this is braking done with a constant braking distance (0 = off)</description>
+  </parameter>
+  <parameter nr=""139"" value=""50"">
+    <description>Constant braking distance in cm, first braking distance</description>
+  </parameter>
+  <parameter nr=""140"" value=""25"">
+    <description>Constant braking distance in cm, alternative braking distance (activated by the cross bit)</description>
+  </parameter>
+  <parameter nr=""141"" value=""40"">
+    <description>Constant braking distance in cm, maximum speed of the model loco in cm/s</description>
+  </parameter>
+  <parameter nr=""142"" value=""0"">
+    <description>Constant braking distance in cm, remainder of the determined maximum speed</description>
+  </parameter>
+  <parameter nr=""143"" value=""0"">
+    <description>Constant braking distance in cm, activation by (0 = off): / Bit 0 = 1 -&gt; target speed step = 0 / Bit 1 = 1 -&gt; ABC braking / Bit 2 = 1 -&gt; DC braking / Bit 3 = 1 -&gt; DCC brake signal</description>
+  </parameter>
+  <parameter nr=""144"" value=""12"">
+    <description>Acceleration delay 2 (as a replacement for CV3)</description>
+  </parameter>
+  <parameter nr=""145"" value=""12"">
+    <description>Braking delay 2 (as a replacement for CV4)</description>
+  </parameter>
+  <parameter nr=""146"" value=""24"">
+    <description>Acceleration delay 3 (as a replacement for CV3)</description>
+  </parameter>
+  <parameter nr=""147"" value=""24"">
+    <description>Braking delay 3 (as a replacement for CV4)</description>
+  </parameter>
+  <parameter nr=""148"" value=""255"">
+    <description>Function key number for ABV 2 (255 = off)</description>
+  </parameter>
+  <parameter nr=""149"" value=""255"">
+    <description>Function key number for ABV 3 (255 = off)</description>
+  </parameter>
+  <parameter nr=""150"" value=""10"">
+    <description>Second dimming of the light and function outputs A1 - A7 / 0 = off, 63 = 100%</description>
+  </parameter>
+  <parameter nr=""151"" value=""10"">
+    <description>Second dimming of the light and function outputs A1 - A7 / 0 = off, 63 = 100%</description>
+  </parameter>
+  <parameter nr=""152"" value=""10"">
+    <description>Second dimming of the light and function outputs A1 - A7 / 0 = off, 63 = 100%</description>
+  </parameter>
+  <parameter nr=""153"" value=""10"">
+    <description>Second dimming of the light and function outputs A1 - A7 / 0 = off, 63 = 100%</description>
+  </parameter>
+  <parameter nr=""154"" value=""10"">
+    <description>Second dimming of the light and function outputs A1 - A7 / 0 = off, 63 = 100%</description>
+  </parameter>
+  <parameter nr=""155"" value=""10"">
+    <description>Second dimming of the light and function outputs A1 - A7 / 0 = off, 63 = 100%</description>
+  </parameter>
+  <parameter nr=""156"" value=""10"">
+    <description>Second dimming of the light and function outputs A1 - A7 / 0 = off, 63 = 100%</description>
+  </parameter>
+  <parameter nr=""157"" value=""10"">
+    <description>Second dimming of the light and function outputs A1 - A7 / 0 = off, 63 = 100%</description>
+  </parameter>
+  <parameter nr=""159"" value=""0"">
+    <description>Marking of the functions F22 - F28 for transfer to SUSI / Bit 0-6; bit = 1 --&gt; F22 - F28 is passed on to SUSI</description>
+  </parameter>
+  <parameter nr=""160"" value=""20"">
+    <description>Servo control, servo 1 position 1 (function key off)</description>
+  </parameter>
+  <parameter nr=""161"" value=""200"">
+    <description>Servo control, servo 1 position 2 (function key on)</description>
+  </parameter>
+  <parameter nr=""162"" value=""30"">
+    <description>Servo control, servo 1 travel time in steps of 100 ms</description>
+  </parameter>
+  <parameter nr=""163"" value=""20"">
+    <description>Servo control, servo 2 position 1 (function key off)</description>
+  </parameter>
+  <parameter nr=""164"" value=""200"">
+    <description>Servo control, servo 2 position 2 (function key on)</description>
+  </parameter>
+  <parameter nr=""165"" value=""30"">
+    <description>Servo control, servo 2 travel time in steps of 100 ms</description>
+  </parameter>
+  <parameter nr=""166"" value=""0"">
+    <description>Servo control via: SUSI = 1, A6 = 64, A7 = 128</description>
+  </parameter>
+  <parameter nr=""167"" value=""7"">
+    <description>Function key number for servo 1 on SUSI-CLK</description>
+  </parameter>
+  <parameter nr=""168"" value=""8"">
+    <description>Function key number for servo 2 on SUSI-Data</description>
+  </parameter>
+  <parameter nr=""170"" value=""0"">
+    <description>Assignment of the PWM curve for the light output, A1 - A7 / Curve 1 - 8, bit 7 = 1 -&gt; curve only active if the CROSS output bit is set</description>
+  </parameter>
+  <parameter nr=""171"" value=""0"">
+    <description>Assignment of the PWM curve for the light output, A1 - A7 / Curve 1 - 8, bit 7 = 1 -&gt; curve only active if the CROSS output bit is set</description>
+  </parameter>
+  <parameter nr=""172"" value=""0"">
+    <description>Assignment of the PWM curve for the light output, A1 - A7 / Curve 1 - 8, bit 7 = 1 -&gt; curve only active if the CROSS output bit is set</description>
+  </parameter>
+  <parameter nr=""173"" value=""0"">
+    <description>Assignment of the PWM curve for the light output, A1 - A7 / Curve 1 - 8, bit 7 = 1 -&gt; curve only active if the CROSS output bit is set</description>
+  </parameter>
+  <parameter nr=""174"" value=""0"">
+    <description>Assignment of the PWM curve for the light output, A1 - A7 / Curve 1 - 8, bit 7 = 1 -&gt; curve only active if the CROSS output bit is set</description>
+  </parameter>
+  <parameter nr=""175"" value=""0"">
+    <description>Assignment of the PWM curve for the light output, A1 - A7 / Curve 1 - 8, bit 7 = 1 -&gt; curve only active if the CROSS output bit is set</description>
+  </parameter>
+  <parameter nr=""176"" value=""0"">
+    <description>Assignment of the PWM curve for the light output, A1 - A7 / Curve 1 - 8, bit 7 = 1 -&gt; curve only active if the CROSS output bit is set</description>
+  </parameter>
+  <parameter nr=""177"" value=""0"">
+    <description>Assignment of the PWM curve for the light output, A1 - A7 / Curve 1 - 8, bit 7 = 1 -&gt; curve only active if the CROSS output bit is set</description>
+  </parameter>
+  <parameter nr=""178"" value=""15"">
+    <description>PWM curve, period of the playback (value * 64 ms)</description>
+  </parameter>
+  <parameter nr=""179"" value=""0"">
+    <description>PWM curve, phase position of the outputs / Bit 0-7 = 0 A0h - A7 -&gt; phase position 0° / Bit 0-7 = 1 A0h - A7 -&gt; phase position 180°</description>
+  </parameter>
+  <parameter nr=""180"" value=""0"">
+    <description>PWM curve, hold time after the CROSS output bit goes off (value * 100 ms)</description>
+  </parameter>
+  <parameter nr=""181"" value=""0"">
+    <description>Firebox flicker of the light and function outputs A1 - A7 / Bit 0-7 -&gt; A0 - A7; bit = 0 -&gt; flicker off, bit = 1 -&gt; flicker on</description>
+  </parameter>
+  <parameter nr=""182"" value=""0"">
+    <description>Firebox flicker, flicker settings / Bit 0-3 -&gt; change the flicker rhythm (value range 1 to 15) / Bit 4-6 -&gt; change the brightness (value range 16, 32, 48, 64, 80, 96, 112) / Bit 7 = 1 -&gt; output always bright (can be combined with bits 4-6)</description>
+  </parameter>
+  <parameter nr=""183"" value=""0"">
+    <description>Energy-saving lamp effect of the light and function outputs A1 - A7 / Bit 0-7 -&gt; A0 - A7; bit = 0 -&gt; effect off, bit = 1 -&gt; effect on</description>
+  </parameter>
+  <parameter nr=""184"" value=""10"">
+    <description>Energy-saving lamp effect, basic brightness</description>
+  </parameter>
+  <parameter nr=""185"" value=""100"">
+    <description>Energy-saving lamp effect, time until maximum brightness is reached (value * 5 ms)</description>
+  </parameter>
+  <parameter nr=""186"" value=""0"">
+    <description>Fading the light and function outputs A1 - A7 in and out / Bit 0-7 -&gt; A0 - A7; bit = 0 -&gt; fade function off, bit = 1 -&gt; fade function on</description>
+  </parameter>
+  <parameter nr=""187"" value=""30"">
+    <description>Fading in and out, fade time (value * 10 ms)</description>
+  </parameter>
+  <parameter nr=""188"" value=""0"">
+    <description>Fluorescent tube switch-on effect of the light and function outputs A1 - A7 / Bit 0-7 -&gt; A0 - A7; bit = 0 -&gt; effect off, bit = 1 -&gt; effect on</description>
+  </parameter>
+  <parameter nr=""189"" value=""20"">
+    <description>Fluorescent tube switch-on effect, flash time (value * 5 ms)</description>
+  </parameter>
+  <parameter nr=""190"" value=""20"">
+    <description>Fluorescent tube switch-on effect, maximum number of flashes</description>
+  </parameter>
+  <parameter nr=""200"" value=""10"">
+    <description>Motor control, speed-dependent period / Minimum speed step up to which the period is set to CV53</description>
+  </parameter>
+  <parameter nr=""201"" value=""150"">
+    <description>Maximum speed step from which the period is set to CV202</description>
+  </parameter>
+  <parameter nr=""202"" value=""250"">
+    <description>Maximum period in steps of 100 µs (min = CV53)</description>
+  </parameter>
+</configuration>"

@@ -1,0 +1,57 @@
+﻿"Kategorie";"Typ";"Name";"Beschreibung";"XML"
+"decoder-configuration";"configuration";"Lenz";"Lenz SILVER+ / GOLD+ - CV table from the operating manual (Information SILVER+ / GOLD+ decoders), pages 16-18";"<configuration count=""18"">
+  <parameter nr=""1"" value=""3"">
+    <description>Basic loco address | This is the number with which you call up the locos in the Digital plus by Lenz® | system. For use with Digital plus by Lenz® | equipment only the range 1-99 is permitted. When this CV is written, | CV19 (consist address) and bit 6 of CV29 (use | of the extended address) are cleared automatically in the decoder.</description>
+  </parameter>
+  <parameter nr=""2"" value=""1"">
+    <description>Minimum starting voltage Vmin</description>
+  </parameter>
+  <parameter nr=""3"" value=""6"">
+    <description>Acceleration delay</description>
+  </parameter>
+  <parameter nr=""4"" value=""5"">
+    <description>Braking delay</description>
+  </parameter>
+  <parameter nr=""5"" value=""254"">
+    <description>Maximum speed Vmax</description>
+  </parameter>
+  <parameter nr=""6"" value=""48"">
+    <description>Medium speed Vmid</description>
+  </parameter>
+  <parameter nr=""7"">
+    <description>Version number | 95: SILVER+ (item no. 10331-01) | 99: SILVER21+ (item no. 10321-01) | 98: SILVERdirect+ (item no. 10330-01) | 91: GOLD+ (item no. 10433-01)</description>
+  </parameter>
+  <parameter nr=""8"" value=""99"">
+    <description>Manufacturer ID</description>
+  </parameter>
+  <parameter nr=""17"" value=""192"">
+    <description>Extended loco address, high byte</description>
+  </parameter>
+  <parameter nr=""18"" value=""100"">
+    <description>Extended loco address, low byte</description>
+  </parameter>
+  <parameter nr=""19"" value=""0"">
+    <description>Consist address | For use with Digital plus by Lenz® equipment only the | range 1-99 is permitted.</description>
+  </parameter>
+  <parameter nr=""28"" value=""3"">
+    <description>RailCom configuration | Bit 1 (0) = 1: 1 channel 1 enabled for address broadcast | Bit 2 (1) = 1: 1 channel 2 enabled for data and acknowledge</description>
+  </parameter>
+  <parameter nr=""29"" value=""14"">
+    <description>Settings 1 | Bit 1 (0) = 0: direction of the loco | 0 normal: the loco runs forwards when the arrow on the | handheld controller points upwards. | 1 reversed: the loco runs forwards when the arrow on the | handheld controller points downwards. | Bit 2 (1) = 1: speed step mode: | 0 operation with 14 or 27 speed steps. Choose this setting | when using the decoder with digital systems that do | not support the 28/128 speed step mode. | 1 operation with 28 or 128 speed steps. Choose this setting | when using the decoder with digital systems that | support the 28/128 speed step mode. | Bit 3 (2) = 1: mode of operation: | 0 the loco runs in digital operation only | 1 the loco runs in conventional as well as in digital operation, | changing over on the move is possible. | Bit 4 (3) = 0: 0 RailCom transmission switched off | 1 RailCom transmission switched on | Bit 5 (4): 0 decoder uses the factory speed curve | 1 decoder uses the self-programmed speed curve | Bit 6 (5) = 0: 0 decoder uses the basic address (from CV1) | 1 decoder uses the extended address (from CV17 and CV18) | Bit 7-8 (6-7) = 0: not used</description>
+  </parameter>
+  <parameter nr=""51"" value=""0"">
+    <description>Brake configuration | Bit 1 (0) = 0: 1 constant braking distance in ABC operation enabled | Bit 2 (1) = 0: 1 ABC enabled | Bit 3 (2) = 0: 1 direction dependency of ABC is switched off | Bit 4 (3) = 0: 1 enable shuttle operation without intermediate stop | Bit 5 (4) = 0: 1 enable shuttle operation with intermediate stop | Bit 6 (5) = 0: 1 stop with DC voltage independently of polarity (only | taken into account if bit 3 in CV29 is cleared) | Bit 7 (6): not used | Bit 8 (7) = 0: constant braking distance via speed step 0 enabled</description>
+  </parameter>
+  <parameter nr=""52"" value=""50"">
+    <description>Braking distance when the constant braking distance is enabled</description>
+  </parameter>
+  <parameter nr=""53"" value=""48"">
+    <description>Slow running with ABC</description>
+  </parameter>
+  <parameter nr=""54"" value=""4"">
+    <description>Dwell time in shuttle operation, 1 to 256 seconds</description>
+  </parameter>
+  <parameter nr=""128"">
+    <description>Service number (please read out the current number)</description>
+  </parameter>
+</configuration>"

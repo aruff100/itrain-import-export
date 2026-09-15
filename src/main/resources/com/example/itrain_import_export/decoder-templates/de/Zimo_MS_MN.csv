@@ -1,0 +1,1332 @@
+﻿"Kategorie";"Typ";"Name";"Beschreibung";"XML"
+"decoder-configuration";"configuration";"ZIMO MS-Sound / MN-Nicht-Sound";"ZIMO MS-Sound-Decoder (MS450 bis MS990) und MN-Nicht-Sound-Decoder, SW-Version 5.29 - Kapitel 9 'CV-Uebersicht, CVs in numerischer Reihenfolge', Seiten 75-93; die indizierten CVs der CV-Page 145 (Seite 94) sind nicht enthalten";"<configuration count=""443"">
+  <parameter nr=""1"" value=""3"" type=""Fahrzeugadresse"">
+    <description>Die „kurze“ Fahrzeugadresse (DCC, MM) Im Falle des DCC-Betriebes: Die Fahrzeugadresse laut CV #1 gilt nur, wenn CV #29 (Grundeinstellungen), Bit 5 = 0. Andernfalls gilt die Adresse laut CV #17 + #18, also wenn CV #29, Bit 5 = 1. Ab Versionen &gt;5.28 löscht ein Schreiben der CV1 das Bit5 in CV29, was die kurze Adresse sofort aktiv schaltet.</description>
+  </parameter>
+  <parameter nr=""2"" value=""1"" type=""Anfahrspannung Vstart der Dreipunkt-Kennlinie, wenn CV #29, Bit 4 = 0"">
+    <description>Interne Fahrstufe (1 - 255) / für niedrigste externe Fahrstufe (also Fahrstufe 1) / (egal, ob 14, 28, oder 128 Fahrstufen) / = 1: niedrigste mögliche Anfahrgeschwindigkeit</description>
+  </parameter>
+  <parameter nr=""3"" value=""2"" type=""Beschleunigungszeit"">
+    <description>Der Inhalt dieser CV, multipliziert mit 0,9, ergibt die Zeit in sec für den Beschleunigungsvorgang vom Stillstand bis zur vollen Fahrt. Der tatsächlich wirksame Default-Wert entspricht bei Sound-Decodern oft nicht dem Wert „2“, sondern wird durch das geladene Soundprojekt bestimmt.</description>
+  </parameter>
+  <parameter nr=""4"" value=""1"" type=""Bremszeit (Verzögerung)"">
+    <description>Der Inhalt dieser CV, multipliziert mit 0,9, ergibt die Zeit in sec für den Verzögerungsvorgang von voller Fahrt bis zum Stillstand. Der tatsächlich wirksame Default-Wert …. siehe oben!</description>
+  </parameter>
+  <parameter nr=""5"" type=""Maximalgeschwindigkeit Vhigh der Dreipunkt-Kennlinie, wenn CV #29, Bit 4 = 0"">
+    <description>Interne Fahrstufe (1 - 255) für höchste externe Fahrstufe (also für externe Fahrstufe 14, 28 bzw. 128 je nach Fahrstufensystem laut CV #29, Bit 1 = 0: gleichbedeutend mit 255 als höchste Fahrstufe = 1: gleichbedeutend mit 255 als höchste Fahrstufe</description>
+  </parameter>
+  <parameter nr=""6"" value=""1"" type=""Mittelgeschwindigkeit Vmid"">
+    <description>Interne Fahrstufe (1 - 255) für mittlere externe Fahrstufe (also für externe Fahrstufe 7, 14 bzw. 64 je nach Fahrstufensystem 14, 28,128 laut CV #29, Bit 1) ”1"" = Default-Kennlinie (Mittengeschwindigkeit ist ein Viertel der Maximalgeschwindigkeit, d.h.: wenn CV #5 =255, gilt Kennlinie wie wenn CV #6 = 64 wäre). Die sich aus den CVs #2, #5, #6 ergebende Dreipunkt-Kennlinie wird automatisch geglättet, daher kein Knick. Die mittlere Geschwindigkeit wird im ersten Drittel der Geschwindigkeitskurve erreicht, da diese nicht linear ist.</description>
+  </parameter>
+  <parameter nr=""7"" type=""SW-Versionsnummer Siehe auch CV #65"">
+    <description>Auslesen dieser CV ergibt die Versionsnummer der aktuell im Decoder geladenen Software (Firmware). CV #7 = die Nummer der „Hauptversion“ CV #65 = Nummer der Subversion</description>
+  </parameter>
+  <parameter nr=""8"" value=""145"" type=""Hersteller-Identifikation und HARD RESET durch CV #8 = „8“ bzw. CV #8 = 0"">
+    <description>Auslesen dieser CV ergibt die von der NMRA vergebene Herstellernummer; für ZIMO “145” (”10010001”). Außerdem wird diese CV verwendet, um durch „Pseudo-Programmieren“ diverse Reset-Vorgänge auszulösen. ”Pseudo-Programmieren” heißt: programmierter Wert wird nicht gespeichert, sondern eine definierte Aktion ausgelöst. CV #8 = “3” → 21MTC-Decoder FA3, FA4 Logikpegel CV #8 = “4” → 21MTC-Decoder FA3, FA4 verstärkt CV #8 = “5” → 21MTC-Decoder FA5, FA6 Logikpegel CV #8 = “6” → 21MTC-Decoder FA5, FA6 verstärkt CV #8 = “8” → HARD RESET (NMRA-standardisiert); alle CVs nehmen Werte des zuletzt aktiven CV-Sets oder Sound-Projekts an, oder (wenn kein solches aktiviert war) die Default-Werte der CV-Tabelle. CV #8 = “0” → NICHT empfohlen (nur Servicezwecke), Default-Werte der CV-Tabelle Mittels CV #258 kann CV #8 ausgelesen werden (mit Ausnahme der Werte 3-6).</description>
+  </parameter>
+  <parameter nr=""9"" value=""55"" type=""Motoransteuerungsperiode bzw. -frequenz und EMK-Abtast-Algorithmus (Abtastrate, Messlücke) Total PWM period"">
+    <description>= 55: Defaultmäßige Motoransteuerung mit Hochfrequenz (20 kHz), mittlerer Abtastrate der Motor-EMK-Messung, die von 200 (Langsamfahrt) bis 50 Hz variiert, und mittlerer EMK-Messlücke. = 0: gleichbedeutend mit 0 (wird autom. umgesetzt) &lt;&gt; 55 und &lt;&gt; 0: Modifikation der Standardeinstellung, jeweils getrennt nach Zehnerstelle (für Abtastrate) und Einerstelle (Messlücke). Hunderterstelle 1: modifizierte Einstellungen für Glockenanker-Motoren (Faulhaber, Maxon, usw.) Zehnerstelle 1 - 4: Abtastrate niedriger gegenüber defaultmäßiger (weniger Antriebsgeräusch!) Zehnerstelle 6 - 9: Abtastrate höher als defaultmäßige (eine Maßnahme gegen Ruckeln!) Einerstelle 1 - 4: EMK-Messlücke kürzer als defaultmäßig (gut bei Faulhaber, Maxon, ... weniger Antriebsgeräusch, mehr Leistung) Einerstelle 5 - 9: EMK-Messlücke länger als defaultmäßig (ev. nötig bei Rund-Motor o.ä.)</description>
+  </parameter>
+  <parameter nr=""10"" value=""0"" type=""Motorola Folgeadressen"">
+    <description>Dezimal: 0= keine Folgeadresse 1= Eine Folgeadresse für F5-F8 2= Zwei Folgeadressen für F5-F12 3= Drei Folgeadressen für F5-F16</description>
+  </parameter>
+  <parameter nr=""12"" value=""117"" type=""Zulässige Betriebsarten"">
+    <description>Bit 0 - DC Analogbetrieb 0 = gesperrt 1 = freigegeben Bit 2 - DCC immer 1 = freigegeben Bit 4 - AC Analogbetrieb 0 = gesperrt 1 = freigegeben Bit 5 - MM 0 = gesperrt 1 = freigegeben Bit 6 - mfx 0 = gesperrt 1 = freigegeben Wert 0 = alle Formate ein</description>
+  </parameter>
+  <parameter nr=""13"" type=""Funktionen F1 -F8 Funktionen F0, F9 - F12 im Analogbetrieb,"">
+    <description>Bit 0 = 0: F1 im Analogbetrieb ausgeschaltet = 1: …. eingeschaltet Bit 1 = 0: F2 im Analogbetrieb ausgeschaltet = 1: …. eingeschaltet ………. F3, F4, F5, F6, F7 Bit 7 = 0: F8 im Analogbetrieb ausgeschaltet = 1: …. Eingeschaltet / Bit 0 = 0: F0 (vorw) im Analogbetrieb ausgeschaltet = 1: …. eingeschaltet Bit 1 = 0: F0 (rückw) im Analogbetr. ausgeschaltet = 1: …. eingeschaltet ………. F9, F10, F11 Bit 5 = 0: F12 im Analogbetrieb ausgeschaltet = 1: …. eingeschaltet = 0: Analogbetrieb mit Beschleunigungsverhalten laut CVs #3 + #4; sinnvoll für Sound = 1: Analogbetrieb ohne Wirkung von CVs #3 + #4, also unmittelbare Reaktion auf Fahrspannung ähnlich klassisch analog.</description>
+  </parameter>
+  <parameter nr=""14"" type=""Funktionen F1 -F8 Funktionen F0, F9 - F12 im Analogbetrieb,"">
+    <description>Bit 0 = 0: F1 im Analogbetrieb ausgeschaltet = 1: …. eingeschaltet Bit 1 = 0: F2 im Analogbetrieb ausgeschaltet = 1: …. eingeschaltet ………. F3, F4, F5, F6, F7 Bit 7 = 0: F8 im Analogbetrieb ausgeschaltet = 1: …. Eingeschaltet / Bit 0 = 0: F0 (vorw) im Analogbetrieb ausgeschaltet = 1: …. eingeschaltet Bit 1 = 0: F0 (rückw) im Analogbetr. ausgeschaltet = 1: …. eingeschaltet ………. F9, F10, F11 Bit 5 = 0: F12 im Analogbetrieb ausgeschaltet = 1: …. eingeschaltet = 0: Analogbetrieb mit Beschleunigungsverhalten laut CVs #3 + #4; sinnvoll für Sound = 1: Analogbetrieb ohne Wirkung von CVs #3 + #4, also unmittelbare Reaktion auf Fahrspannung ähnlich klassisch analog.</description>
+  </parameter>
+  <parameter nr=""15"" value=""0"" type=""Decoder-Sperre (decoder lock)"">
+    <description>Die Decoder-Sperre (besser bekannt als englisches „decoder lock“) dient dazu, auf die CVs mehrerer Decoder mit identischer Adresse getrennt zuzugreifen. Die CVs #16 der einzelnen Decoder werden vor dem Einbau auf unterschiedliche Werte programmiert. Bei Bedarf wird die CV #15 dieses Decoders auf den Wert „seiner“ CV #16 umprogrammiert &gt; alle CVs ansprechbar. CV #15 und #16 = 0: keine Sperre</description>
+  </parameter>
+  <parameter nr=""16"" value=""0"" type=""Decoder-Sperre (decoder lock)"">
+    <description>Die Decoder-Sperre (besser bekannt als englisches „decoder lock“) dient dazu, auf die CVs mehrerer Decoder mit identischer Adresse getrennt zuzugreifen. Die CVs #16 der einzelnen Decoder werden vor dem Einbau auf unterschiedliche Werte programmiert. Bei Bedarf wird die CV #15 dieses Decoders auf den Wert „seiner“ CV #16 umprogrammiert &gt; alle CVs ansprechbar. CV #15 und #16 = 0: keine Sperre</description>
+  </parameter>
+  <parameter nr=""17"" value=""192"" type=""Erweiterte Adresse"">
+    <description>Die „lange“ Fahrzeugadresse (DCC), wenn eine Adresse ab 128 gewünscht wird.; Die Fahrzeugadresse laut CVs #17 + #18 gilt, wenn CV #29 (Grundeinstellungen), Bit 5 = 1.</description>
+  </parameter>
+  <parameter nr=""18"" value=""128"" type=""Erweiterte Adresse"">
+    <description>Die „lange“ Fahrzeugadresse (DCC), wenn eine Adresse ab 128 gewünscht wird.; Die Fahrzeugadresse laut CVs #17 + #18 gilt, wenn CV #29 (Grundeinstellungen), Bit 5 = 1.</description>
+  </parameter>
+  <parameter nr=""19"" value=""0"" type=""Verbundadresse"">
+    <description>Alternative Fahrzeugadresse für den Verbundbetrieb, auch „Traktionsbetrieb“ genannt, engl. „consist“. Wenn CV #19 &gt; 0: Die Geschwindigkeit wird über die Verbundadresse gesteuert (und nicht durch die Einzel-Adresse in CV #1 oder #17 + #18); die Funktionen werden wahlweise durch die Verbundadresse oder die Einzeladresse gesteuert; siehe dazu CVs #21 + #22. Bit 7 = 1: Fahrtrichtung dieser Lok invertiert</description>
+  </parameter>
+  <parameter nr=""20"" value=""0"" type=""Bits 0 - 6: Erweiterte Verbundadresse UND (unabhängig, ob erweiterte Verbundadresse genutzt) Bit 7: Einschalten der Rail-Com-Rückmeldungen für Verbundadresse"">
+    <description>„Lange“ Verbundadresse: der in CV#20 eingestellte Wert wird mit 100 multipliziert und mit dem Wert in CV#19 addiert, welche dann die Adresse im Verbundbetrieb ergibt. Also z. B. CV #20 = 12, CV #19 = 34 ergibt Adr. 1234 oder CV #20 = 100, CV #19 = 0 ergibt 10000. Bit 7 = 1: auf RailCom-Adresse werden die Channel-2 Meldungen (Geschwindigkeit, Richtungsinformation, usw.) ausgesandt, und im Channel-1 (auf alle Adressen außer eigene Consist) wird Consist-Adresse gemeldet. Als Consist-Adresse gilt CV #19 (wenn CV #20 =0); bzw CV #19 und #20 (siehe oben, wenn CV #20 nicht 0).</description>
+  </parameter>
+  <parameter nr=""21"" value=""0"" type=""Funktionen F1 - F8 im Verbundbetrieb"">
+    <description>Auswahl der Funktionen, die im Verbundbetrieb unter der Verbundadresse ansteuerbar sein sollen. Bit 0 = 0: F1 gesteuert durch Einzeladresse = 1: …. durch Verbundadresse Bit 1 = 0: F2 gesteuert durch Einzeladresse = 1: …. durch Verbundadresse ………. F3, F4, F5, F6, F7 Bit 7 = 0: F8 gesteuert durch Einzeladresse = 1: …. durch Verbundadresse</description>
+  </parameter>
+  <parameter nr=""22"" value=""0"" type=""Funktionen F0 vorw, rückw"">
+    <description>Auswahl, ob Stirnlampen unter der Einzeladresse oder der Verbundadresse ein- und abschaltbar sein sollen. / Bit 0 = 0: F0 (vorw) gesteuert durch Einzeladresse = 1: …. durch Verbundadresse Bit 1 = 0: F0 (rückw) gesteuert durch Einzeladresse = 1: …. durch Verbundadresse Bit 2 = 0: F0 (vorw) gesteuert durch Einzeladresse = 1: …. durch Verbundadresse Bit 3 = 0: F10 (vorw) gesteuert durch Einzeladresse = 1: …. durch Verbundadresse Bit 4 = 0: F11 (vorw) gesteuert durch Einzeladresse = 1: …. durch Verbundadresse Bit 5 = 0: F12 (vorw) gesteuert durch Einzeladresse = 1: …. durch Verbundadresse Bit 7 = 1: F13 - F27 (alle!) .… durch Verbundadresse Bit 6 = 1: Auto-Consist: Es wird automatisch zwischen Einzel- und Verbundadresse gewechselt, wenn eine der beiden Adressen die Geschwindigkeit 0 hat und die jeweils andere Adresse Geschwindigkeit größer 0 hat.</description>
+  </parameter>
+  <parameter nr=""23"" value=""0"" type=""Variation Beschleun."">
+    <description>Zur temporären Erhöhung/Reduktion (nach Bit 7 = 0/1) der in CV #3 eingestellten Beschleunigungszeit.</description>
+  </parameter>
+  <parameter nr=""24"" value=""0"" type=""Variation Bremszeit"">
+    <description>Zur temporären Erhöhung/Reduktion (nach Bit 7 = 0/1) der in CV #3 eingestellten Bremszeit.</description>
+  </parameter>
+  <parameter nr=""27"" type=""„BREMS-MODI“: Positions-abhängiges Anhalten („vor dem roten Sig“) bzw. Langsamfahren mittels „Asymmetrisches DCC - Signal“ („Lenz ABC“) oder der ZIMO „signalabhängige Zugbeeinflussung“ (HLU)“) oder mit DC (Gleichstrom) -Bremsabschnitte, „Märklin-Bremsstrecke“ ...“"">
+    <description>Bit 0 und Bit 1 = 0: ABC ist NICHT aktiv, kein Anhalten Bit 0 = 1: ABC-Anhalten erfolgt, wenn rechte Schiene (in Fahrtrichtung) höhere Spannung hat als linke. Dies (CV #27 = 1) ist die übliche ABC-Anwendung Bit 1 = 1: ABC-Anhalten erfolgt, wenn linke Schiene (in Fahrtrichtung) höhere Spannung hat als rechte. Wenn Bit 0 oder Bit 1 = 1 (nur eines, nicht beide): Anhalten erfolgt richtungsabhängig, also nur in Fahrtrichtung auf das Signal zu, Durchfahrt in Gegenrichtung. Bit 0 und Bit 1 = 1: Anhalten richtungsunabhängig. Bit 2 = 1: Anhalten und Geschwindigkeitslimits nach ZIMO HLU-Verfahren aktiv Bit 4 - Gleichstrom-Bremsabschnitt, wenn Polarität entgegengesetzt zur aktuellen Fahrtrichtung. 0 = gesperrt 1 = freigegeben Bit 5 - Gleichstrom-Bremsabschnitt, wenn Polarität gleich wie aktuelle Fahrtrichtung. 0 = gesperrt 1 = freigegeben Bit 4 und Bit 5 = 1: Anhalten bei Gleichspannung (z. B. durch Diode) unabhängig von der Polarität („Märklin-Bremsstrecke“)</description>
+  </parameter>
+  <parameter nr=""28"" value=""131"" type=""RailCom Konfiguration"">
+    <description>Bit 0 - RailCom Channel 1 (Broadcast) Bit 1 - RailCom Channel 2 (Daten) Bit 6 - Hochstrom-RailCom (nur Großbahn-Decoder) für jedes einzelne Bit: 0 = aus 1 = eingeschaltet Bit 7 – DCC-A aktivieren; Freigabe automatische Anmeldung RCN-218</description>
+  </parameter>
+  <parameter nr=""29"" type=""Grundeinstellungen"">
+    <description>Bit 0 - Richtungsverhalten 0 = normal, 1 = invertiert Bit 1 - Fahrstufensystem (Anzahl Fahrstufen) 0 = 14, 1 = 28/128 Fahrstufen Bit 2 - Automatische Umschaltung auf Analogbetrieb 0 = aus, 1 = eingeschaltet / Bit 3 - RailCom („bi-directional communication“) 0 = ausgeschaltet 1 = eingeschaltet Bit 4 - Auswahl der Geschwindigkeitskennlinie 0 = Dreipunkt-Kl. nach CV #2, #5, #6 1 = freie Kennlinie nach CV #67 - #94 Bit 5 - Auswahl der Fahrzeugadresse (DCC) 0 = „kurze“ Adresse laut CV #1 1 = „lange“ Adresse laut CVs #17+#18</description>
+  </parameter>
+  <parameter nr=""30"" value=""1"" type=""Decoder-Selbsttest"">
+    <description>CV #30 = 255: Decoder-Selbsttest 1 = 254: erweiterter Selbsttest (nur bei exakt 18 V) CV #30 auslesen: Fehlercode(s), siehe Kapitel 11 CV #30 = 0: Löschen der CV30 (z.B. nach Reparatur)</description>
+  </parameter>
+  <parameter nr=""33"" value=""1"" type=""NMRA Function mapping F0"">
+    <description>Function mapping für F0 vorwärts</description>
+  </parameter>
+  <parameter nr=""34"" value=""2"" type=""NMRA Func. ma. F0"">
+    <description>Function mapping für F0 rückwärts</description>
+  </parameter>
+  <parameter nr=""35"" type=""Function mapping F1 – F12"">
+    <description>Function mapping für F1 - F12</description>
+  </parameter>
+  <parameter nr=""36"" type=""Function mapping F1 – F12"">
+    <description>Function mapping für F1 - F12</description>
+  </parameter>
+  <parameter nr=""37"" type=""Function mapping F1 – F12"">
+    <description>Function mapping für F1 - F12</description>
+  </parameter>
+  <parameter nr=""38"" type=""Function mapping F1 – F12"">
+    <description>Function mapping für F1 - F12</description>
+  </parameter>
+  <parameter nr=""39"" type=""Function mapping F1 – F12"">
+    <description>Function mapping für F1 - F12</description>
+  </parameter>
+  <parameter nr=""40"" type=""Function mapping F1 – F12"">
+    <description>Function mapping für F1 - F12</description>
+  </parameter>
+  <parameter nr=""41"" type=""Function mapping F1 – F12"">
+    <description>Function mapping für F1 - F12</description>
+  </parameter>
+  <parameter nr=""42"" type=""Function mapping F1 – F12"">
+    <description>Function mapping für F1 - F12</description>
+  </parameter>
+  <parameter nr=""43"" type=""Function mapping F1 – F12"">
+    <description>Function mapping für F1 - F12</description>
+  </parameter>
+  <parameter nr=""44"" type=""Function mapping F1 – F12"">
+    <description>Function mapping für F1 - F12</description>
+  </parameter>
+  <parameter nr=""45"" type=""Function mapping F1 – F12"">
+    <description>Function mapping für F1 - F12</description>
+  </parameter>
+  <parameter nr=""46"" type=""Function mapping F1 – F12"">
+    <description>Function mapping für F1 - F12</description>
+  </parameter>
+  <parameter nr=""49"" value=""0"" type=""Signalabhängige (HLU, ABC) Beschleunigung"">
+    <description>ZIMO signalabhängige Zugbeeinflussung („HLU“) mit Gleisabschnitts-Modul MX9 oder StEin) oder bei Signalhalt durch „asymmetrisches DCC-Signal“: Der Inhalt dieser CV, multipliziert mit 0,4, ergibt die Zeit in sec für den Beschleunigungsvorgang vom Stillstand bis zur vollen Fahrt. Es wird immer nur CV #3 ODER CV #49 verwendet, je nachdem, welcher Wert höher ist.</description>
+  </parameter>
+  <parameter nr=""50"" value=""0"" type=""Signalabhängige (HLU, ABC) Bremszeit"">
+    <description>ZIMO signalabhängige Zugbeeinflussung („HLU“) mit Gleisabschnitts-Modul MX9 oder Nachfolger) oder bei Signalhalt durch „asymmetrisches DCC-Signal“: Der Inhalt dieser CV, multipliziert mit 0,4, ergibt die Zeit in sec für Bremsvorgang aus voller Fahrt zum Stillstand. Es wird immer nur CV #4 ODER CV #50 verwendet, je nachdem, welcher Wert höher ist.</description>
+  </parameter>
+  <parameter nr=""51"" value=""20"" type=""Signalabhängige (HLU) Geschwindigkeits-Limits #52 für “U”, #54 für “L”, #51, #53, #55 Zwi. Stufen"">
+    <description>ZIMO signalabhängige Zugbeeinflussung („HLU“) mit Gleisabschnitts-Modul MX9 oder Nachfolger): Damit wird für jede der 5 Geschwindigkeitslimits, die durch „HLU“ erzeugt werden können, die tatsächlich anzuwendende interne Fahrstufe festgelegt.</description>
+  </parameter>
+  <parameter nr=""52"" type=""Signalabhängige (HLU) Geschwindigkeits-Limits #52 für “U”, #54 für “L”, #51, #53, #55 Zwi. Stufen"">
+    <description>ZIMO signalabhängige Zugbeeinflussung („HLU“) mit Gleisabschnitts-Modul MX9 oder Nachfolger): Damit wird für jede der 5 Geschwindigkeitslimits, die durch „HLU“ erzeugt werden können, die tatsächlich anzuwendende interne Fahrstufe festgelegt.</description>
+  </parameter>
+  <parameter nr=""53"" value=""70"" type=""Signalabhängige (HLU) Geschwindigkeits-Limits #52 für “U”, #54 für “L”, #51, #53, #55 Zwi. Stufen"">
+    <description>ZIMO signalabhängige Zugbeeinflussung („HLU“) mit Gleisabschnitts-Modul MX9 oder Nachfolger): Damit wird für jede der 5 Geschwindigkeitslimits, die durch „HLU“ erzeugt werden können, die tatsächlich anzuwendende interne Fahrstufe festgelegt.</description>
+  </parameter>
+  <parameter nr=""54"" type=""Signalabhängige (HLU) Geschwindigkeits-Limits #52 für “U”, #54 für “L”, #51, #53, #55 Zwi. Stufen"">
+    <description>ZIMO signalabhängige Zugbeeinflussung („HLU“) mit Gleisabschnitts-Modul MX9 oder Nachfolger): Damit wird für jede der 5 Geschwindigkeitslimits, die durch „HLU“ erzeugt werden können, die tatsächlich anzuwendende interne Fahrstufe festgelegt.</description>
+  </parameter>
+  <parameter nr=""55"" value=""180"" type=""Signalabhängige (HLU) Geschwindigkeits-Limits #52 für “U”, #54 für “L”, #51, #53, #55 Zwi. Stufen"">
+    <description>ZIMO signalabhängige Zugbeeinflussung („HLU“) mit Gleisabschnitts-Modul MX9 oder Nachfolger): Damit wird für jede der 5 Geschwindigkeitslimits, die durch „HLU“ erzeugt werden können, die tatsächlich anzuwendende interne Fahrstufe festgelegt.</description>
+  </parameter>
+  <parameter nr=""56"" value=""55"" type=""P- und I- Wert der PID - Motorregelung (= EMK Lastausgleichsregelung) Der Wert dieser CV wird automatisch in die"">
+    <description>= 55: Defaultmäßige Motoransteuerung durch mittlere Werte in den PID-Parametern P und I (Diff = 0). = 0: gleichbedeutend mit 55 (wird automatisch umgesetzt) &lt;&gt; 55 und &lt;&gt; 0: modifizierte Einstellungen Zehnerstelle 1 - 4: Proportional-Wert der PID-Regelung reduziert gegenüber Default-Einstellung Zehnerstelle 6 - 9: Proportional-Wert der PID-Regelung erhöht gegenüber Default-Einstellung Einerstelle 1 - 4: Integral-Wert der PID-Regelung reduziert gegenüber Default-Einstellung Einerstelle 6 - 9: Integral-Wert der PID-Regelung erhöht gegenüber Default-Einstellung Typische Versuchsreihe bei Ruckel-Problem: CV #56 = 55 (default) → 33, 77, 73, 71, ... / ACHTUNG: Die Werte 10, 20, 30, 40, 50, 60, 70, 80 und 90 sind NICHT zulässig!</description>
+  </parameter>
+  <parameter nr=""57"" value=""0"" type=""Regelungsreferenz"">
+    <description>Absolute Motoransteuerungs-Spannung in Zehntel-Volt, die bei voller Fahrt (höchste Fahrregler-Stellung) am Motor anliegen soll. Sinnvoller (gut funktionierender) Bereich 10 bis 24 V (also 100 - 240), und niedriger als die zu erwartende Fahrspannung. BEISPIEL: Fremdsystem mit Schienenspannung im Leerlauf 22 V, bei voller Belastung aber nur 16 V: zweckmäßige Einstellung daher CV #57 = 140 - 150 CV #57 = 0: in diesem Fall erfolgt automatische Anpassung an die Schienenspannung (relative Referenz); nur bei stabilisierter Fahrspannung sinnvoll. Bei angeschlossenem Energiespeicher sollte der Wert nicht 0 betragen. Hinweis: CV #57 wirkt nicht bei Decodern mit einem 5V-Motor-Ausgang, z.B. MN250</description>
+  </parameter>
+  <parameter nr=""58"" value=""255"" type=""Regelungseinfluss ab SW-Version 6.00"">
+    <description>Ausmaß für die Ausregelungskraft durch die EMK-Lastausgleichsregelung bei Niedrigst-Geschwindigkeit. BEISPIELSWERTE: CV #58 = 0: keine Regelung (wie ungeregelter Decoder), CV #58 = 150: mittelstarke Ausregelung, CV #58 = 255: möglichst starke Ausregelung.</description>
+  </parameter>
+  <parameter nr=""59"" value=""5"" type=""Signalabhängige (HLU, ABC, Märklin Bremsstrecke Reaktionszeit"">
+    <description>ZIMO signalabhängige Zugbeeinflussung (HLU, ABC, Märklin Bremsstrecke) mit Gleisabschnitts-Modul MX9 oder StEin) oder bei Signalhalt durch „asymmetrisches DCC-Signal oder Märklin Bremsstrecke“: Zeit in Zehntelsekunden, in der ein Beschleunigungsvorgang nach Empfang eines höheren signalabhängigen Limits als der bisher gültigen eingeleitet wird. Bei CV #59 &gt; 0 hebt dies im Falle der Märklin Bremsstrecke auch eine etwaige Unterbrechung des konstanten Bremsweges (CV #141 bzw. CV #830 bis CV #833) durch einen zweiten Schleifer auf. ab Version 5.15</description>
+  </parameter>
+  <parameter nr=""60"" value=""0"" type=""Dimmen der Funktionsausgänge = Spannungsreduktion der Funktionsausgänge per PWM Grundsätzlich gültig für alle Funktionsausgänge."">
+    <description>Reduktion der effektiven Spannung an den Funktions-Ausgängen durch PWM (Pulsweiten-Modulation); damit wird z. B. die Helligkeit der Lampen reduziert. BEISPIELSWERTE: CV #60 = 0: (entspricht 255) volle Ansteuerung CV #60 = 170: Zweidrittel-Helligkeit CV #60 = 204: 80-prozentige Helligkeit</description>
+  </parameter>
+  <parameter nr=""61"" value=""0"" type=""Erweitertes Mapping"">
+    <description>= 97: NMRA-Mapping ohne „Linksverschiebung“</description>
+  </parameter>
+  <parameter nr=""62"" value=""0"" type=""Nachleuchtdauer Bremslicht"">
+    <description>Bremslicht (Code 001110xx in CV #125 oder #126 oder #127 …): Nachleuchten in Zehntel-sec (also Bereich 0 bis 25 sec) im Stilltand nach Anhalten.</description>
+  </parameter>
+  <parameter nr=""63"" value=""51"" type=""Modifizieren der Lichteffekte"">
+    <description>Zehnerstelle: Veränderung der Zykluszeit für diverse Effekte (0 - 9, default 5), bzw. für Soft start Aufdimmen bei 001101 (0 - 0,9 sec) Einerstelle: Ausschaltzeit-Verlängerung</description>
+  </parameter>
+  <parameter nr=""64"" value=""0"" type=""Ditchlight Modifikation"">
+    <description>Bit 7 - 4: Definieren der Ditchlight-Taste (FunktionsTaste+1)*16 daraus folgt: 0=F2, 1=F0, 2=F1,.. 15=F14 Bit 3 - 0: Ditchlight Nachlaufzeit [s]</description>
+  </parameter>
+  <parameter nr=""65"" type=""SW-Subversionsnummer Siehe auch CV #7 Versionsnummer"">
+    <description>Falls es zur SW-Version in CV #7 noch Subversionen gibt, wird diese aus CV #65 ausgelesen. Die gesamte Bezeichnung einer SW-Version setzt sich also zusammen aus CVs #7 &amp; #65 (also z. B. 28.15).</description>
+  </parameter>
+  <parameter nr=""66"" value=""0"" type=""Geschwindigkeitstrimmung nach Richtung"">
+    <description>Multiplikation der Fahrstufe mit “n/128” (n = Trimmwert) bei Vorwärtsfahrt (CV #66) bzw. Rückwärtsfahrt (#95).</description>
+  </parameter>
+  <parameter nr=""67"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""68"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""69"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""70"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""71"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""72"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""73"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""74"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""75"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""76"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""77"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""78"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""79"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""80"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""81"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""82"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""83"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""84"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""85"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""86"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""87"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""88"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""89"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""90"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""91"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""92"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""93"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""94"" type=""Freie (28-Punkt-) Geschwindigkeits-Kennlinie wenn CV #29, Bit 4 = 1"">
+    <description>Interne Fahrstufen (jeweils 1 - 255) für jede der 28 externen Fahrstufen. *) Die Default-28-Punkt-Kennlinie ist ebenfalls gekrümmt, mit Betonung auf die Langsam-Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""95"" value=""0"" type=""Geschwindigkeitstrimmung nach Richtung"">
+    <description>Multiplikation der Fahrstufe mit “n/128” (n = Trimmwert) bei Vorwärtsfahrt (CV #66) bzw. Rückwärtsfahrt (#95).</description>
+  </parameter>
+  <parameter nr=""97"" value=""0"" type=""Wechsel zwischen Einzelund Verbundadr. Durch Funktionstaste"">
+    <description>Damit kann zwischen der Hauptadresse des Decoders (on CV #1 bzw. CVs #17, #18) per Tastendruck (jeweils auf der Hauptadresse) gewechselt werden.</description>
+  </parameter>
+  <parameter nr=""99"" type=""Deaktivieren von RailCom ID 7 Aussendungen"">
+    <description>Bit 0 = deaktiviert Km/h Bit 1 = deaktiviert O/W Bit 2 = deaktiviert Temperatur Bit 3 = deaktiviert Gleisspannung</description>
+  </parameter>
+  <parameter nr=""100"" type=""Aktuelle Asymmetriespannung read-only"">
+    <description>Die CV#100 liefert beim Auslesen über PoM (=Prog On the Main, =OP Prog Mode) jeweils die DERZEIT gemessene Asymmetriespannung in Zehntelvolt.</description>
+  </parameter>
+  <parameter nr=""101"" value=""0"" type=""Korrekturfaktor zu CV #100 ab SW-Version 5.15"">
+    <description>Über die CV#101 kann ein Korrekturfaktor in eine der beiden Richtungen definiert werden (nur notwendig bei Modellen mit 6pol NEM 651 Schnittstelle, wo ja die Verbraucher einseitig eine der beiden Schienen belasten)</description>
+  </parameter>
+  <parameter nr=""102"" type=""SUSI Slave 3"">
+    <description>Bit0=0 (binär): CV#980 bis CV#1019 stehen Skripten zur Verfügung. Bit0=1 (binär): CV#980 bis CV#1019 stehen SUSI Slave IC mit Bank 3 zur Verfügung.</description>
+  </parameter>
+  <parameter nr=""105"" value=""0"" type=""Benutzerdaten"">
+    <description>Zur freien Verfügung als Speicherplätze (ohne Wirkung!)</description>
+  </parameter>
+  <parameter nr=""106"" value=""0"" type=""Benutzerdaten"">
+    <description>Zur freien Verfügung als Speicherplätze (ohne Wirkung!)</description>
+  </parameter>
+  <parameter nr=""107"" value=""0"" type=""Licht-Ausschaltung (d.h. „Stirn vorne“ UND dieser - laut CV #107 -zusätzlich definierbarer Funktions-Ausgang)"">
+    <description>Der Wert dieser CV wird wie folgt berechnet: Nummer eines Funktions-Ausgangs (FA1 - FA6) x 32 + Nummer einer Funktionstaste (F1, F2, … F28) → Wert der CV #107 Funktionstaste: Jene Taste (F1 - F28), mit welcher ALLE Lichter auf Seite des Führerstandes 1 ausgeschaltet werden soll, also Ausgang „Stirn vorne“ UND Funktions-Ausgang: z. B. Rücklichter auf dieser Seite.</description>
+  </parameter>
+  <parameter nr=""108"" value=""0"" type=""auf Seite des Führerstands 2 (hinten)"">
+    <description>Wie CV#107, aber für andere Seite der Lok.</description>
+  </parameter>
+  <parameter nr=""109"" type=""Automatische einseitige Lichtunterdrückung Weiterer FU-Ausgang Seite 1"">
+    <description>Wenn CV #109, Bit 7 = 1 und CV #110, Bit 7 = 1, wird die Führerstandsseitige Lichtunterdrückung im Consist automatisch aktiviert. FU-Ausgang wird zusammen mit CV#107 ausgeschaltet Bit 0-2: 3. Fu-Ausgang wird zusammen mit CV 107 ausgeschaltet (FA1 – FA7) Bit 3-5: 4. Fu-Ausgang wird zusammen mit CV 107 ausgeschaltet (FA1 – FA7)</description>
+  </parameter>
+  <parameter nr=""110"" type=""Automatische einseitige Lichtunterdrückung Weiterer FU-Ausgang Seite 2"">
+    <description>Wenn CV #109, Bit 7 = 1 und CV #110, Bit 7 = 1, wird die Führerstandsseitige Lichtunterdrückung im Consist automatisch aktiviert. FU-Ausgang wird zusammen mit CV#108 ausgeschaltet Bit 0-2: 3. Fu-Ausgang wird zusammen mit CV 107 ausgeschaltet (FA1 – FA7) Bit 3-5: 4. Fu-Ausgang wird zusammen mit CV 107 ausgeschaltet (FA1 – FA7)</description>
+  </parameter>
+  <parameter nr=""111"" value=""0"" type=""Emergency Verzögerungszeit"">
+    <description>Dieser CV-Wert gilt bei Emergency Stopp anstelle der CV #4, also bei Einzelstopp und Sammelstopp emerg.</description>
+  </parameter>
+  <parameter nr=""112"" type=""Spezielle ZIMO Konfigurationsbits ab SW-Version 5.00"">
+    <description>Bit 2 = 0: ZIMO Zugnummernimpulse ausgeschaltet = 1: ZIMO Zugnummernimpulse aktiv</description>
+  </parameter>
+  <parameter nr=""114"" value=""0"" type=""Dimm-Maske 1 = Ausschluss bestimmter Funktionsausgänge von der Dimmung nach CV #60 Siehe auch Fortsetzung in CV #152"">
+    <description>Angabe jener Funktionsausgänge, welche nicht mit reduzierter PWM-Spannung (Helligkeit) nach CV #60 betrieben werden soll, sondern mit der direkten Spannung des verwendeten Pluspols, also volle Schienenspannung oder Funktions-Niederspannung. Bit 0 - für Stirnlampen vorne, Bit 1 - für Stirnlampen hinten, Bit 2 - für Funktions-Ausgang FA1, Bit 3 - FA2, Bit 4 - für Funktions-Ausgang FA3, Bit 5 - FA4 Bit 6 - für Funktions-Ausgang FA5, Bit 7 - FA6 Jeweiliges Bit = 0: Ausgang wird, wenn eingeschaltet, mit Dimm-Spannung laut CV #60 betreiben. Jeweiliges Bit = 1: Ausgang wird vom Dimmen ausgenommen, d.h. er wird, wenn eingeschaltet, mit voller Spannung betrieben. BEISPIEL: CV #114 = 60: FA1, FA2, FA3, FA4 werden nicht gedimmt; d.h. nur die Stirnlampen werden reduziert.</description>
+  </parameter>
+  <parameter nr=""115"" value=""0"" type=""Kupplungsansteuerung Einschaltezeit oder CV #115 alternativ verwendbar als „zweiter Dimmwert“"">
+    <description>Wirksam, falls in einer der CVs #125 - #132, #159, #160 Funktions-Effekt “Entkupplung” (also “48”) gesetzt ist: Zehnerstelle (0 bis 9): Zeitintervall (in sec) nach folgender Tabelle, in welchem die Kupplung mit voller Spannung angesteuert wird: Wert: 0 1 2 3 4 5 6 7 8 9 sec: 0 0,1 0,2 0,4 0,8 1 2 3 4 5 Einerstelle (0 bis 9): Restspannung (0 bis 90 %) für Ansteuerung der Kupplung während der restlichen Einschaltzeit (für ROCO-Kupplung, nicht für KROIS). oder Einerstelle als „zweiter Dimmwert“ (indem Zehnerstelle auf “0” gesetzt wird) von 0 bis 90 % (laut Einerstelle) / Hunderterstelle: 0=0,3s 1= 2,5s 2=1,0s Wartezeit zwischen Andrücken und Wegfahren.</description>
+  </parameter>
+  <parameter nr=""116"" value=""0"" type=""Automatisches Abrücken beim Entkuppeln= „Kupplungs-Walzer“"">
+    <description>Zehnerstelle (0 bis 9): Dauer, während der die Lok vom Zug wegfahren soll; Codierung wie CV #115. Einerstelle (1 bis 9) = x 4: interne Fahrstufe für Abrücken (Beschleunigung auf diese lt. CV #3) Hunderterstelle = 0: kein Andrücken vor Abrücken. = 1: Andrücken zur Kupplungsentlastung. BEISPIEL: CV #115 = 60 (Abrück-Fahrt 2 sec), und CV #116 = 155 (Andrücken aktiv, Fahrstufe 20, 1 sec)</description>
+  </parameter>
+  <parameter nr=""117"" value=""0"" type=""Blinken Funktionsausgänge laut CV #118 Blink-Maske"">
+    <description>Tastverhältnis der Blinkfunktion: Zehnerstelle: Ausschalt- / Einerstelle: Einschaltphase 0 = 100 msec, 1 = 200 msec, …, 9 = 1 sec BEISPIEL: CV #117 = 55: 1:1 - Blinken im 1 sec - Takt, d.h. identisches Ein- und Ausschaltzeiten</description>
+  </parameter>
+  <parameter nr=""118"" value=""0"" type=""Blink-Maske = Zuordnung der Funktionsausgänge zum Blink-Rhythmus laut CV #117."">
+    <description>Angabe jener Funktionsausgänge, welche im eingeschalteten Zustand blinken sollen. Bit 0 - für Stirnlampen vorne, Bit 1 - für Stirnlampen hinten, Bit 2 - für Funktions-Ausgang FA1, Bit 3 - … FA2 Bit 4 - … FA3, Bit 5 - für Funktions-Ausgang FA4. Jeweiliges Bit = 0: Ausgang soll nicht blinken, jeweiliges Bit = 1: soll - wenn eingeschaltet - blinken. Bit 6 = 1: FA2 soll invers blinken! Bit 7 = 1: FA4 soll invers blinken! (dadurch kann Wechselblinken erzeugt werden) BEISPIELE: CV #118 = 12: Funktionsausgänge FA1 und FA2 sind für Blink-Lampen vorgesehen. CV #118 = 168: Ausgänge FA2 und FA4 sollen wechselweise blinken - wenn beide eingeschaltet...</description>
+  </parameter>
+  <parameter nr=""119"" value=""0"" type=""Abblend-Maske F6 = Zuordnung von Funktionsausgänge als (beispielsweise) Abblend-/Fernlicht"">
+    <description>Angabe jener Funktionsausgänge, welche auf bei eingeschalteter Funktion F6 in den Abblendzustand (d.h. gedimmt laut CV #60) gehen sollen Typische Anwendung: Fern-/Abblend-Licht. Bit 0 - für Stirnlampen vorne, Bit 1 - für Stirnlampen hinten, Bit 2 - für Funktions-Ausgang FA1, Bit 3 - für Funktions-Ausgang FA2, Bit 4 - für Funktions-Ausgang FA3, Bit 5 - für Funktions-Ausgang FA4, Bit 6 - für Funktions-Ausgang FA5. Jeweiliges Bit = 0: Ausgang wird nicht abgeblendet Jeweiliges Bit = 1: Ausgang soll bei Betätigung von F6 auf Wert laut CV #60 abgeblendet werden. Bit 7 = 0: normale Wirkung von F6. = 1: Wirkung von F6 invertiert. BEISPIEL: CV #119 = 131: Stirnlampen sollen mit F6 zwischen Abblend- und Fernlicht (F6 = 1) umgeschaltet werden.</description>
+  </parameter>
+  <parameter nr=""120"" type=""Abblend-Maske F7"">
+    <description>Wie CV #119, aber mit F7 als Abblend-Funktion.</description>
+  </parameter>
+  <parameter nr=""123"" value=""0"" type=""Adaptives Beschleunigungs- und Bremsverfahren ab SW-Version 6.00"">
+    <description>Die Erhöhung bzw. Absenkung der Sollgeschwindigkeit soll erst nach einer definierten Annäherung der Ist-Geschwindigkeit an die bisher vorgegebene Sollgeschwindigkeit erfolgen. Die CV #123 enthält den Fahrstufenabstand, der erreicht werden muss. = 0: kein adaptives Verfahren Zehnerstelle: 0 - 9 für Beschleun. (1 = starke Wirkung) Einerstelle: 0 - 9 für die Bremsung = 11: die stärkste Wirkung;</description>
+  </parameter>
+  <parameter nr=""124"" value=""0"" type=""ACHTUNG: die Bits 2, 3, 4, 6 (also Auswahl für Rangiertasten-Funktionen) gelten nur, wenn CVs #155 und #156 = 0 (diese erlauben erweiterte Auswahl und werden bei neuen Projekten bevorzugt angewandt) Rangiertasten-Funktionen: Halbgeschwindigkeit, Beschleunigungsdeaktivierung Die Bits 0,1 (also ART der Beschleunigungs-deaktivierung) gelten immer, auch zusammen mit CVs #155, #156. Bit 7: Umschaltung SUSI – Logikpegel-Ausgänge"">
+    <description>Auswahl einer Rangiertaste zur Aktivierung der HALBGESCHWINDIGKEIT: Bit 4 = 1 (und Bit 3 = 0): F3 als Halbgeschwind.-Taste Bit 3 = 1 (und Bit 4 = 0): F7 als Halbgeschwind.-Taste Auswahl einer Rangiertaste zur Deaktivierung von BESCHLEUNIGUNGSZEITEN: Bit 2 = 0 (und Bit 6 = 0): MN-Taste als Beschleun.-Deakt Bit 2 = 1 (und Bit 6 = 0): F4 als Beschleun-Deaktivierung Bit 6 = 1 (Bit 2 belanglos): F3 als Beschleun.-Deaktiv. ART (Wirkungsumfang) der Taste (MN, F3 oder F4) zur Deaktivierung von Beschleunigungszeiten: Bits 1,0 = 00: kein Einfluss auf Beschleunigungszeiten = 10: reduziert Beschleunigungs-/Bremszeit auf ¼ der Werte laut CVs #3, #4. = 11: deaktiviert Beschleun.-/Bremszeit völlig. BEISPIELE: F3 als Halbgeschwindigkeits-Taste, wenn CV #124 = 16 F3 als Halbgeschwindigkeits-Taste und F4 zur völligen Deakt. von Beschleunigungs-/Bremszeit, wenn Bits 0, 1, 2, 4 = 1, also CV #124 = 23 F3 als Halbgeschwindig.-Taste und zur Beschl.-Deakt. wenn Bits 0, 1, 4, 6 = 1, also CV #124 = 83 Bit 7 = 0: SUSI-Schnittstelle aktiv (oder Servos, wenn in CVs #181, #182, … definiert = 1: Logik-Pegel anstelle SUSI aktiviert. Achtung = alte Methode! Jetzt verwenden: CV #201 od. #202</description>
+  </parameter>
+  <parameter nr=""126"" value=""0"" type=""Effekte auf Funktionsausgang “Stirn hinten”"">
+    <description>wie CV #125 #125 → Stirn vorne #126 → Stirn hinten</description>
+  </parameter>
+  <parameter nr=""127"" value=""0"" type=""Effekte auf FA1, FA2, FA3, FA4, FA5, FA6"">
+    <description>wie CV #125 #127 → FA1 #128 → FA2 #129 → FA3 #130 → FA4 #131 → FA5 #132 → FA6</description>
+  </parameter>
+  <parameter nr=""128"" value=""0"" type=""Effekte auf FA1, FA2, FA3, FA4, FA5, FA6"">
+    <description>wie CV #125 #127 → FA1 #128 → FA2 #129 → FA3 #130 → FA4 #131 → FA5 #132 → FA6</description>
+  </parameter>
+  <parameter nr=""129"" value=""0"" type=""Effekte auf FA1, FA2, FA3, FA4, FA5, FA6"">
+    <description>wie CV #125 #127 → FA1 #128 → FA2 #129 → FA3 #130 → FA4 #131 → FA5 #132 → FA6</description>
+  </parameter>
+  <parameter nr=""130"" value=""0"" type=""Effekte auf FA1, FA2, FA3, FA4, FA5, FA6"">
+    <description>wie CV #125 #127 → FA1 #128 → FA2 #129 → FA3 #130 → FA4 #131 → FA5 #132 → FA6</description>
+  </parameter>
+  <parameter nr=""131"" value=""0"" type=""Effekte auf FA1, FA2, FA3, FA4, FA5, FA6"">
+    <description>wie CV #125 #127 → FA1 #128 → FA2 #129 → FA3 #130 → FA4 #131 → FA5 #132 → FA6</description>
+  </parameter>
+  <parameter nr=""132"" value=""0"" type=""Effekte auf FA1, FA2, FA3, FA4, FA5, FA6"">
+    <description>wie CV #125 #127 → FA1 #128 → FA2 #129 → FA3 #130 → FA4 #131 → FA5 #132 → FA6</description>
+  </parameter>
+  <parameter nr=""133"" value=""0"" type=""Verwendung von FA4 FA4 als normaler Funktions-Ausgang oder FA4 als Ausgang für Dampf-Ausstoß-Ventilator des Raucherzeugers in DAMPF-Loks und IN (Reed) Pins Konfiguration und MS440: FA9 an Pin IN4"">
+    <description>= 0 (Default): FA4 wird als normaler Funktionsausgang verwendet, also steuerbar durch eine Funktions-Taste, und nicht durch Achs-Detektor. = 1: FA4 für Rauch-Ventilator, der durch „simulierten“ Achsdetektors oder durch „echten“ Achsdetektor (der am über CV#203 od. CV#204 definiertem Input anzuschließen ist) angesteuert wird. Siehe CVs #267, #268! HINWEIS: Die Betriebsweise eines Ventilators wird auch durch das Sound-Projekt bestimmt. HINWEIS: Großbahn-Decoder besitzen spezielle Ausgänge und mehr Einstellmöglichkeiten für Ventilatoren! Bit 4 – Eingang IN1 wird invertiert Bit 3 – Eingang IN2 wird invertiert Bit 2 – Eingang IN3 wird invertiert Bit 5 – Eingang IN4 wird invertiert Bit 6 – (nur Typen MS440) Pin IN4 wird Ausgang FA9</description>
+  </parameter>
+  <parameter nr=""134"" value=""6"" type=""Stopp d. Asymm. (ABC)"">
+    <description>Schwelle (Zehner-, Einerstelle).</description>
+  </parameter>
+  <parameter nr=""136"" value=""128"" type=""Einstellung der Geschwindigkeits- Rückmeldung oder km/h - Regelungskontrollzahl Eichfahrt"">
+    <description>Korrekturfaktor für die Geschwindigkeits-Rückmeldung über Rail-Com. oder (siehe Kapitel 5.8) Nach Eichfahrt kann hier ein Wert der internen Geschwindigkeitsberechnung ausgelesen werden.</description>
+  </parameter>
+  <parameter nr=""137"" value=""0"" type=""Kennlinie für Raucherzeuger an einem der FAs 1 - 8 PWM im Stillstand PWM bei Fahrt PWM Beschleunig."">
+    <description>Wirksam, falls in einer der CVs #127 - #132 einer der Funktions-Effekte “Raucherzeugung” (also “72” oder „80“) zugeordnet ist: Mit den drei Werten in CVs #137 - #139 wird eine Kennlinie für den betreffenden Funktionsausgang (FA1 - FA8, unten als FAx bezeichnet) definiert. CV #137: PWM des FAx bei Stillstand CV #138: PWM des FAx bei konstanter Fahrt CV #139: PWM des FAx bei Beschleunigung</description>
+  </parameter>
+  <parameter nr=""138"" value=""0"" type=""Kennlinie für Raucherzeuger an einem der FAs 1 - 8 PWM im Stillstand PWM bei Fahrt PWM Beschleunig."">
+    <description>Wirksam, falls in einer der CVs #127 - #132 einer der Funktions-Effekte “Raucherzeugung” (also “72” oder „80“) zugeordnet ist: Mit den drei Werten in CVs #137 - #139 wird eine Kennlinie für den betreffenden Funktionsausgang (FA1 - FA8, unten als FAx bezeichnet) definiert. CV #137: PWM des FAx bei Stillstand CV #138: PWM des FAx bei konstanter Fahrt CV #139: PWM des FAx bei Beschleunigung</description>
+  </parameter>
+  <parameter nr=""139"" value=""0"" type=""Kennlinie für Raucherzeuger an einem der FAs 1 - 8 PWM im Stillstand PWM bei Fahrt PWM Beschleunig."">
+    <description>Wirksam, falls in einer der CVs #127 - #132 einer der Funktions-Effekte “Raucherzeugung” (also “72” oder „80“) zugeordnet ist: Mit den drei Werten in CVs #137 - #139 wird eine Kennlinie für den betreffenden Funktionsausgang (FA1 - FA8, unten als FAx bezeichnet) definiert. CV #137: PWM des FAx bei Stillstand CV #138: PWM des FAx bei konstanter Fahrt CV #139: PWM des FAx bei Beschleunigung</description>
+  </parameter>
+  <parameter nr=""140"" value=""0"" type=""Distanzgesteuertes Anhalten konstanter Bremsweg Auswahl des Brems-anlasses und des Bremsverhaltens"">
+    <description>Aktivierung des distanzgesteuerten Anhaltens (konstanten Bremsweges) laut Festlegung in CV #141 anstelle des zeit-gesteuerten Abbremsens laut CV #4, für = 1 automatisches Anhalten mit ZIMO HLU („signalabhängige Zugbeeinflussung“) oder ABC (Signal halt durch „asymmetrisches DCC-Signal“. = 2 manuelles Anhalten durch Fahrregler. = 3 automatisches und manuelles Anhalten. / In den obigen Fällen (= 1, 2, 3) wird die Bremsung aus Teilgeschwindigkeiten verzögert eingeleitet, damit der Zug nicht unnötig lange „schleicht“ (dies ist die empfohlene Wahl). Hingegen = 11, 12, 13 wie oben, aber Bremsung wird immer sofort nach Eintritt in den Halteabschnitt eingeleitet.</description>
+  </parameter>
+  <parameter nr=""141"" value=""20"" type=""Distanzgesteuertes Anhalten konstanter Bremsweg Der Bremsweg"">
+    <description>Durch den Wert in dieser CV wird der „konstante Bremsweg“ definiert. Der für die vorhandenen -&gt; -&gt; Bremsstrecken passende Wert muss durch Probieren ermittelt werden; als Anhaltspunkt kann dienen: CV #141 = 255 bedeutet ca. 500 m im Vorbild (also 6 m in H0), CV #141 = 50 sind ca. 100 m (also 1,2 m für H0). Siehe auch CVs #831 - #833!</description>
+  </parameter>
+  <parameter nr=""143"" value=""0"" type=""Distanzgesteuertes Anhalten – konstanter Bremsweg Kompensation bei Methode HLU"">
+    <description>Da HLU fehlerresistenter ist als ABC, ist meistens keine Erkennungsverzögerung notwendig; daher Default 0.</description>
+  </parameter>
+  <parameter nr=""144"" type=""Bestätigungs-Jingle"">
+    <description>Bit 4 = 1: aktiviert Bestätigungsjingle bei Programmierung Ab Version v5.7.0 MN-Decoder: statt Jingle Vorder- und Rücklicht blinken.</description>
+  </parameter>
+  <parameter nr=""146"" value=""0"" type=""Ausgleich des Getriebe-Leerganges bei Richtungsumkehr zwecks Vermeidung des Anfahr-Rucks. ab SW-Version 6.00"">
+    <description>= 0: keine Wirkung = 1 bis 255: falls zuvor die Fahrtrichtung umgeschaltet wurde, dreht der Motor für eine bestimmten Zeit konstant auf Minimalgeschwindigkeit (CV #2), und beginnt erst danach mit der Beschleunigung; Wie lang der leere „Drehweg“ ist, kann nur durch Probieren ermittelt werden; Typische Werte: = 100: der Motor dreht ca. eine Umdrehung oder höchstens eine sec lang auf Minimaldrehzahl = 50: ca. halbe Umdrehung oder max. ½ sec. = 200: ca. zwei Umdrehungen oder max. 2 sec. Wichtig: die CV #2 (Anfahrgeschwindigkeit) muss korrekt eingestellt sein: bei niedrigster Fahrstufe (1) am Fahrregler soll das Fahrzeug bereits sicher fahren.</description>
+  </parameter>
+  <parameter nr=""147"" value=""100"" type=""Feineinstellung der PID – Parameter HINWEIS: werden bei Änderung der CV #56 mitgeführt!"">
+    <description>Integralwert der PID - Motorregelung, empfohlen für „modernen“ Antrieb: CV #147 = 65 Differentialwert der PID - Motorregelung, empfohlen für „modernen“ Antrieb: CV #148 = 45 Proportionalwert der PID - Motorregelung, empfohlen für „modernen“ Antrieb: CV #149 = 65</description>
+  </parameter>
+  <parameter nr=""148"" value=""100"" type=""Feineinstellung der PID – Parameter HINWEIS: werden bei Änderung der CV #56 mitgeführt!"">
+    <description>Integralwert der PID - Motorregelung, empfohlen für „modernen“ Antrieb: CV #147 = 65 Differentialwert der PID - Motorregelung, empfohlen für „modernen“ Antrieb: CV #148 = 45 Proportionalwert der PID - Motorregelung, empfohlen für „modernen“ Antrieb: CV #149 = 65</description>
+  </parameter>
+  <parameter nr=""149"" value=""100"" type=""Feineinstellung der PID – Parameter HINWEIS: werden bei Änderung der CV #56 mitgeführt!"">
+    <description>Integralwert der PID - Motorregelung, empfohlen für „modernen“ Antrieb: CV #147 = 65 Differentialwert der PID - Motorregelung, empfohlen für „modernen“ Antrieb: CV #148 = 45 Proportionalwert der PID - Motorregelung, empfohlen für „modernen“ Antrieb: CV #149 = 65</description>
+  </parameter>
+  <parameter nr=""151"" value=""0"" type=""Reduktion der Motor regelung im Consist. oder Motorbremse (wenn Adresse NICHT im Consist)"">
+    <description>Die Zehnerstell 1 - 9 reduziert die Ausregelung des Motors auf 10 -90 % des Wertes laut CV #58. = 0: keine Motorbremse = 1 - 9: Wenn trotz „Null-Energiezufuhr zum Motor“ (Motor-PWM null) die Soll-Geschwindigkeit nicht erreicht wird (weiter zu hohe Geschwindigkeit), wird Motorbremse langsam angelegt (verteilt über 1, 2, ... 8 sec bis zur vollen Wirkung durch Motor-Kurzschluss über die Endstufe). Je höher der Wert, desto stärker erfolgt Anlegen der Motorbremse. = Zehnerstelle (1-9): Reduktion der Ausregelung des Motors bei aktiver Consist-Taste einstellbar. Die Werte 1-9 in der Zehnerstelle von CV #151 reduzieren die Ausregelung auf 10% - 90% des in CV #58 gesetzten Wertes.</description>
+  </parameter>
+  <parameter nr=""152"" value=""0"" type=""Dimm-Maske 2 (Ausschluss bestimmter Funktionsausgänge von der Dimmung) Fortsetzung der CV #114 und FA3, FA4 als Richtungs-Ausgänge"">
+    <description>… Fortsetzung von CV #114. Bit 0 - für Funktions-Ausgang FA7, Bit 1 - für Funktions-Ausgang FA8, Bit 2 - für Funktions-Ausgang FA9, Bit 3 - für Funktions-Ausgang FA10, Bit 4 - für Funktions-Ausgang FA11, Bit 5 - für Funktions-Ausgang FA12. Bit 6 = 0: „normal“ = 1: „Richtungs-Bit“ auf FA3, FA4, d.h. FA3 wird eingeschaltet, wenn Rückwärtsfahrt, FA4 wird eingeschaltet, wenn Vorwärtsfahrt. (für Märklin Schleifenumschalter mit C-Typ) Bit 7 = 1: “Richtungsbit” für FA9 wenn Vorwärtsfahrt</description>
+  </parameter>
+  <parameter nr=""153"" value=""100"" type=""Zeitbegrenzung des Weiterfahrens ohne Schienensignal"">
+    <description>0: Feature nicht genutzt 1 - 255: Zeit in Zehntelsekunden, nach der der Decoder einen Bremsvorgang startet, wenn kein DCC-Empfang mehr über seine zwei Schienenkontakte gegeben ist. Beim Bremsvorgang werden alle Brems-CVs (z.B. CV #4) berücksichtigt. Übliche CV-Werte für CV #153 sind entweder 0 oder 10-20 (für 1,0 bis 2,0 Sekunden).</description>
+  </parameter>
+  <parameter nr=""154"" value=""16"" type=""Diverse Spezialbits Bits 1+2 ab SW-Version 6.00 Bits 4+7 implementiert"">
+    <description>Bit 1 = 1: DIESEL, ELEKTRO: Sofort abfahren, auch wenn Standgeräusch noch nicht zu Ende abgespielt ist. Bit 2 = 1: DIESEL, ELEKTRO: Bei Abfahrt kurz nach Stehbleiben Warten auf Standgeräusch. Bit 4 = 1: Z1-Zufallssound nach Halt (z. B. Luftpumpe). Wichtig: Z1 min/max Intervalle müssen gleich sein; die Größe des Wertes bestimmt die Häufigkeit (Fahrzeit wird addiert): 2/2 nach jedem Halt, 40/40 erst nach 40 s Fahrzeit. Andere Bits: OEM Spezialanwendungen, Panto-Lok≈, u.a)</description>
+  </parameter>
+  <parameter nr=""155"" value=""0"" type=""bei neuen Projekten zu bevorzugende Alternative zu CV #124: Auswahl Funktionstaste für Halbgeschwindigkeit"">
+    <description>≈ In Erweiterung der Einstellungen der CV #124, wenn die dortige Auswahl (Halbgeschwindigkeit auf F3 oder F7) nicht ausreicht, weil andere Taste gewünscht ist: CV #155: Bestimmung der Funktions-Taste, mit welcher die Halbgeschwindigkeit (= höchste Fahrstufe er- gibt halbe Geschwindigkeit) eingeschaltet werden kann. Wenn CV #155 &gt; 0 (also eine Taste eingestellt), ist eine eventuelle Zuordnung in CV #124 unwirksam. Wenn CV #155 = = 0: CV #155 nicht aktiv, es gilt also CV #124. = 1 - 28: Funktionstaste F1 - F28 = 29: Funktionstaste F0 = 30: MAN-Taste Bits 7, 6, 5: Modifikation der „Halb“-Geschwindigkeit“ = 000: Geschwindigkeit laut Fahrstufe, multipl. mit 0,625 = 001 … 100: … Fahrstufe, multipliziert mit 0,125 …0,5 = 100 … 111: … Fahrstufe, multipliziert mit 0,5 …0,875</description>
+  </parameter>
+  <parameter nr=""156"" value=""0"" type=""bei neuen Projekten zu bevorzugende Alternative zu CV #124: Auswahl Funktionstaste"">
+    <description>Diese CV überschreibt die Einstellung der F-Tasten in CV #124 (Bit 2&amp;6) im Fall, dass diese nicht zufriedenstellend ist. Der eingestellte Wirkungsumfang (Bit 0&amp;1) des Beschleunigungsverhaltens ändert sich nicht. Wenn CV #156 &gt; 0 (also eine Taste eingestellt), ist eine eventuelle Zuordnung in CV #124 unwirksam. Wenn CV #156 = = 0“ bedeutet CV #156 nicht aktiv, es gilt also CV #124. = 1 - 28: Funktionstaste F1 - F28 / = 29: Funktionstaste F0 = 30: MAN-Taste Bit 7 = 1: Unterdrücken des Umschaltens des Lichts bei Richtungsumkehr. Die Einstellungen der CV #124 über die Art der Deaktivierung oder Reduzierung gelten weiterhin, also: CV #124, Bit 1, 0 = = 00: kein Einfluss auf Beschleunigungszeiten = 10: reduziert Beschleun. /Bremszeit auf ¼ der Werte laut CVs #3, #4. = 11: deaktiviert Beschleun. /Bremszeit völlig. Typischer Weise wird daher die CV #124 = 3 gesetzt, um die volle Deaktivierung zu erreichen (sofern nicht noch andere Bits in CV #124 auch gesetzt werden).</description>
+  </parameter>
+  <parameter nr=""157"" value=""0"" type=""Auswahl Funktionstaste für die MAN-Funktion Für Fälle, wo nicht die standardmäßig dafür vorgesehene MN-Taste am ZIMO Fahrpult zur Verfügung steht."">
+    <description>Die MAN-Funktion (bzw. MAN-Taste am ZIMO Fahrpult) ist eine ursprünglich allein für ZIMO Anwendungen geschaffene Funktion, um Halt und Geschwindigkeitslimits durch das HLU-System der „signalabhängigen Zugbeeinflussung“ aufzuheben. In späteren Software-Erweiterungen wurde diese Funktion auch für den Signalhalt durch „asymmetrisches DCC-Signal“ (Lenz ABC) ausgedehnt. In jenen Fällen, wo ein ZIMO Decoder innerhalb eines Fremdsystems (also nicht ZIMO) verwendet wird (selten in HLU Anwendungen, häufiger mit ABC) kann nun per CV #157 eine beliebige Taste verwendet werden, um die Zugbeeinflussung oder den Signalhalt aufzuheben.</description>
+  </parameter>
+  <parameter nr=""158"" type=""Diverse Spezialbits Bits 1, 3,5, 6, 7 (nur Diesel &amp; Elektro)"">
+    <description>Bit 1 = 1: DIESEL-MECH: Beim Bremsen kein Erhöhen der Drehzahl (siehe auch CV #364). Bit 2 = 0: RailCom Geschwindigkeits (km/h) -Rückmeldung in „alter“ Variante (für MX31ZL), RailCom-Id 3) = 1: RailCom Geschwindigkeits (km/h) -Rückmeldung neue NORMGEMÄSSE Variante (RailCom-Id 7) Bit 3 =1: DIESEL: Stand-Sample wird bei „vorzeitigem“ Abfahren ausgeblendet. Bit 4 = 1: DAMPFschlag Häufigkeit steigt beim Schnellfahren unterproportional (= geringer) Bit 5 = 1: DIESEL: Bremsen (auch nur um eine Fahrstufe) bewirkt Absenken des Motorund Turbolader-Sounds um eine Diesel-Stufe Bit 6 = 1: ELEKTRO: Thyristor-Sound kann beim Bremsen lauter werden. Bit 7 = 1: ELEKTRO: Schaltwerksblitzen auf FA7.</description>
+  </parameter>
+  <parameter nr=""159"" value=""0"" type=""Effekte auf FA7, FA8"">
+    <description>wie CV #125 #159 → FA7 #160 → FA8</description>
+  </parameter>
+  <parameter nr=""160"" value=""0"" type=""Effekte auf FA7, FA8"">
+    <description>wie CV #125 #159 → FA7 #160 → FA8</description>
+  </parameter>
+  <parameter nr=""161"" value=""0"" type=""Servo-Ausgänge Protokoll und alternative Verwendung der Servo-Ausgänge 3 &amp; 4 als SUSI-Pins"">
+    <description>Bit 0 = 0: Servo-Protokoll mit positiven Impulsen. = 1: Servo-Protokoll mit negativen Impulsen. Bit 1 = 0: Steuerleitung aktiv während Bewegung = 1: … immer aktiv (verbraucht Strom, zittert manchmal, aber hält die Stellung auch bei mechanischer Belastung); Bit 2 = 0: im Falle der Zweitastenbedienung (laut CV #181, ...) Mittelstellung, wenn beide Tasten nicht betätigt. / = 1: im Falle der Zweitastenbedienung (laut CV #181, …) läuft Servo nur während der Tastenbetätigung.</description>
+  </parameter>
+  <parameter nr=""162"" type=""Servo 1 Endstellung links Endstellung rechts Mittelstellung Umlaufzeit"">
+    <description>Endstellungen und Mittelstellung definieren den auszunützenden Anteil am gesamten Drehbereich des Servos (typ. ca. 270o) „links“, „rechts“ sind symbolisch zu verstehen; Tatsächliche Wirkung kann auch genau umgekehrt sein. Geschwindigkeit der Stellbewegung: Zeit zwischen den definierten Endstellungen in Zehntel sec (also Bereich bis 25 sec, Default 3 sec).</description>
+  </parameter>
+  <parameter nr=""163"" type=""Servo 1 Endstellung links Endstellung rechts Mittelstellung Umlaufzeit"">
+    <description>Endstellungen und Mittelstellung definieren den auszunützenden Anteil am gesamten Drehbereich des Servos (typ. ca. 270o) „links“, „rechts“ sind symbolisch zu verstehen; Tatsächliche Wirkung kann auch genau umgekehrt sein. Geschwindigkeit der Stellbewegung: Zeit zwischen den definierten Endstellungen in Zehntel sec (also Bereich bis 25 sec, Default 3 sec).</description>
+  </parameter>
+  <parameter nr=""164"" type=""Servo 1 Endstellung links Endstellung rechts Mittelstellung Umlaufzeit"">
+    <description>Endstellungen und Mittelstellung definieren den auszunützenden Anteil am gesamten Drehbereich des Servos (typ. ca. 270o) „links“, „rechts“ sind symbolisch zu verstehen; Tatsächliche Wirkung kann auch genau umgekehrt sein. Geschwindigkeit der Stellbewegung: Zeit zwischen den definierten Endstellungen in Zehntel sec (also Bereich bis 25 sec, Default 3 sec).</description>
+  </parameter>
+  <parameter nr=""165"" type=""Servo 1 Endstellung links Endstellung rechts Mittelstellung Umlaufzeit"">
+    <description>Endstellungen und Mittelstellung definieren den auszunützenden Anteil am gesamten Drehbereich des Servos (typ. ca. 270o) „links“, „rechts“ sind symbolisch zu verstehen; Tatsächliche Wirkung kann auch genau umgekehrt sein. Geschwindigkeit der Stellbewegung: Zeit zwischen den definierten Endstellungen in Zehntel sec (also Bereich bis 25 sec, Default 3 sec).</description>
+  </parameter>
+  <parameter nr=""166"" type=""Servo 2 Servo 3 Servo 4"">
+    <description></description>
+  </parameter>
+  <parameter nr=""167"" type=""Servo 2 Servo 3 Servo 4"">
+    <description></description>
+  </parameter>
+  <parameter nr=""168"" type=""Servo 2 Servo 3 Servo 4"">
+    <description></description>
+  </parameter>
+  <parameter nr=""169"" type=""Servo 2 Servo 3 Servo 4"">
+    <description></description>
+  </parameter>
+  <parameter nr=""170"" type=""Servo 2 Servo 3 Servo 4"">
+    <description></description>
+  </parameter>
+  <parameter nr=""171"" type=""Servo 2 Servo 3 Servo 4"">
+    <description></description>
+  </parameter>
+  <parameter nr=""172"" type=""Servo 2 Servo 3 Servo 4"">
+    <description></description>
+  </parameter>
+  <parameter nr=""173"" type=""Servo 2 Servo 3 Servo 4"">
+    <description></description>
+  </parameter>
+  <parameter nr=""174"" type=""Servo 2 Servo 3 Servo 4"">
+    <description></description>
+  </parameter>
+  <parameter nr=""175"" type=""Servo 2 Servo 3 Servo 4"">
+    <description></description>
+  </parameter>
+  <parameter nr=""176"" type=""Servo 2 Servo 3 Servo 4"">
+    <description></description>
+  </parameter>
+  <parameter nr=""177"" type=""Servo 2 Servo 3 Servo 4"">
+    <description></description>
+  </parameter>
+  <parameter nr=""178"" value=""0"" type=""Panto Nachschwingen"">
+    <description>Gültig für jeden Servo, der unter CVs #181 - #184 (Funktionszuordnungen) als „Panto...“ gilt = 94 - 97), Nach Erreichen der Endstellung (also nach „Panto heben“) soll sich der Panto noch einige Male leicht auf und ab bewegen. Mit CV #178 wird die Amplitude dieser Nachschwingung (genauer der ersten davon) eingestellt = 0: kein Nachschwingen = 22: sinnvolle Ersteinstellung, von dort aus variieren Amplitude = Einer-Stelle *0,04 Die Zehner-Stelle stellt den Dämpfungfaktor ein. 0 stellt einen Sonderfall dar, in diesem Fall hört das Nachschwingen nämlich niemals auf. Es gilt: Dämpfungsfaktor = Zehner-Stelle *0,1</description>
+  </parameter>
+  <parameter nr=""179"" value=""0"" type=""Steigerung der Geschwindigkeit mit Schienenspannung"">
+    <description>Ist zur Einstellung der Höchstgeschwindigkeit im Analogbetrieb geeignet. Wirkt sowohl im geregelten als ungeregelten Analogbetrieb, ab SW 5.15</description>
+  </parameter>
+  <parameter nr=""181"" value=""0"" type=""Servo 1-4 Funktionszuordnung HINWEIS: Falls eine Servo-Steuerleitung ihren Anschluss mit einer anderen Funktion (z. B. SUSI oder Eingang) zur wahlweisen Verwendung teilt, bedeutet ein Wert &gt;0 in der CV #181, #182, …"">
+    <description>= 0: Servo nicht in Betrieb = 1: Eintastenbedienung mit F1 = 2: Eintastenbedienung mit F2 usw. = 28: Eintastenbedienung mit F28 = 90: Servo abhängig von Richtungsfunktion vorwärts = Servo links; rückwärts = rechts = 91: Servo abhängig von Stillstand und Richtung d.h.: Servo rechts bei Stillstand und Richtung auf Vorwärts eingestellt, sonst links = 92: Servo abhängig von Stillstand und Richtung d . h : S e r v o r echts … auf Rückwärts …, sonst links = 93: Servo abhängig von Stillstand oder Fahrt; NICHT Richtung; d.h: rechts bei Stillstand, links bei Fahrt; = 94: verweist auf die Funktion ""Panto1"" laut CV#186 = 95: …""Panto2"" laut CV #187. = 96: …""Panto3"" laut CV #188. = 97: …""Panto4"" laut CV #189. / = 101: Zweitastenbedienung F1 + F2 = 102: Zweitastenbedienung F2 + F3 usw. = 111: Zweitastenbedienung F11 + F12 = 112: Zweitastenbedienung F3 + F6 = 113: Zweitastenbedienung F4 + F7 = 114: Zweitastenbedienung F5 + F8 (Zweitastenbedienung laut CV #161, Bit 2) = 201 - 208: Events 1 - 8 aus Scripts oder Sound</description>
+  </parameter>
+  <parameter nr=""182"" value=""0"" type=""Servo 1-4 Funktionszuordnung HINWEIS: Falls eine Servo-Steuerleitung ihren Anschluss mit einer anderen Funktion (z. B. SUSI oder Eingang) zur wahlweisen Verwendung teilt, bedeutet ein Wert &gt;0 in der CV #181, #182, …"">
+    <description>= 0: Servo nicht in Betrieb = 1: Eintastenbedienung mit F1 = 2: Eintastenbedienung mit F2 usw. = 28: Eintastenbedienung mit F28 = 90: Servo abhängig von Richtungsfunktion vorwärts = Servo links; rückwärts = rechts = 91: Servo abhängig von Stillstand und Richtung d.h.: Servo rechts bei Stillstand und Richtung auf Vorwärts eingestellt, sonst links = 92: Servo abhängig von Stillstand und Richtung d . h : S e r v o r echts … auf Rückwärts …, sonst links = 93: Servo abhängig von Stillstand oder Fahrt; NICHT Richtung; d.h: rechts bei Stillstand, links bei Fahrt; = 94: verweist auf die Funktion ""Panto1"" laut CV#186 = 95: …""Panto2"" laut CV #187. = 96: …""Panto3"" laut CV #188. = 97: …""Panto4"" laut CV #189. / = 101: Zweitastenbedienung F1 + F2 = 102: Zweitastenbedienung F2 + F3 usw. = 111: Zweitastenbedienung F11 + F12 = 112: Zweitastenbedienung F3 + F6 = 113: Zweitastenbedienung F4 + F7 = 114: Zweitastenbedienung F5 + F8 (Zweitastenbedienung laut CV #161, Bit 2) = 201 - 208: Events 1 - 8 aus Scripts oder Sound</description>
+  </parameter>
+  <parameter nr=""183"" value=""0"" type=""Servo 1-4 Funktionszuordnung HINWEIS: Falls eine Servo-Steuerleitung ihren Anschluss mit einer anderen Funktion (z. B. SUSI oder Eingang) zur wahlweisen Verwendung teilt, bedeutet ein Wert &gt;0 in der CV #181, #182, …"">
+    <description>= 0: Servo nicht in Betrieb = 1: Eintastenbedienung mit F1 = 2: Eintastenbedienung mit F2 usw. = 28: Eintastenbedienung mit F28 = 90: Servo abhängig von Richtungsfunktion vorwärts = Servo links; rückwärts = rechts = 91: Servo abhängig von Stillstand und Richtung d.h.: Servo rechts bei Stillstand und Richtung auf Vorwärts eingestellt, sonst links = 92: Servo abhängig von Stillstand und Richtung d . h : S e r v o r echts … auf Rückwärts …, sonst links = 93: Servo abhängig von Stillstand oder Fahrt; NICHT Richtung; d.h: rechts bei Stillstand, links bei Fahrt; = 94: verweist auf die Funktion ""Panto1"" laut CV#186 = 95: …""Panto2"" laut CV #187. = 96: …""Panto3"" laut CV #188. = 97: …""Panto4"" laut CV #189. / = 101: Zweitastenbedienung F1 + F2 = 102: Zweitastenbedienung F2 + F3 usw. = 111: Zweitastenbedienung F11 + F12 = 112: Zweitastenbedienung F3 + F6 = 113: Zweitastenbedienung F4 + F7 = 114: Zweitastenbedienung F5 + F8 (Zweitastenbedienung laut CV #161, Bit 2) = 201 - 208: Events 1 - 8 aus Scripts oder Sound</description>
+  </parameter>
+  <parameter nr=""184"" value=""0"" type=""Servo 1-4 Funktionszuordnung HINWEIS: Falls eine Servo-Steuerleitung ihren Anschluss mit einer anderen Funktion (z. B. SUSI oder Eingang) zur wahlweisen Verwendung teilt, bedeutet ein Wert &gt;0 in der CV #181, #182, …"">
+    <description>= 0: Servo nicht in Betrieb = 1: Eintastenbedienung mit F1 = 2: Eintastenbedienung mit F2 usw. = 28: Eintastenbedienung mit F28 = 90: Servo abhängig von Richtungsfunktion vorwärts = Servo links; rückwärts = rechts = 91: Servo abhängig von Stillstand und Richtung d.h.: Servo rechts bei Stillstand und Richtung auf Vorwärts eingestellt, sonst links = 92: Servo abhängig von Stillstand und Richtung d . h : S e r v o r echts … auf Rückwärts …, sonst links = 93: Servo abhängig von Stillstand oder Fahrt; NICHT Richtung; d.h: rechts bei Stillstand, links bei Fahrt; = 94: verweist auf die Funktion ""Panto1"" laut CV#186 = 95: …""Panto2"" laut CV #187. = 96: …""Panto3"" laut CV #188. = 97: …""Panto4"" laut CV #189. / = 101: Zweitastenbedienung F1 + F2 = 102: Zweitastenbedienung F2 + F3 usw. = 111: Zweitastenbedienung F11 + F12 = 112: Zweitastenbedienung F3 + F6 = 113: Zweitastenbedienung F4 + F7 = 114: Zweitastenbedienung F5 + F8 (Zweitastenbedienung laut CV #161, Bit 2) = 201 - 208: Events 1 - 8 aus Scripts oder Sound</description>
+  </parameter>
+  <parameter nr=""185"" value=""0"" type=""Spezialzuordnung für Echtdampfloks Bis auf Weiteres in MS-Decodern NICHT implementiert (CV reserviert für ev. Bedarf)"">
+    <description>= 1: Dampflok mit Ein-Servo-Betrieb; Geschwindigkeit und Fahrtrichtung durch Fahrregler, Mittelstellung ist Stop. = 2: Servo 1 proportional am Fahrregler, Servo 2 an Richtungsfunktion. = 3: wie 2, aber: Richtungs-Servo automatisch in Nullstellung, wenn Fahrstufe 0 und F1 = on; Bei Fahrstufe &gt; 0: Richtungs-Servo auf Richtung. HINWEIS zu CV #185 = 2 oder 3: Servo 1 ist durch CV #162, #163 einstellbar (Endstellungen), durch entsprechende Werte ist auch eine Umkehrung der Richtung möglich. Servo 2 ist durch CV #166, #167 einstellbar</description>
+  </parameter>
+  <parameter nr=""186"" value=""0"" type=""&quot;Panto1&quot; &quot;Panto2&quot; &quot;Panto3&quot; &quot;Panto4&quot;"">
+    <description>Bit 7 = 0: Nicht Sound-Abhängig = 1: Sound-Abhängig Bit 6 - 5 = 00: Richtungs-unabhängig, = 01: nur bei Vorwärtsfahrt = 10: nur bei Rückwärtsfahrt = 11: nur wenn Funktionstaste ausgeschaltet Bit 4 - 0: Taste zum aktivieren 00001 = F1 00010 = F2 00011 = F3, …</description>
+  </parameter>
+  <parameter nr=""187"" value=""0"" type=""&quot;Panto1&quot; &quot;Panto2&quot; &quot;Panto3&quot; &quot;Panto4&quot;"">
+    <description>Bit 7 = 0: Nicht Sound-Abhängig = 1: Sound-Abhängig Bit 6 - 5 = 00: Richtungs-unabhängig, = 01: nur bei Vorwärtsfahrt = 10: nur bei Rückwärtsfahrt = 11: nur wenn Funktionstaste ausgeschaltet Bit 4 - 0: Taste zum aktivieren 00001 = F1 00010 = F2 00011 = F3, …</description>
+  </parameter>
+  <parameter nr=""188"" value=""0"" type=""&quot;Panto1&quot; &quot;Panto2&quot; &quot;Panto3&quot; &quot;Panto4&quot;"">
+    <description>Bit 7 = 0: Nicht Sound-Abhängig = 1: Sound-Abhängig Bit 6 - 5 = 00: Richtungs-unabhängig, = 01: nur bei Vorwärtsfahrt = 10: nur bei Rückwärtsfahrt = 11: nur wenn Funktionstaste ausgeschaltet Bit 4 - 0: Taste zum aktivieren 00001 = F1 00010 = F2 00011 = F3, …</description>
+  </parameter>
+  <parameter nr=""189"" value=""0"" type=""&quot;Panto1&quot; &quot;Panto2&quot; &quot;Panto3&quot; &quot;Panto4&quot;"">
+    <description>Bit 7 = 0: Nicht Sound-Abhängig = 1: Sound-Abhängig Bit 6 - 5 = 00: Richtungs-unabhängig, = 01: nur bei Vorwärtsfahrt = 10: nur bei Rückwärtsfahrt = 11: nur wenn Funktionstaste ausgeschaltet Bit 4 - 0: Taste zum aktivieren 00001 = F1 00010 = F2 00011 = F3, …</description>
+  </parameter>
+  <parameter nr=""190"" value=""0"" type=""Aufblendzeit für Effekte 88, 89, 90"">
+    <description>B Der Bereich 0 – 100 entspricht 0 – 1s (10ms/Wert) 101 – 200 1 – 100s (1s/Wert) 201 – 255 100 – 320s (4s/Wert)</description>
+  </parameter>
+  <parameter nr=""191"" value=""0"" type=""Abblendzeit für Effekte 88, 89, 90"">
+    <description>Der Bereich 0 – 100 entspricht 0 – 1s (10ms/Wert) 101 – 200 1 – 100s (1s/Wert) 201 – 255 100 – 320s (4s/Wert)</description>
+  </parameter>
+  <parameter nr=""192"" value=""0"" type=""Wert für Effekt Dimmen"">
+    <description>Funktionsweise wie CV #60, gilt aber für den Effekt Dimmen: Code 011010xx in CV #125 oder #126 oder #127).</description>
+  </parameter>
+  <parameter nr=""193"" value=""0"" type=""ABC - Pendelbetrieb mit Aufenthaltszeit an Umkehrabschnitten"">
+    <description>= 0: kein Pendelbetrieb auf ABC-Basis = 1 - 254: Pendelbetrieb mit Zwischenhalt (Umkehrabschnitte durch ABC-Langsamabschnitte, Zwischenhalte durch ABC-Halteabschnitte definiert) Aufenthaltszeit (in sec) in den Zwischenhalten = 255: wie oben aber Dauerhalt in den Zwischenhalten (bis Freigabe durch Aufheben Haltewirkung).</description>
+  </parameter>
+  <parameter nr=""194"" value=""0"" type=""ABC - Pendelbetrieb mit zusätzlichen Zwischenaufenthalte"">
+    <description>Alle Pendelbetriebsarten nur, wenn CV #193 = 1 - 255 = 0: Pendelbetrieb ohne Zwischenhalt (siehe oben) = 1 - 254: Pendelbetrieb mit Zwischenhalt (Umkehrabschnitte durch ABC-Langsamabschnitte, Zwischenhalte durch ABC-Halteabschnitte definiert) Aufenthaltszeit (in sec) in den Zwischenhalten = 255: wie oben aber Dauerhalt in den Zwischenhalten (bis Freigabe durch Aufheben Haltewirkung).</description>
+  </parameter>
+  <parameter nr=""195"" value=""0"" type=""Effekte auf FA9, FA10, FA11, FA12, FA13"">
+    <description>wie CV #125 #195 → FA9 #196 → FA10 #197 → FA11 #198 → FA12 #199 → FA13</description>
+  </parameter>
+  <parameter nr=""196"" value=""0"" type=""Effekte auf FA9, FA10, FA11, FA12, FA13"">
+    <description>wie CV #125 #195 → FA9 #196 → FA10 #197 → FA11 #198 → FA12 #199 → FA13</description>
+  </parameter>
+  <parameter nr=""197"" value=""0"" type=""Effekte auf FA9, FA10, FA11, FA12, FA13"">
+    <description>wie CV #125 #195 → FA9 #196 → FA10 #197 → FA11 #198 → FA12 #199 → FA13</description>
+  </parameter>
+  <parameter nr=""198"" value=""0"" type=""Effekte auf FA9, FA10, FA11, FA12, FA13"">
+    <description>wie CV #125 #195 → FA9 #196 → FA10 #197 → FA11 #198 → FA12 #199 → FA13</description>
+  </parameter>
+  <parameter nr=""199"" value=""0"" type=""Effekte auf FA9, FA10, FA11, FA12, FA13"">
+    <description>wie CV #125 #195 → FA9 #196 → FA10 #197 → FA11 #198 → FA12 #199 → FA13</description>
+  </parameter>
+  <parameter nr=""201"" value=""0"" type=""Alternative (übersichtlichere, bei neuen Projekten zu bevorzugende) „SUSI“ Verwendung."">
+    <description>= 11: SUSI-Pins als Logikpegel-Ausgänge (siehe oben) = 22: SUSI-Pins als Logikpegel- („Reed“) -Eingänge = 33: SUSI-Pins als Servo-Steuerleitungen = 44: SUSI ""Burst Mode"" In diesem Modus werden alle ~14ms alle Pakete ans Modul in einer kontinuierlichen Aussendung wiederholt. = 55: SUSI-Pins als I2C Bus. (noch nicht implementiert) = 66: SUSI ""Compatibility Mode"" In diesem Modus wird alle ~10ms ein Paket ans Modul gesendet. Alle Pakete werden in einem fixen Raster wiederholt. Dieser Modus ist auf Grund seines langsameren Aussendezyklus natürlich nicht zu empfehlen.</description>
+  </parameter>
+  <parameter nr=""202"" value=""0"" type=""Falls Decoder (Großbahn-Decoder) zwei „SUSI“ Anschlüsse hat"">
+    <description>Wie oben (CV #201), aber für zweiten SUSI-Anschluss; dort ist die CV #202 allerdings die einzige Einstellmöglichkeit, nicht nur die Alternative).</description>
+  </parameter>
+  <parameter nr=""203"" value=""0"" type=""Verwendung der Eingänge IN1 &amp; IN2, bzw. IN3 &amp; IN4"">
+    <description>= 11: beide „IN“s als Logikpegel-Ausgänge (siehe oben) = 22: beide „IN“s als Logikpegel- („Reed“) -Eingänge = 33: SUSI-Pins als Servo-Steuerleitungen = 44: beide „IN“s als Eingänge für Achsdetektor CV #203 Einerstelle: IN1 CV #203 Zehnerstelle: IN2 CV #204 Einerstelle: IN3 CV #204 Zehnerstelle: IN4 Wenn der Achsdetektor genutzt wird aber weder CV #203 noch #204 konfiguriert ist, dann wird IN3 als Default angenommen.</description>
+  </parameter>
+  <parameter nr=""204"" value=""0"" type=""Verwendung der Eingänge IN1 &amp; IN2, bzw. IN3 &amp; IN4"">
+    <description>= 11: beide „IN“s als Logikpegel-Ausgänge (siehe oben) = 22: beide „IN“s als Logikpegel- („Reed“) -Eingänge = 33: SUSI-Pins als Servo-Steuerleitungen = 44: beide „IN“s als Eingänge für Achsdetektor CV #203 Einerstelle: IN1 CV #203 Zehnerstelle: IN2 CV #204 Einerstelle: IN3 CV #204 Zehnerstelle: IN4 Wenn der Achsdetektor genutzt wird aber weder CV #203 noch #204 konfiguriert ist, dann wird IN3 als Default angenommen.</description>
+  </parameter>
+  <parameter nr=""248"" type=""Bootloader-Version und Subversion"">
+    <description>Auslesen dieser CVs ergibt Versions- und Subversionsnummer des aktuell im Decoder geladenen Bootloaders (= Programm zum Laden der eigentlichen Software).</description>
+  </parameter>
+  <parameter nr=""249"" type=""Bootloader-Version und Subversion"">
+    <description>Auslesen dieser CVs ergibt Versions- und Subversionsnummer des aktuell im Decoder geladenen Bootloaders (= Programm zum Laden der eigentlichen Software).</description>
+  </parameter>
+  <parameter nr=""250"" type=""Decoder-ID, davon CV #250 und CV #251 (Bits 7-4) = Decoder-Typ (siehe Kapitel 1 0BÜbersicht der Typen und Typabhängigen Daten…) CV #251 (Bits 3 - 0) und CV #252 und #253"">
+    <description>Die Decoder-ID (= Serien-Nummer) wird automatisch bei der Produktion eingeschrieben: das erste Byte und die Hälfte des zweiten ist ein Code für den Decoder-Typ, der Rest bildet eine laufende Nummer. Benötigt wird die Decoder-ID vor allem für Anmeldeprozeduren an Digitalzentralen sowie in Zusammenhang mit dem Lade-Code für „coded“ Sound-Projekte (siehe CVs #260 bis #263).</description>
+  </parameter>
+  <parameter nr=""251"" type=""Decoder-ID, davon CV #250 und CV #251 (Bits 7-4) = Decoder-Typ (siehe Kapitel 1 0BÜbersicht der Typen und Typabhängigen Daten…) CV #251 (Bits 3 - 0) und CV #252 und #253"">
+    <description>Die Decoder-ID (= Serien-Nummer) wird automatisch bei der Produktion eingeschrieben: das erste Byte und die Hälfte des zweiten ist ein Code für den Decoder-Typ, der Rest bildet eine laufende Nummer. Benötigt wird die Decoder-ID vor allem für Anmeldeprozeduren an Digitalzentralen sowie in Zusammenhang mit dem Lade-Code für „coded“ Sound-Projekte (siehe CVs #260 bis #263).</description>
+  </parameter>
+  <parameter nr=""252"" type=""Decoder-ID, davon CV #250 und CV #251 (Bits 7-4) = Decoder-Typ (siehe Kapitel 1 0BÜbersicht der Typen und Typabhängigen Daten…) CV #251 (Bits 3 - 0) und CV #252 und #253"">
+    <description>Die Decoder-ID (= Serien-Nummer) wird automatisch bei der Produktion eingeschrieben: das erste Byte und die Hälfte des zweiten ist ein Code für den Decoder-Typ, der Rest bildet eine laufende Nummer. Benötigt wird die Decoder-ID vor allem für Anmeldeprozeduren an Digitalzentralen sowie in Zusammenhang mit dem Lade-Code für „coded“ Sound-Projekte (siehe CVs #260 bis #263).</description>
+  </parameter>
+  <parameter nr=""253"" type=""Decoder-ID, davon CV #250 und CV #251 (Bits 7-4) = Decoder-Typ (siehe Kapitel 1 0BÜbersicht der Typen und Typabhängigen Daten…) CV #251 (Bits 3 - 0) und CV #252 und #253"">
+    <description>Die Decoder-ID (= Serien-Nummer) wird automatisch bei der Produktion eingeschrieben: das erste Byte und die Hälfte des zweiten ist ein Code für den Decoder-Typ, der Rest bildet eine laufende Nummer. Benötigt wird die Decoder-ID vor allem für Anmeldeprozeduren an Digitalzentralen sowie in Zusammenhang mit dem Lade-Code für „coded“ Sound-Projekte (siehe CVs #260 bis #263).</description>
+  </parameter>
+  <parameter nr=""258"" type=""Auslesen von CV #8"">
+    <description>Hiermit kann CV #8 ausgelesen werden (Ausnahme 3-6)</description>
+  </parameter>
+  <parameter nr=""260"" type=""Lade-Code für „Coded“ Sound-Projekte"">
+    <description>Gegen Aufpreis beim Kauf können ZIMO Sound Decoder mit werksseitig eingeschriebenem ""Lade-Code"" bezogen werden und sind dann von Beginn an bereit zur Aufnahme von ""coded"" Sound-Projekten des betreffenden „Bündels“. Ansonsten muss der ""Lade-Code"" nachträglich beschafft (gekauft) und eingeschrieben werden: Siehe dazu ZIMO Website www.zimo.at.</description>
+  </parameter>
+  <parameter nr=""261"" type=""Lade-Code für „Coded“ Sound-Projekte"">
+    <description>Gegen Aufpreis beim Kauf können ZIMO Sound Decoder mit werksseitig eingeschriebenem ""Lade-Code"" bezogen werden und sind dann von Beginn an bereit zur Aufnahme von ""coded"" Sound-Projekten des betreffenden „Bündels“. Ansonsten muss der ""Lade-Code"" nachträglich beschafft (gekauft) und eingeschrieben werden: Siehe dazu ZIMO Website www.zimo.at.</description>
+  </parameter>
+  <parameter nr=""262"" type=""Lade-Code für „Coded“ Sound-Projekte"">
+    <description>Gegen Aufpreis beim Kauf können ZIMO Sound Decoder mit werksseitig eingeschriebenem ""Lade-Code"" bezogen werden und sind dann von Beginn an bereit zur Aufnahme von ""coded"" Sound-Projekten des betreffenden „Bündels“. Ansonsten muss der ""Lade-Code"" nachträglich beschafft (gekauft) und eingeschrieben werden: Siehe dazu ZIMO Website www.zimo.at.</description>
+  </parameter>
+  <parameter nr=""263"" type=""Lade-Code für „Coded“ Sound-Projekte"">
+    <description>Gegen Aufpreis beim Kauf können ZIMO Sound Decoder mit werksseitig eingeschriebenem ""Lade-Code"" bezogen werden und sind dann von Beginn an bereit zur Aufnahme von ""coded"" Sound-Projekten des betreffenden „Bündels“. Ansonsten muss der ""Lade-Code"" nachträglich beschafft (gekauft) und eingeschrieben werden: Siehe dazu ZIMO Website www.zimo.at.</description>
+  </parameter>
+  <parameter nr=""264"" value=""15"" type=""Variable Niederspannung (Großbahn- und Spezial-Decoder)"">
+    <description>Variable (per CV einstellbare) Niederspannung (nur Großbahn- und einige Spezial-Decoder) = 10 - 158: Niederspannung in Zehntel-Volt (1 - 15,8 V)</description>
+  </parameter>
+  <parameter nr=""265"" type=""Auswahl des Loktyp"">
+    <description>= 0, 100, 200: Reserviert für zukünftige Verwendung = 1 - 32: Auswahl zwischen im Decoder geladenen Dampflok-Sounds in Sound Collection, z. B. für Loktyp BR01, BR28, BR50, usw. Sowohl Dampfschläge als auch sonstige Geräusche (Pfiffe, Kompressor, Glocken, …) werden angepasst. = 101 - 132: Auswahl zwischen Dieselloktypen (falls mehrere Diesel-Sounds in Collection).</description>
+  </parameter>
+  <parameter nr=""266"" value=""65"" type=""Gesamt-Lautstärke (Multiplikator)"">
+    <description>Der Default-Wert „65“ ergibt rechnerisch die lautest-mögliche verzerrungsfreie Wiedergabe. Bei LS8x12 Lautsprechern nur Werte bis ca. 65! Größere Lautsprecher bis Wert 85 empfohlen.</description>
+  </parameter>
+  <parameter nr=""267"" value=""63"" type=""Dampfschlag-Häufigkeit nach “simuliertem Achsdetektor“ siehe auch CVs #354 und #393 in dieser Liste (Dampfschlag-Häufigkeit bei Fahrstufe 1, Dampfschlag-Intervall)"">
+    <description>CV #267 nur wirksam, wenn CV #268 = 0: Dampfschläge folgen dem „simulierten Achsdetektor“; dann braucht kein echter Achsdetektor am Decoder angeschlossen zu sein. Die Grundeinstellung „70“ ergibt ungefähr 4 oder 6 oder 8 Dampfschläge pro Umdrehung, je nach dem ausgewählten Dampfschlag-Set; da jedoch eine starke Abhängigkeit von Motor und Getriebe besteht, muss meistens noch ein individueller Abgleich vorgenommen werden, um wirklich exakt auf die gewünschte Dampfschlag-Dichte zu kommen; dazu dient CV #267: Absenken des Wertes bewirkt höhere Dampfschlag-Häufigkeit und umgekehrt. Die Einstellung sollte bei kleiner Geschwindigkeit erfolgen (etwa bei Fahrstufe 10, nicht Fahrstufe 1). Mittels Bit 6 der CV #393 kann das Dampfschlag-Intervall über das Maximum von CV #267 hinaus verlängert werden.</description>
+  </parameter>
+  <parameter nr=""268"" value=""1"" type=""Umschaltung auf echten Achsdetektor und Flankenzahl des Achsdetektors für Dampfschlag und"">
+    <description>= 0: „Simulierter“ Achsdetektor aktiv (einzustellen durch CV #267, siehe oben). = 1: echter aktiv, jede negative Flanke ergibt einen Dampfschlag. = 2, 3, … 63 echter Achsdetektor, mehrere Flanken hintereinander (2, 3, …, 63) ergeben einen Dampfschlag. = 128 (Bit 7 = 1 bei „simuliertem Achsdetektor): zweites Triebwerk etwas langsamer - nur sinnvoll, wenn eigene „Zweit-Samples“ als nächstes Dampfset des Sound-Projekts vorhanden sind. = 192 (Bit 6 und Bit 7 = 1): wenn keine „Zweit-Samples“, also eigene Samples für zweites Triebwerk), wird für beide Triebwerke das identische Dampfset verwendet, zweites Abspielen langsam / Bit 7 = 1 (mit echten Achsdetektor, siehe Werte oben) Achsdetektor für Triebwerk 1 an IN3 (wie normal), Achsdetektor für Triebwerk 2 an IN2 (nur möglich, wenn Decoder zwei Eingänge hat)</description>
+  </parameter>
+  <parameter nr=""269"" value=""10"" type=""Führungsschlag-Betonung"">
+    <description>Für das Klangbild einer vorbeifahrenden Dampflok ist es charakteristisch, dass einer der Dampfschläge aus der 4er- oder 6er-Gruppe lauter klingt als die anderen; dieser Effekt ist an sich bereits im ausgewählten Dampfschlag-Set gegeben, kann aber mit Hilfe der CV #269 noch verstärkt werden.</description>
+  </parameter>
+  <parameter nr=""271"" value=""1"" type=""Schnellfahrt Überlappungseffekt"">
+    <description>Bei Schnellfahrt überlappen sich beim Vorbild die Dampfschläge und gehen in ein schwaches Rauschen über. Im Modellbahn-Betrieb klingt das oft unattraktiv; daher lässt sich mit CV #271 einstellen, ob die Schläge betont oder verrauscht wiedergegeben werden</description>
+  </parameter>
+  <parameter nr=""272"" type=""Entwässerungs-dauer siehe auch CV #312 in dieser Liste (Entwässerungs-Taste)"">
+    <description>Das Öffnen der Zylinderventile zum Entwässern erfolgt beim Vorbild individuell nach dem Dafürhalten des Lokführers. Im Modellbahnbetrieb ist es eher automatisch beim Anfahren gewünscht; mit der CV #272 wird festgelegt, wie lange beim Anfahren die akustische Wirkung der offenen Zylinderventile anhalten soll. Wert in CV #272 = Zeit in Zehntel-sec! HINWEIS: Falls das Entwässerungs-Geräusch auch einer Funktions-Taste zugeordnet ist (im Auslieferungszustand F4, siehe CV #312), kann über die betreffende Funktionstaste das automatische Entwässern nach Belieben abgekürzt oder verlängert werden. Automatisches Entwässern und Funktions-Entwässern ist zwangsläufig identisch (laut später erfolgter Auswahl/Zuordnung). = 0: kein Entwässerungs-Geräusch</description>
+  </parameter>
+  <parameter nr=""273"" value=""0"" type=""Entwässerungs-Anfahrverzögerung"">
+    <description>Das Öffnen der Zylinderventile und das damit verbundene Geräusch beginnt beim Vorbild meistens bereits im Stillstand. Mit der CV #273 kann dies nachgebildet werden, indem das Anfahren automatisch verzögert wird. Die Wirkung der Anfahrverzögerung wird aufgehoben, wenn eine Rangierfunktion mit Beschleunigungs-Deaktivierung aktiviert wird (siehe Zuordnung von F3 oder F4 über CV #124). = 0: keine Anfahrverzögerung = 1: Spezialeinstellung Entwässern per Fahrregler; keine Anfahrverzögerung, aber unterste Fahrstufe (niedrigste Reglerstellung über 0, nur bei 128 Fahrstufen) bedeutet „noch nicht fahren, aber entwässern!“). =2...:Anfahrverzögerung in Zehntel-sec, Empfehlung: keine Werte &gt; 20 (&gt; 2 sec) Hinweis MN: damit die hier definierte Verzögerung wirkt, CV #310=255 virtueller Fahrsound an.</description>
+  </parameter>
+  <parameter nr=""274"" type=""Entwässerung-Stillstandzeit und Anfahrpfiff-Stillstandszeit"">
+    <description>Im Rangierbetrieb (häufiges Stehenbleiben und Anfahren) wird in der Praxis auf das dauernde Öffnen und Schließen der Zylinderventile verzichtet. CV #274 bewirkt, dass das Entwässerungs-Geräusch unterdrückt wird, wenn die Lok nicht für die hier definierte Zeit stillgestanden ist. Wert in #274 = Zeit in Zehntel-Sekunden Diese Stillstandszeit gilt auch für den Anfahrpfiff!</description>
+  </parameter>
+  <parameter nr=""275"" value=""220"" type=""Lautstärke der Dampfschläge bei unbelasteter Langsamfahrt"">
+    <description>Mit CV #275 wird eingestellt, wie laut die Dampfschläge bei Langsamfahrt und „Grundlast“ (also gleiche Betriebsbedingung wie bei der zuvor durchgeführten „Messfahrt“) sein sollen. Dabei wird eine Geschwindigkeit von ca. 1/10 der Maximalgeschwindigkeit gefahren; dies muss nicht exakt eingehalten werden). / CV #277 soll auf dabei „0“ bleiben, damit die Einstellung für „unbelastete Fahrt“ nicht durch Belastung verfälscht wird.</description>
+  </parameter>
+  <parameter nr=""276"" value=""220"" type=""Lautstärke bei unbelasteter Schnellfahrt"">
+    <description>Wie CV #275 (siehe oben), aber für Schnellfahrt. Bei Einstellung von CV #276 soll volle Geschwindigkeit gefahren werden.</description>
+  </parameter>
+  <parameter nr=""277"" value=""10"" type=""Abhängigkeit der Lautstärke der Dampfschläge von aktueller Belastung Ab SW 5.15"">
+    <description>Bei Abweichung von der Grundlast (laut Messfahrt) sollen die Dampfschläge kräftiger werden (bei Steigung) bzw. schwächer werden oder gänzlich verschwinden (bei Gefälle). Die CV #277 stellt das Ausmaß dieser Abhängigkeit ein; der passende Wert wird durch Probieren ermittelt.</description>
+  </parameter>
+  <parameter nr=""278"" value=""10"" type=""Laständerung Schwellwert"">
+    <description>Damit kann eine Reaktion des Fahrgeräusches auf kleine Laständerungen unterdrückt werden (z. B. Kurvenfahrt), um einen unruhigen akustischen Eindruck zu vermeiden. Der passende Wert wird durch Probieren ermittelt.</description>
+  </parameter>
+  <parameter nr=""279"" value=""1"" type=""Laständerung Reaktionszeit"">
+    <description>Damit kann die Reaktion des Fahrgeräusches auf Laständerungen verzögert werden, wobei es sich um keine definierte Zeitangabe handelt, sondern um eine „Laständerungs-abhängige Zeit“ (= je größer die Änderung, desto schneller Wirkung). Auch diese CV dient da-zu, einen unruhigen akustischen Eindruck zu vermeiden. Der passende Wert wird durch Probieren ermittelt.</description>
+  </parameter>
+  <parameter nr=""280"" value=""10"" type=""Dieselmotor -Lasteinfluss Ab SW 5.15"">
+    <description>Damit wird die Reaktion des Dieselmotors auf die Motorbelastung (bestimmt aus Motor-PWM und Fahrstufe), eingestellt; HINWEIS: von Geschwindigkeit und Beschleunigung ist das Geräusch des Dieselmotors grundsätzlich immer abhängig. Diesel-hydraulische Lok - höhere und niedrigere Drehzahl- und Leistungs-Stufen, Diesel-elektrische Lok - Lauf/Leerlauf, Loks mit Schaltgetriebe – Schaltstufen. = 0: kein Einfluss, Motor Drehzahl gemäß Geschwindigkeit = 1 bis 255: wachsender bis maximaler Einfluss. HINWEIS: Es ist zu empfehlen, zuvor die Messfahrt mit CV #302 = 75 durchzuführen (siehe dazu vorne Kapitel 5.2),</description>
+  </parameter>
+  <parameter nr=""281"" value=""1"" type=""Lautstärke der Dampfschläge Beschleunigungsschwelle für volles Beschleunigungsgeräusch"">
+    <description>Lautere Dampfschläge sollen den erhöhten Leistungsbedarf gegenüber der Grundlast bei Beschleunigungsvorgängen begleiten. Der Modellmotor reagiert auf eine Beschleunigung allerdings meistens nicht merklich (daher nicht gut genug messbar) mit dem Stromverbrauch, daher muss die Wirkung simuliert werden. Um zu realisieren, dass der veränderte Sound wie beim Vorbild bereits im Voraus zu hören ist (also bevor noch die Beschleunigung selbst sichtbar wird, weil diese ja eine Folgewirkung der verstärkten Dampfzufuhr ist), ist es zweckmäßig, das Beschleunigungsgeräusch schon bei Erhöhung um eine einzige Fahrstufe (also bei unmerklicher Geschwindigkeitsänderung) auszulösen. Der „Lokführer“ kann auf diese Art (1 Fahrstufe) aber auch vorausschauend das Fahrgeräusch auf eine kommende Steigung einstellen. = 1: Beschleunigungs-Fahrgeräusch (lautere Dampfschläge) bereits bei Erhöhung der Geschwindigkeit um nur 1 Fahrstufe. = 2, 3, ... Beschleunigungs-Fahrgeräusch erst auf volle Lautstärke bei Erhöhung um diese Zahl von Fahrstufen; davor proportionale Lautstärke.</description>
+  </parameter>
+  <parameter nr=""282"" value=""30"" type=""Dauer des Beschleunigungs-Geräusches"">
+    <description>Nach Erhöhung der Geschwindigkeit soll das Beschleunigungsgeräusch noch für eine bestimmte Zeit anhalten (ansonsten würde jede Fahrstufe einzeln zu hören sein, was unrealistisch wäre). Wert in CV #282 = Zeit in Zehntel-sec!</description>
+  </parameter>
+  <parameter nr=""283"" value=""255"" type=""Fahrgeräusch-Lautstärke für Beschleunigung"">
+    <description>Mit CV #283 wird eingestellt, wie laut die Dampfschläge bei maximaler Beschleunigung sein sollen (Default: 255 = maximale Lautstärke).</description>
+  </parameter>
+  <parameter nr=""284"" value=""1"" type=""Verzögerungsschwelle für Geräuschreduktion bei Verzögerung"">
+    <description>Leisere bis verschwindende Dampfschläge sollen den reduzierten Leistungsbedarf in der Verzögerung begleiten. Die Logik der Geräuschreduktion ist analog dem umgekehrten Fall des Beschleunigens (laut CV #283). = 1: auf Minimum (laut CV #286) reduziertes Fahrgeräusch (Dampfschläge) bereits bei Absenken der Geschwindigkeit um 1 Fahrstufe. = 2, 3, ... auf Minimum reduziertes Fahrgeräusch bei Absenken um diese Zahl von Fahrstufen.</description>
+  </parameter>
+  <parameter nr=""285"" value=""30"" type=""Dauer der Geräuschreduktion bei Verzögerung"">
+    <description>Nach Absenken der Geschwindigkeit soll das reduzierte Fahrgeräusch noch für eine bestimmte Zeit reduziert bleiben (wie bei Beschleunigung). Wert in CV #285 = Zeit in Zehntel-sec!</description>
+  </parameter>
+  <parameter nr=""286"" value=""20"" type=""Lautstärke des reduzierten Fahrgeräusches bei Verzögerung"">
+    <description>Mit CV #286 wird eingestellt, wie laut die Dampfschläge bei Verzögerung sein sollen (Default: 20 = ziemlich leise, aber nicht Null). Wenn CV #284 = 1 (also die Verzögerungsschwelle auf eine Fahrstufe gesetzt), kommt die hier definierte Lautstärke bei jeder Geschwindigkeitsabsenkung (auch bei einer Fahrstufe) zur Wirkung.</description>
+  </parameter>
+  <parameter nr=""287"" value=""50"" type=""Schwelle für Bremsenquietschen"">
+    <description>Das Bremsenquietschen soll einsetzen, wenn bei Verzögern eine bestimmte Fahrstufe unterschritten wird. Es wird beim Erreichen der Nullgeschwindigkeit (Stillstand auf Grund EMK - Messergebnis) automatisch gestoppt.</description>
+  </parameter>
+  <parameter nr=""288"" value=""50"" type=""Bremsenquietschen Mindestfahrzeit"">
+    <description>Das Bremsenquietschen soll unterdrückt werden, wenn die Lok nur kurze Zeit gefahren ist, weil es sich dabei meistens nur um Rangierfahrten häufig ohne Wagen (in der Realität quietschen meistens die Wagen, nicht die Lok selbst!) handelt. HINWEIS: Bremsenquietsch-Geräusche können auch auf eine Funktions-Taste zugeordnet werden (siehe Zuordnungs-Prozedur CV #300 = ...), wodurch diese entweder manuell ausgelöst oder gestoppt werden können.</description>
+  </parameter>
+  <parameter nr=""289"" type=""Thyristoren Stufeneffekt"">
+    <description>= 1 - 255: Stufeneffekt bezüglich der Tonhöhe</description>
+  </parameter>
+  <parameter nr=""290"" value=""50"" type=""Thyristoren Tonhöhe langsam"">
+    <description>Tonhöhe bei „langsamer“ int. Fahrstufe (1 - 255) laut CV #292.</description>
+  </parameter>
+  <parameter nr=""291"" value=""255"" type=""Thyristoren Tonhöhe maximal"">
+    <description>Tonhöhe bei „maximaler“ int. Fahrstufe (1 - 255) laut CV #838.</description>
+  </parameter>
+  <parameter nr=""292"" value=""128"" type=""Thyristoren langsame Geschw."">
+    <description>Definition der „langsamen“ Fahrstufe (1 - 255) für welche Tonhöhe laut CV #290 gilt.</description>
+  </parameter>
+  <parameter nr=""293"" value=""100"" type=""Thyristoren Lautstärke konstant"">
+    <description>Lautstärke bei konstanter Geschwindigkeit.</description>
+  </parameter>
+  <parameter nr=""294"" type=""Thyristoren Lautstärke Beschl."">
+    <description>Lautstärke bei Beschleunigung.</description>
+  </parameter>
+  <parameter nr=""295"" type=""Thyristoren Lautstärke Bremsen"">
+    <description>Lautstärke beim Bremsen.</description>
+  </parameter>
+  <parameter nr=""296"" value=""0"" type=""E-Motor Lautstärke"">
+    <description>Maximale Lautstärke des Motorgeräusches, welches bei voller Geschwindigkeit erreicht wird, oder bei Geschwindigkeit laut CV #298.</description>
+  </parameter>
+  <parameter nr=""297"" value=""0"" type=""E-Motor Mindestlast"">
+    <description>Interne Fahrstufe, bei der Motorgeräusch erstmals hörbar wird; bei dieser Geschwindigkeit beginnt es leise und erreicht bei der Geschwindigkeit laut CV #298 die maximale Lautstärke laut CV #296</description>
+  </parameter>
+  <parameter nr=""298"" value=""0"" type=""E-Motor Lautstärke Abhängigkeit von Geschwindigkeit"">
+    <description>Interne Fahrstufe, bei der Motorgeräusch volle Lautstärke laut CV #296 erreicht. Siehe Beschreibung ZSP!</description>
+  </parameter>
+  <parameter nr=""299"" value=""0"" type=""E-Motor Tonhöhe (Frequenz) Abhängigkeit von Geschwindigkeit"">
+    <description>Das Motorgeräusch wird entsprechend dieser CV mit wachsender Geschwindigkeit schneller abgespielt. = 0: Tonhöhe (Abspielgeschwindigkeit) wird nicht erhöht = 100: Verdoppelung der Tonhöhe Siehe auch CV #844</description>
+  </parameter>
+  <parameter nr=""307"" type=""KurvenquietschenAblauf Reed Konfiguration"">
+    <description>Bit0 - Reed1 löst Kurvenquietschen aus Bit1 - Reed2 löst Kurvenquietschen aus Bit2 - Reed3 löst Kurvenquietschen aus Bit3 - Reed4 löst Kurvenquietschen aus Bit7 - 0 = Taste aus CV #308 unterdrückt Kurvenquietschen der Reed-Eingänge, wenn Taste ein 1 = Taste aus CV #308 aktiviert Kurvenquietschen unabhängig von den Reed-Eingängen</description>
+  </parameter>
+  <parameter nr=""308"" value=""25"" type=""Kurvenquietschen-Taste"">
+    <description>0: Keine Taste. Reed-Eingänge immer aktiv. 1 - 28 = Taste F1 bis F28.</description>
+  </parameter>
+  <parameter nr=""309"" value=""0"" type=""Bremstaste"">
+    <description>Die hier zugewiesene Funktionstaste löst einen Bremsvorgang nach der in CV #349 definierten Bremszeit aus (die normale - höhere -Verzögerungszeit in CV #4 wird ignoriert). 0=deaktiviert, 1=F1, …, 28=F28, 29=F0;</description>
+  </parameter>
+  <parameter nr=""310"" value=""1"" type=""Ein/Ausschalt-Taste für Fahr-Sounds und Zufalls-Sounds"">
+    <description>Funktionstaste zum Ein-/Ausschalten der Fahr-Sounds (Dampfschläge, Siedegeräusch, Entwässern, Bremsenquietschen, bzw. Dieselmotor, Thyristor-Geräusche, usw.) sowie die Zufalls-Geräusche (Luftpumpe, Kohleschaufeln, ...). = 8: also F8-Taste zum Ein-Ausschalten der Fahrgeräusche HINWEIS: dies ist Default für ZIMO Sound-Projekte; typische OEM Projekte (z. B. in ROCO Fahrzeugen haben oft andere Einstellung, z. B. 1, also F1-Taste. = 0 - 28: Ein-/Austaste F0 - F28 für Fahrgeräusche. = 255: Fahr- und Zufallsgeräusche immer eingeschaltet.</description>
+  </parameter>
+  <parameter nr=""311"" value=""0"" type=""Ein/Ausschalt-Taste für"">
+    <description>Funktions-Taste zum Ein-/Ausschalten der Funktions-Sounds, die den Tasten zugeordnet sind (z. B. F2 - Pfiff). / = 0: bedeutet nicht etwa F0, sondern dass die Funktions-Geräusche immer aktiv sind (nicht ausschaltbar). = gleiche Eintragung wie #310: mit der betreffenden Taste wird der Sound komplett ein- und ausgeschaltet. = 1 - 28: eigene General-Taste für Funktions-Sounds.</description>
+  </parameter>
+  <parameter nr=""312"" value=""13"" type=""Entwässerungs-Taste"">
+    <description>Siehe Kapitel 5.4 SOUND: Dampflok → Sound-Grundeinstellungen“; Funktions-Taste, mit welcher das Entwässerungs-Geräusch ausgelöst werden kann; z. B. zum Rangieren mit „offenen Ventilen“.</description>
+  </parameter>
+  <parameter nr=""313"" value=""114"" type=""„Mute“ (Ein/Ausblende) -Taste"">
+    <description>Funktions-Taste, mit welcher die Fahrgeräusche weich ein- und ausgeblendet werden können. In vielen Sound-Projekten ist CV #313 = CV #310, also gleiche Eintragung in beiden CVs, somit verläuft „normales“ Ein/Ausschalten des Sounds weich. = 0: keine „Mute“-Taste bzw. „Mute“-Funktion. = 1 - 28: Entsprechende Funktions-Taste F1 - F28. = 101 - 128: Entsprechend Funktions-Taste wirkt invertiert.</description>
+  </parameter>
+  <parameter nr=""314"" value=""0"" type=""„Mute“ -(Ein/Ausblende) - Zeit"">
+    <description>Zeit für den „Mute“-Vorgang in Zehntel sec; also bis 25 sec, = 0 (bis 10): Mindestzeit 1 sec = 11 - 255: längere „Mute“-Verläufe</description>
+  </parameter>
+  <parameter nr=""315"" value=""1"" type=""Zufallsgenerator Z1 Mindest-Intervall"">
+    <description>Der Zufallsgenerator erzeugt in unregelmäßigen (= zufälligen) zeitlichen Abständen interne Impulse, durch welche jeweils ein dem Zufallsgenerator zugeordnetes Zufalls-Geräusch ausgelöst wird. Die CV #315 legt das kleinstmögliche Intervall zwischen zwei aufeinanderfolgenden Impulsen fest. Die Zuordnung von Sound-Samples zum Zufallsgenerator Z1 erfolgt durch die Prozedur eingeleitet durch CV #300 = 101, siehe vorne! Im Auslieferungszustand befindet sich die „Luftpumpe“ als Standgeräusch auf Z1.</description>
+  </parameter>
+  <parameter nr=""316"" value=""60"" type=""Zufallsgenerator Z1 Höchst-Intervall"">
+    <description>Die CV #316 legt das größtmögliche Intervall zwischen zwei aufeinanderfolgenden Impulsen des Zufallsgenerators Z1 fest; zwischen den beiden Werten in CV #315 und CV #316 sind die tatsächlich auftretenden Impulse gleichverteilt.</description>
+  </parameter>
+  <parameter nr=""317"" value=""5"" type=""Zufallsgenerator Z1 Abspiel-Dauer"">
+    <description>Das dem Zufallsgenerator Z1 zugeordnete Sound-Sample (also meistens die Luftpumpe) soll jeweils für die in der CV #317 definierten Dauer abgespielt werden. = 0: Sound-Sample einmal abspielen</description>
+  </parameter>
+  <parameter nr=""318"" value=""20"" type=""Wie oben, aber für Zufallsgenerator Z2"">
+    <description>Im Auslieferungszustand (default) befindet sich das „Kohlenschaufeln“ als Standgeräusch auf Z2.</description>
+  </parameter>
+  <parameter nr=""319"" value=""80"" type=""Wie oben, aber für Zufallsgenerator Z2"">
+    <description>Im Auslieferungszustand (default) befindet sich das „Kohlenschaufeln“ als Standgeräusch auf Z2.</description>
+  </parameter>
+  <parameter nr=""320"" value=""5"" type=""Wie oben, aber für Zufallsgenerator Z2"">
+    <description>Im Auslieferungszustand (default) befindet sich das „Kohlenschaufeln“ als Standgeräusch auf Z2.</description>
+  </parameter>
+  <parameter nr=""321"" value=""30"" type=""Wie oben, aber für Zufallsgenerator Z3"">
+    <description>Im Auslieferungszustand (default) befindet sich die „Wasserpumpe“ als Standgeräusch auf Z3.</description>
+  </parameter>
+  <parameter nr=""322"" value=""90"" type=""Wie oben, aber für Zufallsgenerator Z3"">
+    <description>Im Auslieferungszustand (default) befindet sich die „Wasserpumpe“ als Standgeräusch auf Z3.</description>
+  </parameter>
+  <parameter nr=""323"" value=""3"" type=""Wie oben, aber für Zufallsgenerator Z3"">
+    <description>Im Auslieferungszustand (default) befindet sich die „Wasserpumpe“ als Standgeräusch auf Z3.</description>
+  </parameter>
+  <parameter nr=""324"" type=""Wie oben, aber für Zufallsgenerator Z4 - Z8"">
+    <description>Im Auslieferungszustand ist dieser Zufallsgenerator unbenützt.</description>
+  </parameter>
+  <parameter nr=""325"" type=""Wie oben, aber für Zufallsgenerator Z4 - Z8"">
+    <description>Im Auslieferungszustand ist dieser Zufallsgenerator unbenützt.</description>
+  </parameter>
+  <parameter nr=""326"" type=""Wie oben, aber für Zufallsgenerator Z4 - Z8"">
+    <description>Im Auslieferungszustand ist dieser Zufallsgenerator unbenützt.</description>
+  </parameter>
+  <parameter nr=""327"" type=""Wie oben, aber für Zufallsgenerator Z4 - Z8"">
+    <description>Im Auslieferungszustand ist dieser Zufallsgenerator unbenützt.</description>
+  </parameter>
+  <parameter nr=""328"" type=""Wie oben, aber für Zufallsgenerator Z4 - Z8"">
+    <description>Im Auslieferungszustand ist dieser Zufallsgenerator unbenützt.</description>
+  </parameter>
+  <parameter nr=""329"" type=""Wie oben, aber für Zufallsgenerator Z4 - Z8"">
+    <description>Im Auslieferungszustand ist dieser Zufallsgenerator unbenützt.</description>
+  </parameter>
+  <parameter nr=""330"" type=""Wie oben, aber für Zufallsgenerator Z4 - Z8"">
+    <description>Im Auslieferungszustand ist dieser Zufallsgenerator unbenützt.</description>
+  </parameter>
+  <parameter nr=""331"" type=""Wie oben, aber für Zufallsgenerator Z4 - Z8"">
+    <description>Im Auslieferungszustand ist dieser Zufallsgenerator unbenützt.</description>
+  </parameter>
+  <parameter nr=""332"" type=""Wie oben, aber für Zufallsgenerator Z4 - Z8"">
+    <description>Im Auslieferungszustand ist dieser Zufallsgenerator unbenützt.</description>
+  </parameter>
+  <parameter nr=""333"" type=""Wie oben, aber für Zufallsgenerator Z4 - Z8"">
+    <description>Im Auslieferungszustand ist dieser Zufallsgenerator unbenützt.</description>
+  </parameter>
+  <parameter nr=""334"" type=""Wie oben, aber für Zufallsgenerator Z4 - Z8"">
+    <description>Im Auslieferungszustand ist dieser Zufallsgenerator unbenützt.</description>
+  </parameter>
+  <parameter nr=""335"" type=""Wie oben, aber für Zufallsgenerator Z4 - Z8"">
+    <description>Im Auslieferungszustand ist dieser Zufallsgenerator unbenützt.</description>
+  </parameter>
+  <parameter nr=""336"" type=""Wie oben, aber für Zufallsgenerator Z4 - Z8"">
+    <description>Im Auslieferungszustand ist dieser Zufallsgenerator unbenützt.</description>
+  </parameter>
+  <parameter nr=""337"" type=""Wie oben, aber für Zufallsgenerator Z4 - Z8"">
+    <description>Im Auslieferungszustand ist dieser Zufallsgenerator unbenützt.</description>
+  </parameter>
+  <parameter nr=""338"" type=""Wie oben, aber für Zufallsgenerator Z4 - Z8"">
+    <description>Im Auslieferungszustand ist dieser Zufallsgenerator unbenützt.</description>
+  </parameter>
+  <parameter nr=""339"" value=""0"" type=""Taste zum Anheben der Dieselstufe"">
+    <description>Funktions-Taste, mit welcher der Dieselmotor auf die in CV #340 definierte Mindeststufe angehoben wird. Siehe unten für den Fall, dass weitere Tasten weitere Anhebungen definiert werden sollen.</description>
+  </parameter>
+  <parameter nr=""340"" value=""0"" type=""Dieselstufe, auf die angehoben werden soll, und ev. weitere Tasten"">
+    <description>Mindeststufe, auf die der Sound des Dieselmotors mit der Taste laut CV #339 angehoben wird; ev. ergänzt durch die Formel (wenn mehrere Tasten definiert werden sollen): Mindeststufe + (16 * (Anzahl der Tasten - 1)</description>
+  </parameter>
+  <parameter nr=""341"" value=""0"" type=""Schalteingang 1 Abspiel-Dauer"">
+    <description>Das dem Schalteingang S1 zugeordnete Sound-Sample soll jeweils für die in der CV #341 definierten Dauer abgespielt werden. = 0: Sound-Sample einmal abspielen</description>
+  </parameter>
+  <parameter nr=""342"" value=""0"" type=""Schalteingang 2 Abspiel-Dauer"">
+    <description>Das dem Schalteingang S2 zugeordnete Sound-Sample soll jeweils für die in der CV #342 definierten Dauer abgespielt werden. = 0: Sound-Sample einmal abspielen</description>
+  </parameter>
+  <parameter nr=""343"" value=""0"" type=""Schalteingang 3 Abspiel-Dauer"">
+    <description>Das dem Schalteingang S3 (soweit nicht als Achsdetektor genutzt) zugeordnete Sound-Sample soll jeweils für die in der CV #343 definierten Dauer abgespielt werden. = 0: Sound-Sample einmal abspielen</description>
+  </parameter>
+  <parameter nr=""344"" type=""Nachlaufzeit der Motorgeräusche (Lüfter, u.a.) nach dem Anhalten"">
+    <description>Nach dem Anhalten der Lok sollen (beispielsweise) die Lüfter noch weiterlaufen und nach der hier definierten Zeit automatisch stoppen, falls Lok in der Zwischenzeit nicht wieder angefahren ist. = 0: Nicht weiterlaufen = 1 - 255: Weiterlaufen für 1 - 25 sec</description>
+  </parameter>
+  <parameter nr=""345"" value=""0"" type=""Umschalte-Taste auf nächste Variante innerhalb einer Sound-Collection für die Betriebsarten einer Lok, oder die Antriebsarten einer Mehrsystem-Lok"">
+    <description>Funktionstaste (F1 - F28), mit welcher zwischen zwei Sound-Varianten innerhalb einer dafür vor-gesehenen Sound-Collection umgeschaltet werden kann, und zwar zwischen der in CV #265 gewählten und der nächsthöheren, z. B. um - zwischen zwei Betriebsarten (z. B. leichter Zug / schwerer Zug) zu wechseln, oder um - zwischen Elektro- oder Dieselbetrieb einer Mehrsystem-Lok zu wechseln; typischer Fall: Sound-Projekt für RhB Gem.</description>
+  </parameter>
+  <parameter nr=""346"" value=""0"" type=""Bedingungen zur Umschaltung in Collection laut CV #345"">
+    <description>Bit 0 = 1: Umschaltung im Stand möglich, Bit 1 = 1: Umschaltung in Fahrt möglich (Bits für Stand und Fahrt auch gleichzeitig möglich) Bit 2 = 1: Übergangssets im Dieselprojekt, die beim Wechsel von einem Set zu anderem abgespielt werden.</description>
+  </parameter>
+  <parameter nr=""347"" value=""0"" type=""Alleinfahrt-Taste zur Umschaltung von Fahrverhalten und Sound"">
+    <description>= 0: keine Taste, keine Alleinfahrt-Schaltung = 1 - 28: Funktionstaste (F1 - F28), mit welcher zwischen Zugfahrt (mit relativ schwerem Zug) und Alleinfahrt (ohne Anhängelast) umgeschaltet wird.</description>
+  </parameter>
+  <parameter nr=""348"" type=""Wenn die Alleinfahrt-Taste (CV #347, siehe oben)"">
+    <description>Bei Alleinfahrt (Funktion laut CV #347 ein) soll … Bit 0 = 1: … der Diesel-Sound (die Sound-Stufen) beim Beschleunigen unbeschränkt weit hochlaufen (sonst: beschränkt in Abhängigkeit von Fahrstufe laut CV #389). / Bit 1 = 1: … Beschleunigungs- und Verzögerungszeiten gemäß CVs #3, #4 reduziert werden, wobei: Ausmaß der Reduktion laut CV #390. Bit 2 = 1: … im langsamen Geschwindigkeitsbereich mit Standgeräusch gefahren werden, wobei: oberste Fahrstufe mit Standgeräusch laut CV #391. Bit 3 = 1: … zweiter Rauch-Ventilator und -Heizung deaktiviert werden (zweimot. Diesellok fährt mit nur einem Motor). Bit 4 = 1: Bremsenquietschen unterdrückt werden Bit 5 = 1 : E-Bremse bei Lokfahrt unterdrückt werden.</description>
+  </parameter>
+  <parameter nr=""349"" value=""0"" type=""Bremszeit für Bremstaste"">
+    <description>Damit die gewünschte Wirkung eintritt, muss die normale Verzögerungszeit in CV #4 auf einen sehr hohen Wert gesetzt werden (etwa 50 - 250), die Bremszeit in CV #349 eher niedrig (5 - 20). Dann wird bei „Regler auf null“ antriebsloses Auslaufen der Lok simuliert, während die Bremstaste zu raschem Anhalten führt</description>
+  </parameter>
+  <parameter nr=""350"" value=""0"" type=""Elektro-Schaltwerk Sperre nach Anfahren"">
+    <description>Zeit in Zehntelsekunden (also 0 bis 25 sec), in welcher nach dem Anfahren Schaltwerks-Geräusch nicht kommen soll; sinnvoll, wenn die erste Schaltstufe bereits im Sample „Stand -&gt; F1“. = 0: Schaltwerk kommt sofort beim Anfahren.</description>
+  </parameter>
+  <parameter nr=""351"" value=""128"" type=""Geschwindigkeit des Rauch-Ventilators bei konstanter Fahrt für DIESEL-Loks"">
+    <description>Die Geschwindigkeit des Ventilators wird per PWM eingestellt; der Wert der CV #351 definiert das Verhalten bei normaler Fahrt. = 128: Halbe Spannung (PWM) bei Fahrt.</description>
+  </parameter>
+  <parameter nr=""352"" value=""255"" type=""für DIESEL-Loks Geschwindigkeit des Rauch-Ventilators bei Beschleunigung und beim Motor-Starten für Dampf-Loks"">
+    <description>Zur Erzeugung einer Rauchwolke beim Anlaufen der Maschinen wird der Ventilator auf höhere (meistens maximale) Geschwindigkeit gesetzt, ebenso im Falle einer starken Beschleunigung während des Betriebes. = 255: Maximale Spannung beim Starten. Bei 255 läuft der Lüfter ununterbrochen und erzeigt keine Dampfschläge. Der Ventilator läuft ständig mit maximaler Drehzahl, und der Wert bestimmt das Verhältnis von Ein- und Ausschaltzeiten während des Dampfschlags.</description>
+  </parameter>
+  <parameter nr=""353"" value=""0"" type=""Automatisches Abschalten des Raucherzeugers"">
+    <description>Für Effekte „010010xx“ oder „010100xx“ (Raucherzeuger): Schutz vor Überhitzung: Abschaltung ½ min bis ca. 2 h. = 0: keine automatische Abschaltung, = 1 bis 255: autom. Abschaltung nach 25 sec / Einheit</description>
+  </parameter>
+  <parameter nr=""354"" value=""11"" type=""Dampfschlag-Häufigkeit bei Fahrstufe 1"">
+    <description>CV #354 nur in Zusammenhang mit CV #267! Mit CV #354 wird die Nicht-Linearität der Geschwindigkeits-Messung für den „simulierten Achsdetektor“ ausgeglichen: D.h.: während die Einstellung der CV #267 ungefähr bei Fahrstufe 10 erfolgen soll (also langsam, aber nicht extrem langsam), kann mit CV #354 eine Korrektur für die Fahrstufe 1 erfolgen (also für extrem langsame Fahrt). / = 0: kein Einfluss (Häufigkeit linear laut CV #267) = 1 - 127: Dampfschläge bei Fahrstufe 1 (und extrem langsamer Fahrt) häufiger als CV #267 = 255 - 128: Dampfschläge weniger häufig.</description>
+  </parameter>
+  <parameter nr=""355"" value=""0"" type=""Geschwindigkeit des Rauch-Ventilators bei Stillstand für DAMPF-Loks, und DIESEL-Loks"">
+    <description>Mit CV #355 wird die Geschwindigkeit des Ventilators bei Stillstand - falls Sound eingeschaltet ist – eingestellt. Dies hat den Effekt, auch bei Stillstand (eine kleine Menge, aber sichtbar) Rauch auszustoßen.</description>
+  </parameter>
+  <parameter nr=""356"" type=""Speedlock-Taste"">
+    <description>Wenn die Taste aktiviert ist, lässt sich der Fahrsound mit dem Geschwindigkeitsregler ändern, ohne dass sich dabei die Geschwindigkeit ändert.</description>
+  </parameter>
+  <parameter nr=""357"" type=""Thyristoren Absenkung der Lautstärke bei schnellerer Fahrt"">
+    <description>Interne Fahrstufe, ab welcher das Thyristor-Geräusch leiser werden soll. Während des Bremsens wird die Lautstärke jedoch nicht angehoben. Durch CV #158, Bit 6 = 1 kann bewirkt werden, dass die Lautstärke während des Bremsens trotzdem angehoben wird.</description>
+  </parameter>
+  <parameter nr=""358"" type=""Thyristoren Verlauf der Absenkung der Lautstärke bei schnellerer Fahrt"">
+    <description>Verlauf, wie das Thyristor-Geräusch ab der in CV#357 definierten Fahrstufe leiser werden soll. = 0: gar nicht. = 10: wird um ca. 3 % pro Fahrstufe leiser. = 255: bricht bei der in CV #357 definierten Fahrstufe ab.</description>
+  </parameter>
+  <parameter nr=""359"" value=""30"" type=""Elektro-Schaltwerk Anzahl Stufen, die beim Beschleunigen nacheinander kommen dürfen"">
+    <description>Maximale Anzahl der Schaltwerkstufen die beim Beschleunigen nacheinander kommen dürfen. Nur wirksam, wenn Schaltwerks-Geräusch im Sound-Projekt vorhanden.</description>
+  </parameter>
+  <parameter nr=""360"" value=""0"" type=""Elektro-Schaltwerk Abspieldauer nach Anhalten ab SW-Version 6.00"">
+    <description>Zeit in Zehntelsekunden (also 0 bis 25 sec), für welche das Schaltwerks-Geräusch nach dem Anhalten zu hören sein soll. = 0: nach Anhalten überhaupt nicht.</description>
+  </parameter>
+  <parameter nr=""361"" value=""20"" type=""Elektro-Schaltwerk Wartezeit bis zum nächsten Abspielen"">
+    <description>Bei rasch hintereinander folgenden Geschwindigkeitsänderungen würde Schaltwerks-Geräusch zu oft kommen. CV #361: Zeit in Zehntelsekunden (also 0 bis 25 sec) als minimaler Abstand zwischen mehrmaligem Abspielen Schaltwerks-Geräusch.</description>
+  </parameter>
+  <parameter nr=""362"" type=""Thyristoren Umschalteschwelle auf zweites Geräusch"">
+    <description>Fahrstufe, ab welcher auf ein zweites Thyristorgeräusch für höhere Geschwindigkeiten umgeschaltet wird; dies wurde anlässlich des Sound-Projekts für den „ICN“ (Roco Erstausrüstung)) eingeführt. = 0: kein zweites Thyristor-Geräusch</description>
+  </parameter>
+  <parameter nr=""363"" value=""0"" type=""Elektro-Schaltwerk"">
+    <description>Anzahl der Schaltstufen über den gesamten Bereich (Stillstand bis volle Fahrt), z. B. wenn 10 Schaltstufen definiert sind, kommt bei (interner) / Fahrstufe 25, 50, 75, … (also insgesamt 10 Mal) das Schaltwerks-Geräusch. = 0: gleichbedeutend mit 5; d.h. 5 Schaltstufen über den gesamten Fahrbereich.</description>
+  </parameter>
+  <parameter nr=""364"" value=""0"" type=""Dieselmotor mit Schaltgetriebe Hochschalt-Rückfall"">
+    <description>Spezial-CV nur für Diesel-mechanische Loks, Drehzahl-Rückfall beim Hochschalten. Siehe Sound-Projekte (z. B. VT 61)</description>
+  </parameter>
+  <parameter nr=""365"" value=""0"" type=""Dieselmotor mit Schaltgetriebe Hochschalt-Drehzahl"">
+    <description>Spezial-CV nur für Diesel-mechanische Loks, Höchste Drehzahl vor Hochschalten. Siehe Sound-Projekte (z. B. VT 61)</description>
+  </parameter>
+  <parameter nr=""366"" value=""48"" type=""Turbolader Maximale Lautstärke"">
+    <description></description>
+  </parameter>
+  <parameter nr=""367"" value=""150"" type=""Turbolader Abhängigkeit der Drehzahl von der Geschwindigkeit"">
+    <description>Abhängigkeit der Abspielfrequenz von Fahrgeschwindigkeit.</description>
+  </parameter>
+  <parameter nr=""368"" value=""100"" type=""Turbolader Abhängigkeit der Drehzahl von der Beschleunigung"">
+    <description>Abhängigkeit der Abspielfrequenz von der Differenz zwischen neuer Fahrstufe und aktueller (= Beschleunigung).</description>
+  </parameter>
+  <parameter nr=""369"" value=""30"" type=""Turbolader Mindestlast"">
+    <description>Hörbarkeits-Schwelle für Turbolader; die Last ergibt sich aus CVs #367, #368.</description>
+  </parameter>
+  <parameter nr=""370"" value=""25"" type=""Turbolader Frequenz-Erhöhung"">
+    <description>Schnelligkeit der Frequenz-Erhöhung des Turboladers.</description>
+  </parameter>
+  <parameter nr=""371"" value=""15"" type=""Turbolader Frequenz-Absenkung"">
+    <description>Schnelligkeit der Frequenz-Absenkung des Turboladers.</description>
+  </parameter>
+  <parameter nr=""372"" value=""0"" type=""E-Motor Lautstärke Abhängigkeit von Beschleunigung"">
+    <description>= 0: keine Funktion = 1 - 255: minimale bis maximale Wirkung</description>
+  </parameter>
+  <parameter nr=""373"" value=""0"" type=""E-Motor Lautstärke Abhängigkeit vom Bremsen"">
+    <description>= 0: keine Funktion = 1 - 255: minimale bis maximale Wirkung</description>
+  </parameter>
+  <parameter nr=""374"" value=""0"" type=""Coasting-Taste (oder Notching) für Dieselsound-projekte"">
+    <description>Funktions-Taste, mit welcher „Coasting“ aktiviert werden kann, d.h. der Sound wird unabhängig von der Fahrsituation auf eine bestimmte Fahrstufe geschaltet. Siehe CV #375 für Fahrstufe (häufige Anwendung: Standgeräusch trotz Fahrt). = 0: bedeutet NICHT F0, sondern KEINE Coasting-Taste = 1 - 28: Funktionstaste F1 - F28 für Coasting, 29 = F0</description>
+  </parameter>
+  <parameter nr=""375"" value=""0"" type=""Coasting-Stufe (oder Notching)"">
+    <description>Sound-Stufe, die bei Betätigung der Coasting-Taste (laut CV #374), unabhängig von der Fahrsituation aktiviert wird. / = 0: Standgeräusch (typischer Coasting-Fall) = 1 - 10: Sound-Stufe (typischerweise gibt es bei Diesel-Loks 5 bis 10 Stufen), die mit der Coasting-Taste aktiviert werden soll (beispielsweise um Standheizung im Stillstand darzustellen).</description>
+  </parameter>
+  <parameter nr=""376"" value=""255"" type=""Fahr-Sound-Lautstärke (Multiplikator)"">
+    <description>Zur Lautstärkenreduktion der Ablauf-Sounds (Hauptablauf z. B. Dieselmotor zusammen mit den „Nebenabläufen“ wie Turbolader) gegenüber den Funktions-Sounds.</description>
+  </parameter>
+  <parameter nr=""378"" value=""0"" type=""Wahrscheinlichkeit Lichtblitzen bei Beschleunigung ab SW-Version 6.00"">
+    <description>Wahrscheinlichkeit für Lichtblitze (laut CV #158, Bit 7 für FA7 oder #394 für FA6) beim Beschleunigen. = 0: immer = 1: sehr selten = 255: sehr oft (fast immer)</description>
+  </parameter>
+  <parameter nr=""379"" value=""0"" type=""Wahrscheinlichkeit Lichtblitzen bei Verzögerung ab SW-Version 6.00"">
+    <description>Wahrscheinlichkeit für Lichtblitze (laut CV #158, Bit 7 für FA7 oder #394 für FA6) beim Verzögern. = 0: immer = 1: sehr selten = 255: sehr oft (fast immer)</description>
+  </parameter>
+  <parameter nr=""380"" value=""0"" type=""Manuelle Elektrische Bremse Taste ab SW-Version 6.00"">
+    <description>Funktionstaste zum manuellen Einschalten des Sounds der „dynamischen“ oder „elektrischen Bremse“.</description>
+  </parameter>
+  <parameter nr=""381"" value=""0"" type=""Elektrische Bremse minimale Fahrstufe"">
+    <description>Elektrische Bremse soll nur dann zu hören sein, wenn Fahrstufe zwischen dem Wert in CV #381</description>
+  </parameter>
+  <parameter nr=""382"" value=""0"" type=""Elektrische Bremse maximale Fahrstufe"">
+    <description>… und dem Wert in CV #382</description>
+  </parameter>
+  <parameter nr=""383"" value=""0"" type=""Elektrische Bremse Tonhöhe"">
+    <description>= 0: Tonhöhe unabhängig von Geschwindigkeit = 1 - 255: … in steigendem Ausmaß abhängig</description>
+  </parameter>
+  <parameter nr=""384"" value=""0"" type=""Elektrische Bremse Verzögerungsschwelle"">
+    <description>Anzahl der Fahrstufen, um die verzögert werden muss, um „Elektrisch Bremse“ Sound auszulösen</description>
+  </parameter>
+  <parameter nr=""385"" value=""0"" type=""Elektrische Bremse Gefällefahrt"">
+    <description>= 0: keine Auslösung durch „negative“ Belastung = 1 - 255: Auslösung nach „negative Motorlast“</description>
+  </parameter>
+  <parameter nr=""386"" value=""0"" type=""Elektrische Bremse Loop"">
+    <description>Bit 3 = 0: Sound wird am Ende ausgeblendet = 1: Sound endet mit Ende-Sample Bit 2.. 0: Verlängerung der Mindestlaufzeit des Bremsgeräuschs um 0 - 7 sec, damit es zwischen den Fahrstufen nicht zu einer Unterbrechung des Bremsgeräusches kommt.</description>
+  </parameter>
+  <parameter nr=""387"" value=""0"" type=""Einfluss der Beschleunigung auf Diesel-Sound-Stufen"">
+    <description>Neben der Fahrstufe (laut in ZSP definiertem Ablaufplan) soll die aktuelle Veränderung der Geschwindigkeit (Beschleunigung, Verzögerung) wegen der damit verbundenen Lasterhöhung oder -verminderung Einfluss auf den Sound haben. / = 0: kein Einfluss (Sound nur abhängig von Fahrstufe) = 64: erfahrungsgemäß praktikabler Wert = 255: maximale Beschleunigungsabhängigkeit (höchste Sound-Stufe bei Beschleunigung)</description>
+  </parameter>
+  <parameter nr=""388"" value=""0"" type=""Einfluss der Verzögerung auf Diesel-Sound-Stufen"">
+    <description>Wie CV #387, angewandt auf Situation der Verzögerung. = 0: kein Einfluss (Sound nur abh. von Fahrstufe) = 64: erfahrungsgemäß praktikabler Wert = 255: maximaler Einfluss auf Verzögerung</description>
+  </parameter>
+  <parameter nr=""389"" value=""0"" type=""Beschränkung des Beschleunigungs-einflusses auf die Diesel-Sound-Stufen"">
+    <description>Die CV bestimmt, wie weit sich die Sound-Stufe bei Beschleunigung (= Differenz zwischen Zielfahrstufe laut Reglerstellung und gerade gefahrener Stufe) von der reinen Abhängigkeit von der Fahrstufe (laut Ablaufplan) entfernen kann. = 0: volle Beschränkung; Motorgeräusch laut Ablaufplan, Sound-Stufe nicht abhängig von Beschl. = 1 - 254: Abhängigkeit gemäß Wert der CV, = 255: volle Abhängigkeit von Zielgeschwindigkeit</description>
+  </parameter>
+  <parameter nr=""390"" value=""0"" type=""Reduktion der Beschleunigungs- und Verzögerungszeiten bei Alleinfahrt"">
+    <description>Wenn auf Alleinfahrt geschaltet wird (Taste laut CV #347) und Beschleunigungs- und Verzögerungsreduktion aktiviert ist (laut CV #348, Bit 1): = 0 = 255: keine Reduktion = 128: Reduktion auf die Hälfte = 64: Reduktion auf ein Viertel = 1: praktisch Aufhebung der Beschl./Verz. Zeiten</description>
+  </parameter>
+  <parameter nr=""391"" value=""0"" type=""Fahren mit Standgeräusch, wenn Alleinfahrt"">
+    <description>Bis zu der in CV #391 eingestellten Fahrstufe soll bei Alleinfahrt (Funktionstaste laut CV #347) der Diesel-Sound im Standgeräusch verbleiben.</description>
+  </parameter>
+  <parameter nr=""392"" value=""0"" type=""Schalteingang 4 Abspiel-Dauer 0"">
+    <description>Das dem Schalteingang S4 zugeordnete Sound-Sample soll jeweils für die in der CV #342 definierten Dauer abgespielt werden. = 0: Sound-Sample einmal abspielen</description>
+  </parameter>
+  <parameter nr=""393"" value=""0"" type=""Spezielle ZIMO Konfigurationsbits „5“"">
+    <description>Bit 0 = 1: Aktiviert Ditchlight wenn Glocke spielt Bit 1 = 1: Aktiviert Ditchlight wenn Horn spielt Bit 2 = 0: Immer mit dem 1.Sample des Hochgeschwindigkeitsschaltwerks beginnen =1: Ein Sample nach dem anderen verwenden. Bit 3 =0: Beim Hochschalten Anfang- und Endteil abspielen (beim Runterschalten nur Mittelteil). =1: Auch beim Hochschalten Anfangs- und Endteil überspringen (wie beim Runterschalten) Bit 4 = 1: Thyristor2 Tonhöhe nicht anheben Bit 6 = 1: 4-fach Verlängerung des Dampfschlag-Intervalls</description>
+  </parameter>
+  <parameter nr=""394"" type=""Spezielle ZIMO Konfigurationsbits „4“ Ab SW-Version 6.00"">
+    <description>Bit 0 = 1: Lichtblitzen bei Schaltwerks-Sound. Bit 4 = 1: Schnelleres Beschleunigen und Sound auf hohe Leistung, wenn Fahrregler schnell auf Vollwert Bit 5 = 1: Dampfschläge überblenden Bit 6 = 1: Verhindert das Beschleunigen, wenn Bremstaste aktiv Bit 7 = 1: Thyristor-Sound kommt vor Wegfahren</description>
+  </parameter>
+  <parameter nr=""395"" value=""64"" type=""Maximal-Lautstärke für Lauter-Taste"">
+    <description>Einstellbereich für Lautstärke mit Hilfe der Lauter-Taste laut CV #397; kann bei Bedarf auch höher sein als die Grundeinstellung in CV #266.</description>
+  </parameter>
+  <parameter nr=""396"" value=""0"" type=""Leiser - Taste"">
+    <description>0 = Keine Taste 1-28 = Taste F1 bis F28 29 = Taste F0</description>
+  </parameter>
+  <parameter nr=""397"" value=""0"" type=""Lauter- Taste"">
+    <description>0 = Keine Taste 1-28 = Taste F1 bis F28 29 = Taste F0</description>
+  </parameter>
+  <parameter nr=""398"" value=""0"" type=""Automatische Coasting-Wirkung"">
+    <description>Anzahl der Fahrstufen, um welche innerhalb einer Zeit von 0,5 sec gebremst werden muss, um damit „Coasting“ automatisch (d.h. ohne spezieller „Coasting-Taste“, siehe oben) auszulösen, d.h. den Diesel-Motor auf Standgeräusch abzusenken Bei langsamerem Zurücknehmen der Fahrstufe tritt dieser Effekt hingegen nicht ein.</description>
+  </parameter>
+  <parameter nr=""399"" value=""0"" type=""Geschwindigkeitsabhängiges Fernlicht (nach „Rule 17“) Ab SW-Version 6.00"">
+    <description>In Zusammenhang mit „Schweizer Mapping“ bei Spezialeinstellung „Fernlicht“, siehe CV #431 = 255; für jede der 13 CV-Gruppen (CV #437, #443, ...): Auf Fernlicht umgeschaltet wird nur, wenn die Geschwindigkeit höher ist, als Wert in dieser CV (255 Fahrstufen). BEISPIELE und SPEZIALFÄLLE: = 0: Fernlicht bei jeder Geschwindigkeit (auch im Stillstand), nur gesteuert von F-Taste (z. B. laut CV #430). = 1: Fernlicht bei Fahrt (NICHT im Stillstand), ansonsten nur gesteuert von F-Taste (z. B. laut CV #430). = 128: Fernlicht ab Halbgeschwindigkeit.</description>
+  </parameter>
+  <parameter nr=""400"" value=""0"" type=""Eingangs-Mapping für interne F0 d.h. welche Funktionstaste schaltet die interne Funktion F0?"">
+    <description>= 0: aus = 1: Taste F1 wird auf interne F0 weitergleitet…. = 28: Taste F28 wird auf interne F0 weitergleitet. = 29: Taste F0 wird auf interne F0 weitergleitet. = 30: Taste F1 auf interne F0, nur bei Vorwärtsfahrt… = 57: Taste F28 auf interne F0, nur bei Vorwärtsfahrt. = 58: Taste F0 auf interne F0, nur bei Vorwärtsfahrt. = 59: Taste F1 auf interne F0, nur bei Rückwärtsfahrt... = 86: Taste F28 auf interne F0, nur bei Rückwärtsfahrt. = 87: Taste F0 auf interne F0, nur bei Rückwärtsfahrt. = 101: Taste F1-invertiert auf interne F0…. = 187: Taste F0-invertiert aus int. F0, bei Rückwärtsfahrt = 254: Richtungsbit auf interne F0, bei Vorwärtsfahrt = 255: Richtungsbit auf interne F0, bei Rückwärtsfahrt</description>
+  </parameter>
+  <parameter nr=""401"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""402"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""403"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""404"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""405"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""406"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""407"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""408"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""409"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""410"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""411"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""412"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""413"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""414"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""415"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""416"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""417"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""418"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""419"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""420"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""421"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""422"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""423"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""424"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""425"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""426"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""427"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""428"" value=""0"" type=""Eingangs-Mapping für interne F1 - F28"">
+    <description>Wie Eingangs-Mapping oben, aber beispielsweise: CV #403 = 1: Taste F1 wird weitergeleitet auf F3 = 9: Taste F9 wird weitergeleitet auf F3, usw.</description>
+  </parameter>
+  <parameter nr=""430"" value=""0"" type=""Schweiz. Mapp. - Grup 1 „F-Taste“"">
+    <description>Mit der hier definierten „F-Taste“ sollen die unter A1 (Vorw bzw. Rückw) und A2 (Vorw bzw. Rückw) Angeführten Funktions-Ausgänge eingeschaltet werden. Bit 7 = 1: Funktion der F-Taste invertieren</description>
+  </parameter>
+  <parameter nr=""431"" value=""0"" type=""Schweiz. Mapp. - Grup 1 „M-Taste“ oder Spezialeinstellung “Fernlicht“"">
+    <description>Das „normale Function Mapping“ der hier definierten „M-Taste“ soll deaktiviert werden (d.h. die betreffenden Ausgänge, beispielsweise die Stirnlampen ausgeschaltet), wenn die „F-Taste“ eingeschaltet wird. Bit 7 = 1: außerdem sollen die unter A1 und A2 angeführten Ausgänge nur eingeschaltet werden, wenn die F- und M-Taste eingeschaltet sind. Bit 6 = 1: Bei Fahrrichtung Vorwärts werden die Ausgänge der M-Taste nicht abgeschaltet, wenn die F-Taste ein ist. Bit 5 = 1: Bei Fahrrichtung Rückwärts werden die Ausgänge der M-Taste nicht abgeschaltet, wenn F-Taste ein. = 157: ist ein häufiger Wert für CV #431, weil meistens F0 (= 29) als „M-Taste“ eingetragen wird, / und meistens auch Bit 7 = 1. F0 fungiert dann als General-Ein/Aus-Taste. = 255 (Spezialeinstellung für Fernlicht): die in den folgenden vier CVs definierten Fu-Ausgänge werden auf volle Intensität geschaltet, vorausgesetzt, dass sie über das „normale Function mapping“ eingeschaltet sind, und durch CV #60 abgeblendet; diese Funktion wird z. B. gebraucht, um die Stirnlampen einer Schweizer Lok auf Fernlicht umzuschalten, ohne das weiße Rücklicht mit aufzublenden. Abhängigkeit von CV #399: Auf Fernlicht umgeschaltet wird nur, wenn Geschwindigkeit höher als Wert in dieser CV (im 255-Fahrstufen System).</description>
+  </parameter>
+  <parameter nr=""432"" value=""0"" type=""Schweiz.Mapp. -Grup 1 „A1“ vorwärts"">
+    <description>Bits 0 - 3: Fu-Ausgang, der unter der Bedingung, dass „F-“ und „M-Taste“ eingeschaltet sind (bei Bit 7 = 1 in CV für „M-Taste“, ansonsten genügt „F“), bei Fahrtrichtung vorwärts eingeschaltet werden soll. Bits 7,6,5 (mit 7 möglichen Werten und Null): Nummer der anzuwendenden „Dimming-CV“, d.h. „1“ (Bit 5 = 1) bedeutet Dimming laut CV #508, usw.</description>
+  </parameter>
+  <parameter nr=""433"" value=""0"" type=""Schweiz.Mapp. -Grup 1 „A2“ vorwärts"">
+    <description>Bits 0 - 3: Weiterer Fu-Ausgang, der unter Bedingung, dass „F-“ und „M-Taste“ eingeschaltet sind (bei Bit 7 = 1 in CV für „M-Taste“, ansonsten genügt „F“), bei Fahrtrichtung vorwärts eingeschaltet werden soll. Bíts 7,6,5 (mit 7 möglichen Werten und Null): Nummer der anzuwendenden „Dimming-CV“, d.h. „1“ (Bit 5 = 1) bedeutet Dimming laut CV #508, usw.</description>
+  </parameter>
+  <parameter nr=""434"" value=""0"" type=""Schweiz.Mapp. -Grup 1 „A1“ rückwärts"">
+    <description>Bits 0 - 3: Fu-Ausgang, der unter der Bedingung, dass „F-“ und „M-Taste“ eingeschaltet sind (bei Bit 7 = 1 in CV für „M-Taste“, ansonsten genügt „F“), bei Fahrtrichtung rückwärts eingeschaltet werden soll. Bíts 7,6,5 (mit 7 möglichen Werten und Null): Nummer der anzuwendenden „Dimming-CV“, d.h. „1“ (Bit 5 = 1) bedeutet Dimming laut CV #508, usw.</description>
+  </parameter>
+  <parameter nr=""435"" value=""0"" type=""Schweiz.Mapp. -Grup 1 „A2“ rückwärts"">
+    <description>Bits 0 - 3: Weiterer Fu-Ausgang, der unter Bedingung, dass „F-“ und „M-Taste“ eingeschaltet sind (bei Bit 7 = 1 in CV für „M-Taste“, ansonsten genügt „F“), bei Fahrtrichtung rückwärts eingeschaltet werden soll. Bits 7,6,5 (mit 7 möglichen Werten und Null): Nummer der anzuwendenden „Dimming-CV“, d.h. „1“ (Bit 5 = 1) bedeutet Dimming laut CV #508, usw.</description>
+  </parameter>
+  <parameter nr=""436"" value=""0"" type="". . . - Grup 2."">
+    <description>Alle 6 CVs der Gruppe 2 sind gleich definiert wie die 6 CVs der Gruppe 1!</description>
+  </parameter>
+  <parameter nr=""437"" value=""0"" type="". . . - Grup 2."">
+    <description>Alle 6 CVs der Gruppe 2 sind gleich definiert wie die 6 CVs der Gruppe 1!</description>
+  </parameter>
+  <parameter nr=""438"" value=""0"" type="". . . - Grup 2."">
+    <description>Alle 6 CVs der Gruppe 2 sind gleich definiert wie die 6 CVs der Gruppe 1!</description>
+  </parameter>
+  <parameter nr=""439"" value=""0"" type="". . . - Grup 2."">
+    <description>Alle 6 CVs der Gruppe 2 sind gleich definiert wie die 6 CVs der Gruppe 1!</description>
+  </parameter>
+  <parameter nr=""440"" value=""0"" type="". . . - Grup 2."">
+    <description>Alle 6 CVs der Gruppe 2 sind gleich definiert wie die 6 CVs der Gruppe 1!</description>
+  </parameter>
+  <parameter nr=""441"" value=""0"" type="". . . - Grup 2."">
+    <description>Alle 6 CVs der Gruppe 2 sind gleich definiert wie die 6 CVs der Gruppe 1!</description>
+  </parameter>
+  <parameter nr=""442"" value=""0"" type="". . . - Grup 3."">
+    <description>Alle 6 CVs der folgenden Gruppen sind gleich definiert wie die 6 CVs der Gruppe 1!</description>
+  </parameter>
+  <parameter nr=""443"" value=""0"" type="". . . - Grup 3."">
+    <description>Alle 6 CVs der folgenden Gruppen sind gleich definiert wie die 6 CVs der Gruppe 1!</description>
+  </parameter>
+  <parameter nr=""444"" value=""0"" type="". . . - Grup 3."">
+    <description>Alle 6 CVs der folgenden Gruppen sind gleich definiert wie die 6 CVs der Gruppe 1!</description>
+  </parameter>
+  <parameter nr=""445"" value=""0"" type="". . . - Grup 3."">
+    <description>Alle 6 CVs der folgenden Gruppen sind gleich definiert wie die 6 CVs der Gruppe 1!</description>
+  </parameter>
+  <parameter nr=""446"" value=""0"" type="". . . - Grup 3."">
+    <description>Alle 6 CVs der folgenden Gruppen sind gleich definiert wie die 6 CVs der Gruppe 1!</description>
+  </parameter>
+  <parameter nr=""447"" value=""0"" type="". . . - Grup 3."">
+    <description>Alle 6 CVs der folgenden Gruppen sind gleich definiert wie die 6 CVs der Gruppe 1!</description>
+  </parameter>
+  <parameter nr=""448"" value=""0"" type="". . . - Grup 4."">
+    <description>. . .</description>
+  </parameter>
+  <parameter nr=""449"" value=""0"" type="". . . - Grup 4."">
+    <description>. . .</description>
+  </parameter>
+  <parameter nr=""450"" value=""0"" type="". . . - Grup 4."">
+    <description>. . .</description>
+  </parameter>
+  <parameter nr=""451"" value=""0"" type="". . . - Grup 4."">
+    <description>. . .</description>
+  </parameter>
+  <parameter nr=""452"" value=""0"" type="". . . - Grup 4."">
+    <description>. . .</description>
+  </parameter>
+  <parameter nr=""453"" value=""0"" type="". . . - Grup 4."">
+    <description>. . .</description>
+  </parameter>
+  <parameter nr=""454"" value=""0"" type="". . . - Grup 5."">
+    <description>. . .</description>
+  </parameter>
+  <parameter nr=""455"" value=""0"" type="". . . - Grup 5."">
+    <description>. . .</description>
+  </parameter>
+  <parameter nr=""456"" value=""0"" type="". . . - Grup 5."">
+    <description>. . .</description>
+  </parameter>
+  <parameter nr=""457"" value=""0"" type="". . . - Grup 5."">
+    <description>. . .</description>
+  </parameter>
+  <parameter nr=""458"" value=""0"" type="". . . - Grup 5."">
+    <description>. . .</description>
+  </parameter>
+  <parameter nr=""459"" value=""0"" type="". . . - Grup 5."">
+    <description>. . .</description>
+  </parameter>
+  <parameter nr=""460"" value=""0"" type="". . . - Grup 6."">
+    <description>. . .</description>
+  </parameter>
+  <parameter nr=""461"" value=""0"" type="". . . - Grup 6."">
+    <description>. . .</description>
+  </parameter>
+  <parameter nr=""462"" value=""0"" type="". . . - Grup 6."">
+    <description>. . .</description>
+  </parameter>
+  <parameter nr=""463"" value=""0"" type="". . . - Grup 6."">
+    <description>. . .</description>
+  </parameter>
+  <parameter nr=""464"" value=""0"" type="". . . - Grup 6."">
+    <description>. . .</description>
+  </parameter>
+  <parameter nr=""465"" value=""0"" type="". . . - Grup 6."">
+    <description>. . .</description>
+  </parameter>
+  <parameter nr=""466"" value=""0"" type="". . . - Grup 7."">
+    <description>. . .</description>
+  </parameter>
+  <parameter nr=""467"" value=""0"" type="". . . - Grup 7."">
+    <description>. . .</description>
+  </parameter>
+  <parameter nr=""468"" value=""0"" type="". . . - Grup 7."">
+    <description>. . .</description>
+  </parameter>
+  <parameter nr=""469"" value=""0"" type="". . . - Grup 7."">
+    <description>. . .</description>
+  </parameter>
+  <parameter nr=""470"" value=""0"" type="". . . - Grup 7."">
+    <description>. . .</description>
+  </parameter>
+  <parameter nr=""471"" value=""0"" type="". . . - Grup 7."">
+    <description>. . .</description>
+  </parameter>
+  <parameter nr=""472"" value=""0"" type="". . . - Grup 8."">
+    <description>. . .</description>
+  </parameter>
+  <parameter nr=""835"" type=""Weitere Set-Umschalt-Tasten"">
+    <description>Erweiterung von CV #345. Hier kann die Anzahl an aufeinanderfolgenden Tasten definiert werden, welche dann auf Set2, Set3, Set4, …. Umschalten. Die erste Taste wird weiterhin in CV #345 definiert</description>
+  </parameter>
+  <parameter nr=""836"" value=""0"" type=""Motor Start Sound ab SW-Version 6.00"">
+    <description>Bit 0 = 1: Lok soll nicht Anfahren solange der Motor Start Sound nicht zu Ende gespielt hat</description>
+  </parameter>
+  <parameter nr=""837"" value=""0"" type=""Deaktivierung Scripts 1 - 8"">
+    <description>Bit 0 - 7 = 1: Script 1 - 8 deaktivieren</description>
+  </parameter>
+  <parameter nr=""838"" value=""255"" type=""Thyristoren maximale Geschw."">
+    <description>Definition der „maximalen“ Fahrstufe (1 - 255), für welche Tonhöhe laut CV #291 gilt.</description>
+  </parameter>
+  <parameter nr=""839"" type=""SW-Unter-Version"">
+    <description>Decoder-Unter-Version (Patch Version)</description>
+  </parameter>
+  <parameter nr=""840"" value=""0"" type=""Funktionen F13 - F20 bzw. F21 - F28"">
+    <description>Weitere im Analogbetrieb eingeschaltete Funktionen</description>
+  </parameter>
+  <parameter nr=""841"" value=""0"" type=""Funktionen F13 - F20 bzw. F21 - F28"">
+    <description>Weitere im Analogbetrieb eingeschaltete Funktionen</description>
+  </parameter>
+  <parameter nr=""842"" type=""BL-Unter-Version"">
+    <description>Bootloader-Unter-Version (Patch Version)</description>
+  </parameter>
+  <parameter nr=""843"" value=""0"" type=""Deaktivierung Scripts 9 - 16"">
+    <description>Bit 0 - 7 = 1: Script 9 - 16 deaktivieren</description>
+  </parameter>
+  <parameter nr=""844"" value=""0"" type=""E-Motor Tonhöhe (Frequenz) Abhängigkeit von Ge-schwindigkeit"">
+    <description>Erweiterung der Frequenzerhöhung zu CV 299 0: keine weitere Frequenzerhöhung zu CV #299 1: Wert der CV #299 x 1,01 2 … 254: Wert der CV #299 x 1,02 … 3,54 255: Wert der CV #299 x 3,55</description>
+  </parameter>
+  <parameter nr=""980"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""981"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""982"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""983"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""984"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""985"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""986"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""987"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""988"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""989"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""990"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""991"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""992"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""993"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""994"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""995"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""996"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""997"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""998"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""999"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""1000"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""1001"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""1002"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""1003"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""1004"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""1005"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""1006"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""1007"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""1008"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""1009"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""1010"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""1011"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""1012"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""1013"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""1014"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""1015"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""1016"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""1017"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""1018"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+  <parameter nr=""1019"" value=""0"" type=""Script CVs, siehe Changelog ZSP"">
+    <description>Werte dieser CVs werden von Scripten gelesen. Dadurch können Werte in Scripten verändert werden, wenn das Projekt im Decoder gespeichert ist.</description>
+  </parameter>
+</configuration>"

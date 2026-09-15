@@ -1,0 +1,40 @@
+﻿"Kategorie";"Typ";"Name";"Beschreibung";"XML"
+"decoder-configuration";"configuration";"NEM Standard";"Basic CVs only";"<configuration count=""12"">
+  <parameter nr=""1"" type=""Primary address"" value=""3"">
+    <description>Short loco address (1-127, as delivered usually 3)</description>
+  </parameter>
+  <parameter nr=""2"" type=""Vstart"">
+    <description>Starting voltage (minimum voltage at which the motor starts to run)</description>
+  </parameter>
+  <parameter nr=""3"" type=""Acceleration"">
+    <description>Acceleration delay (inertia simulation when accelerating)</description>
+  </parameter>
+  <parameter nr=""4"" type=""Deceleration"">
+    <description>Braking delay (inertia simulation when braking)</description>
+  </parameter>
+  <parameter nr=""5"" type=""Vhigh"">
+    <description>Maximum speed</description>
+  </parameter>
+  <parameter nr=""6"" type=""Vmid"">
+    <description>Medium speed (for a non-linear three-point speed curve)</description>
+  </parameter>
+  <parameter type=""Version ID"">
+    <description>Software version of the decoder (write-protected)</description>
+  </parameter>
+  <parameter nr=""8"" type=""Manufacturer ID"">
+    <description>Manufacturer ID (e.g. 151 = ESU, 145 = ZIMO, 109 = Märklin/Trix, 127 = D&amp;H). Often also used for the decoder reset (write the value 8).</description>
+  </parameter>
+  <parameter nr=""17"" type=""Extended address"">
+    <description>Long loco address (128-10239)</description>
+  </parameter>
+  <parameter nr=""18"" type=""Extended address"">
+    <description>Long loco address (128-10239)</description>
+  </parameter>
+  <parameter nr=""19"" type=""Consist address"">
+    <description>Consist address (for multiple-unit operation)</description>
+  </parameter>
+  <parameter nr=""29"" type=""Configuration"">
+    <description>Central configuration register (bit pattern for direction of travel, speed steps, long/short address, analogue operation, etc.)</description>
+  </parameter>
+</configuration>
+"

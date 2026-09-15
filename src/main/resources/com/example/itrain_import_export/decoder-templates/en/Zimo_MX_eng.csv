@@ -1,0 +1,543 @@
+﻿"Kategorie";"Typ";"Name";"Beschreibung";"XML"
+"decoder-configuration";"configuration";"ZIMO MX600 - MX660 (ohne Sound)";"ZIMO non-sound decoders MX600-MX638 / sound decoders MX640-MX660 - CV overview list (chapter 11, pages 68-77), CV 1 to 264; the sound CVs from #265 onwards are not included";"<configuration count=""180"">
+  <parameter nr=""1"" value=""3"" type=""Vehicle address"">
+    <description>The ""short"" one. Applies if CV #29, bit 5 = 0.</description>
+  </parameter>
+  <parameter nr=""2"" value=""1"" type=""Starting voltage"">
+    <description>Internal speed step for the lowest external speed step.</description>
+  </parameter>
+  <parameter nr=""3"" value=""2"" type=""Acceleration time"">
+    <description>multiplied by 0.9 -&gt; time for acceleration.</description>
+  </parameter>
+  <parameter nr=""4"" value=""1"" type=""Deceleration time"">
+    <description>multiplied by 0.9 -&gt; time for deceleration.</description>
+  </parameter>
+  <parameter nr=""5"" value=""1"" type=""Maximum speed"">
+    <description>Internal speed step for the highest external speed step.</description>
+  </parameter>
+  <parameter nr=""6"" value=""1"" type=""Medium speed"">
+    <description>Internal speed step for the medium external speed step.</description>
+  </parameter>
+  <parameter nr=""7"" type=""SW version number"">
+    <description>of the software currently loaded; see the sub-version in CV #65.</description>
+  </parameter>
+  <parameter nr=""8"" value=""145"" type=""Manufacturer ID, reset, set"">
+    <description>assigned by the NMRA; CV #8 = 8 -&gt; hard reset.</description>
+  </parameter>
+  <parameter nr=""9"" value=""55"" type=""Motor control - sampling"">
+    <description>Back-EMF measuring gap (tens digit), sampling rate (units digit)</description>
+  </parameter>
+  <parameter nr=""10"" value=""0"" type=""Control cutoff"">
+    <description>Internal speed step where the control force is as per CV #113.</description>
+  </parameter>
+  <parameter nr=""13"" value=""0"" type=""Analogue operation F1 - F8"">
+    <description>Selection of the analogue functions F1 (bit 0), F2 (bit 1), ...</description>
+  </parameter>
+  <parameter nr=""14"" value=""67"" type=""Analogue operation F0, F9 …"">
+    <description>Bit 0 = 0: F0 (forwards) switched off in analogue operation = 1: ... switched on Bit 1 = 0: F0 (backwards) switched off in analogue operation = 1: ... switched on ......... F9, F10, F11 Bit 5 = 0: F12 switched off in analogue operation = 1: ... switched on Bit 6 = 0: analogue operation with acceleration behaviour according to CVs #3 + #4; useful for sound = 1: analogue operation without any effect of CVs #3 + #4, i.e. immediate response to the track voltage, similar to classic analogue.</description>
+  </parameter>
+  <parameter nr=""17"" value=""192"" type=""Extended address"">
+    <description>The ""long"" one. Applies if CV #29, bit 5 = 1.</description>
+  </parameter>
+  <parameter nr=""18"" value=""128"" type=""Extended address"">
+    <description>The ""long"" one. Applies if CV #29, bit 5 = 1.</description>
+  </parameter>
+  <parameter nr=""19"" value=""0"" type=""Consist address"">
+    <description>Vehicle address for consist operation 1 - 127, bit 7 = 1: direction of travel inverted</description>
+  </parameter>
+  <parameter nr=""20"" value=""0"" type=""Extended consist addr."">
+    <description>Content of CV #20 * 100 + content of CV #19 = extended consist address</description>
+  </parameter>
+  <parameter nr=""21"" value=""0"" type=""Consist operation F1 - F8, consist operation F0"">
+    <description>Selection of the consist functions F1 (bit 0), F2 (bit 1), ... Selection of the consist functions F0 forwards (bit 0), backwards (bit 1). detection to be found)</description>
+  </parameter>
+  <parameter nr=""22"" value=""0"" type=""Consist operation F1 - F8, consist operation F0"">
+    <description>Selection of the consist functions F1 (bit 0), F2 (bit 1), ... Selection of the consist functions F0 forwards (bit 0), backwards (bit 1). detection to be found)</description>
+  </parameter>
+  <parameter nr=""23"" value=""0"" type=""Variation acceleration"">
+    <description>For temporary adjustment relative to CV #3 (acceleration)</description>
+  </parameter>
+  <parameter nr=""24"" value=""0"" type=""Variation deceleration"">
+    <description>For temporary adjustment relative to CV #4 (deceleration)</description>
+  </parameter>
+  <parameter nr=""27"" value=""0"" type=""Stop by asymm. (ABC)"">
+    <description>Bit 0 = 1: stop if the voltage is on the right, bit 1: on the left</description>
+  </parameter>
+  <parameter nr=""28"" value=""3"" type=""RailCom configuration"">
+    <description>Bit 0 = 1: RailCom broadcast, bit 1 = 1: data</description>
+  </parameter>
+  <parameter nr=""29"" value=""14"" type=""DCC basic settings"">
+    <description>Bit 0 - direction behaviour: 0 = normal, 1 = reversed Bit 1 - speed step system: 0 = 14, 1 = 28, 128 Bit 2 - automatic changeover to analogue operation Bit 3 - RailCom: 0 = off, 1 = switched on Bit 4 - speed curve: 0 = three-point, 1 = free Bit 5 - vehicle address: 0 = CV #1, 1 = CVs #17, #18</description>
+  </parameter>
+  <parameter nr=""33"" value=""1"" type=""NMRA function map F0"">
+    <description>Function mapping for F0 forwards</description>
+  </parameter>
+  <parameter nr=""34"" value=""2"" type=""NMRA function map F0"">
+    <description>Function mapping for F0 backwards</description>
+  </parameter>
+  <parameter nr=""35"" value=""4"" type=""Function mapp. F1 - F12"">
+    <description>Function mapping for F1 - F12</description>
+  </parameter>
+  <parameter nr=""36"" value=""4"" type=""Function mapp. F1 - F12"">
+    <description>Function mapping for F1 - F12</description>
+  </parameter>
+  <parameter nr=""37"" value=""4"" type=""Function mapp. F1 - F12"">
+    <description>Function mapping for F1 - F12</description>
+  </parameter>
+  <parameter nr=""38"" value=""4"" type=""Function mapp. F1 - F12"">
+    <description>Function mapping for F1 - F12</description>
+  </parameter>
+  <parameter nr=""39"" value=""4"" type=""Function mapp. F1 - F12"">
+    <description>Function mapping for F1 - F12</description>
+  </parameter>
+  <parameter nr=""40"" value=""4"" type=""Function mapp. F1 - F12"">
+    <description>Function mapping for F1 - F12</description>
+  </parameter>
+  <parameter nr=""41"" value=""4"" type=""Function mapp. F1 - F12"">
+    <description>Function mapping for F1 - F12</description>
+  </parameter>
+  <parameter nr=""42"" value=""4"" type=""Function mapp. F1 - F12"">
+    <description>Function mapping for F1 - F12</description>
+  </parameter>
+  <parameter nr=""43"" value=""4"" type=""Function mapp. F1 - F12"">
+    <description>Function mapping for F1 - F12</description>
+  </parameter>
+  <parameter nr=""44"" value=""4"" type=""Function mapp. F1 - F12"">
+    <description>Function mapping for F1 - F12</description>
+  </parameter>
+  <parameter nr=""45"" value=""4"" type=""Function mapp. F1 - F12"">
+    <description>Function mapping for F1 - F12</description>
+  </parameter>
+  <parameter nr=""46"" value=""4"" type=""Function mapp. F1 - F12"">
+    <description>Function mapping for F1 - F12</description>
+  </parameter>
+  <parameter nr=""49"" value=""0"" type=""HLU acceleration"">
+    <description>multiplied by 0.4 -&gt; time for signal-dependent acceleration</description>
+  </parameter>
+  <parameter nr=""50"" value=""0"" type=""HLU braking time"">
+    <description>multiplied by 0.4 -&gt; time for signal-dependent braking</description>
+  </parameter>
+  <parameter nr=""51"" value=""0"" type=""HLU limits"">
+    <description>Speed step for each of the 5 HLU speed limits</description>
+  </parameter>
+  <parameter nr=""52"" value=""0"" type=""HLU limits"">
+    <description>Speed step for each of the 5 HLU speed limits</description>
+  </parameter>
+  <parameter nr=""53"" value=""0"" type=""HLU limits"">
+    <description>Speed step for each of the 5 HLU speed limits</description>
+  </parameter>
+  <parameter nr=""54"" value=""0"" type=""HLU limits"">
+    <description>Speed step for each of the 5 HLU speed limits</description>
+  </parameter>
+  <parameter nr=""55"" value=""0"" type=""HLU limits"">
+    <description>Speed step for each of the 5 HLU speed limits</description>
+  </parameter>
+  <parameter nr=""56"" value=""55"" type=""Motor control param., motor control reference"">
+    <description>PID control: P value (tens digit), I value (units digit). Tenths of a volt: max. motor voltage, = 0: according to the track voltage</description>
+  </parameter>
+  <parameter nr=""57"" value=""0"" type=""Motor control param., motor control reference"">
+    <description>PID control: P value (tens digit), I value (units digit). Tenths of a volt: max. motor voltage, = 0: according to the track voltage</description>
+  </parameter>
+  <parameter nr=""58"" value=""255"" type=""Motor control influence"">
+    <description>Control force of the load compensation</description>
+  </parameter>
+  <parameter nr=""59"" value=""5"" type=""HLU reaction time"">
+    <description>Tenths of a second of delay for the validity of the HLU limits</description>
+  </parameter>
+  <parameter nr=""60"" value=""0"" type=""Dimming of function outputs"">
+    <description>Reduction of the effective voltage by PWM</description>
+  </parameter>
+  <parameter nr=""61"" value=""0"" type=""ZIMO extended mapping"">
+    <description>= 97: NMRA mapping ""without left shift""</description>
+  </parameter>
+  <parameter nr=""62"" value=""0"" type=""Modifying light effects"">
+    <description>Change of the minimum dimming value (in steps of 10 %)</description>
+  </parameter>
+  <parameter nr=""63"" value=""51"" type=""Modifying light effects"">
+    <description>Cycle time (tens digit), off extension (units digit)</description>
+  </parameter>
+  <parameter nr=""64"" value=""0"" type=""Modifying light effects"">
+    <description>Ditch light off time modification</description>
+  </parameter>
+  <parameter nr=""65"" type=""SW sub-version number"">
+    <description>Supplement to the version number in CV #7.</description>
+  </parameter>
+  <parameter nr=""66"" value=""0"" type=""Trim value forward"">
+    <description>Multiplication of the speed step by the trim value/128</description>
+  </parameter>
+  <parameter nr=""67"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""68"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""69"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""70"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""71"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""72"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""73"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""74"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""75"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""76"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""77"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""78"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""79"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""80"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""81"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""82"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""83"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""84"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""85"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""86"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""87"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""88"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""89"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""90"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""91"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""92"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""93"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""94"" type=""Free speed curve"">
+    <description>Internal speed step for each of the 28 external speed steps.</description>
+  </parameter>
+  <parameter nr=""95"" value=""0"" type=""Trim value reverse"">
+    <description>Multiplication of the speed step by the trim value/128</description>
+  </parameter>
+  <parameter nr=""97"" value=""0"" type=""Consist key"">
+    <description>= 1-28 (F1-F28): switching between the main and consist address</description>
+  </parameter>
+  <parameter nr=""100"" type=""Measurement of the asymmetry voltage"">
+    <description>Currently measured absolute asymmetry of the track voltage [0.1 V] (in order to avoid problems with the ABC</description>
+  </parameter>
+  <parameter nr=""101"" type=""Correction factor for CV #100"">
+    <description>Offset adjustment of the asymmetry (signed: 128 = -128 ... 127 = +127) in order to compensate for resistor tolerances of the track voltage measurement</description>
+  </parameter>
+  <parameter nr=""105"" value=""0"" type=""User data"">
+    <description>Freely available as storage locations (no effect)</description>
+  </parameter>
+  <parameter nr=""106"" value=""0"" type=""User data"">
+    <description>Freely available as storage locations (no effect)</description>
+  </parameter>
+  <parameter nr=""107"" value=""0"" type=""One-sided light suppr."">
+    <description>Light suppression on the side of cab 1 (front)</description>
+  </parameter>
+  <parameter nr=""108"" value=""0"" type=""One-sided light suppr."">
+    <description>Light suppression on the side of cab 2 (rear)</description>
+  </parameter>
+  <parameter nr=""109"" value=""0"" type=""Extension of CV #107"">
+    <description>Bits 0-2: 3rd output (FA1-FA7) is suppressed. Bits 3-5: 4th output (FA1-FA7) is suppressed. 7 = 1, the cab-side light suppression is activated automatically in a consist.</description>
+  </parameter>
+  <parameter nr=""110"" value=""0"" type=""Extension of CV #108"">
+    <description>As CV #109, but only together with CV #108</description>
+  </parameter>
+  <parameter nr=""111"" value=""0"" type=""Emergency deceleration"">
+    <description>Instead of CV #4 for an individual stop and global stops</description>
+  </parameter>
+  <parameter nr=""112"" value=""0"" type=""Special ZIMO configuration bits"">
+    <description>Bit 0 = sound curve dependent on the target value (0) or on the load (1); the curve is defined in CV #137 to #139. Bit 1 = 1: acknowledgement by high-frequency pulses Bit 2 = 0 / 1: ZIMO train number pulses off/on Bit 3 = 1: 8 function mode (for old ZIMO systems) Bit 4 = 1: pulse chain reception (for the old LGB system) Bit 5 = 0 / 1: motor control 20 kHz / 40 kHz Bit 6 = 1: ""Märklin"" braking (+ CV #29, bit 2, #124, 5) Bit 7 = 1: pulse chain generation</description>
+  </parameter>
+  <parameter nr=""113"" value=""0"" type=""Control cutoff"">
+    <description>Control force at the speed step according to CV #10.</description>
+  </parameter>
+  <parameter nr=""114"" value=""0"" type=""Dimming mask 1"">
+    <description>Exclusion of individual outputs from the dimming according to CV #60</description>
+  </parameter>
+  <parameter nr=""115"" value=""0"" type=""Coupler control"">
+    <description>With effect 48: interval (tens digit), residual voltage (units digit)</description>
+  </parameter>
+  <parameter nr=""116"" value=""0"" type=""„Coupling waltz“"">
+    <description>Pushing up (hundreds digit), pull-away time (tens digit), speed (units digit)</description>
+  </parameter>
+  <parameter nr=""117"" value=""0"" type=""Flashing"">
+    <description>On phase (tens digit), off phase (units digit)</description>
+  </parameter>
+  <parameter nr=""118"" value=""0"" type=""Flash mask"">
+    <description>Specification of the function outputs for flashing according to CV #117.</description>
+  </parameter>
+  <parameter nr=""119"" value=""0"" type=""Dimming mask F6"">
+    <description>Specification of the function outputs for dipping with F6 to CV #60</description>
+  </parameter>
+  <parameter nr=""120"" value=""0"" type=""Dimming mask F7"">
+    <description>Specification of the function outputs for dipping with F7 to CV #60</description>
+  </parameter>
+  <parameter nr=""121"" value=""0"" type=""Expon. acceleration"">
+    <description>Curve range (tens digit), curvature (units digit)</description>
+  </parameter>
+  <parameter nr=""122"" value=""0"" type=""Expon. braking curve"">
+    <description>Curve range (tens digit), curvature (units digit)</description>
+  </parameter>
+  <parameter nr=""123"" value=""0"" type=""Adapt. accel./brake"">
+    <description>Approach for acceleration (tens digit), for braking (units digit)</description>
+  </parameter>
+  <parameter nr=""124"" value=""3"" type=""Shunting keys, outputs instead of SUSI"">
+    <description>Shunting key (half speed, acceleration deactivation), switching the SUSI pins to logic-level outputs.</description>
+  </parameter>
+  <parameter nr=""125"" value=""0"" type=""Effect on „front headlight“ (FA0v), „rear headlight“ (FA0r), FA1, FA2, FA3, FA4, FA5, FA6"">
+    <description>Bits 1, 0 = 00: independent of direction (always effective) = 01: effective only when running forwards = 10: effective only when running backwards. Bits 7, 6, 5, 4, 3, 2 = effect code, e.g.: coupler control (usable from FA1) - 00110000 = ""48"" soft start for the output - 00110100 = ""52"" automatic brake light - 00111000 = ""56"" etc.</description>
+  </parameter>
+  <parameter nr=""126"" value=""0"" type=""Effect on „front headlight“ (FA0v), „rear headlight“ (FA0r), FA1, FA2, FA3, FA4, FA5, FA6"">
+    <description>Bits 1, 0 = 00: independent of direction (always effective) = 01: effective only when running forwards = 10: effective only when running backwards. Bits 7, 6, 5, 4, 3, 2 = effect code, e.g.: coupler control (usable from FA1) - 00110000 = ""48"" soft start for the output - 00110100 = ""52"" automatic brake light - 00111000 = ""56"" etc.</description>
+  </parameter>
+  <parameter nr=""127"" value=""0"" type=""Effect on „front headlight“ (FA0v), „rear headlight“ (FA0r), FA1, FA2, FA3, FA4, FA5, FA6"">
+    <description>Bits 1, 0 = 00: independent of direction (always effective) = 01: effective only when running forwards = 10: effective only when running backwards. Bits 7, 6, 5, 4, 3, 2 = effect code, e.g.: coupler control (usable from FA1) - 00110000 = ""48"" soft start for the output - 00110100 = ""52"" automatic brake light - 00111000 = ""56"" etc.</description>
+  </parameter>
+  <parameter nr=""128"" value=""0"" type=""Effect on „front headlight“ (FA0v), „rear headlight“ (FA0r), FA1, FA2, FA3, FA4, FA5, FA6"">
+    <description>Bits 1, 0 = 00: independent of direction (always effective) = 01: effective only when running forwards = 10: effective only when running backwards. Bits 7, 6, 5, 4, 3, 2 = effect code, e.g.: coupler control (usable from FA1) - 00110000 = ""48"" soft start for the output - 00110100 = ""52"" automatic brake light - 00111000 = ""56"" etc.</description>
+  </parameter>
+  <parameter nr=""129"" value=""0"" type=""Effect on „front headlight“ (FA0v), „rear headlight“ (FA0r), FA1, FA2, FA3, FA4, FA5, FA6"">
+    <description>Bits 1, 0 = 00: independent of direction (always effective) = 01: effective only when running forwards = 10: effective only when running backwards. Bits 7, 6, 5, 4, 3, 2 = effect code, e.g.: coupler control (usable from FA1) - 00110000 = ""48"" soft start for the output - 00110100 = ""52"" automatic brake light - 00111000 = ""56"" etc.</description>
+  </parameter>
+  <parameter nr=""130"" value=""0"" type=""Effect on „front headlight“ (FA0v), „rear headlight“ (FA0r), FA1, FA2, FA3, FA4, FA5, FA6"">
+    <description>Bits 1, 0 = 00: independent of direction (always effective) = 01: effective only when running forwards = 10: effective only when running backwards. Bits 7, 6, 5, 4, 3, 2 = effect code, e.g.: coupler control (usable from FA1) - 00110000 = ""48"" soft start for the output - 00110100 = ""52"" automatic brake light - 00111000 = ""56"" etc.</description>
+  </parameter>
+  <parameter nr=""131"" value=""0"" type=""Effect on „front headlight“ (FA0v), „rear headlight“ (FA0r), FA1, FA2, FA3, FA4, FA5, FA6"">
+    <description>Bits 1, 0 = 00: independent of direction (always effective) = 01: effective only when running forwards = 10: effective only when running backwards. Bits 7, 6, 5, 4, 3, 2 = effect code, e.g.: coupler control (usable from FA1) - 00110000 = ""48"" soft start for the output - 00110100 = ""52"" automatic brake light - 00111000 = ""56"" etc.</description>
+  </parameter>
+  <parameter nr=""132"" value=""0"" type=""Effect on „front headlight“ (FA0v), „rear headlight“ (FA0r), FA1, FA2, FA3, FA4, FA5, FA6"">
+    <description>Bits 1, 0 = 00: independent of direction (always effective) = 01: effective only when running forwards = 10: effective only when running backwards. Bits 7, 6, 5, 4, 3, 2 = effect code, e.g.: coupler control (usable from FA1) - 00110000 = ""48"" soft start for the output - 00110100 = ""52"" automatic brake light - 00111000 = ""56"" etc.</description>
+  </parameter>
+  <parameter nr=""133"" value=""0"" type=""FA4 as fan output + reed config."">
+    <description>Bit 0: = 0: FA4 normal output = 1: fan. Bit 4 - inverts the polarity of the reed 1 input Bit 3 - inverts the polarity of the reed 2 input Bit 2 - inverts the polarity of the reed 3 input Bit 5 - inverts the polarity of the reed 4 input</description>
+  </parameter>
+  <parameter nr=""134"" value=""106"" type=""Stop by asymm. (ABC)"">
+    <description>Smoothing (hundreds digit), threshold (tens and units digits).</description>
+  </parameter>
+  <parameter nr=""135"" value=""0"" type=""km/h control and „9th bit“ for CV #136"">
+    <description>= 1 -&gt; initiate a calibration run; 5, 10, 20: km per step ratio. Bit 6: is used as the 9th bit for the value of CV #136</description>
+  </parameter>
+  <parameter nr=""136"" type=""RailCom km/h correction"">
+    <description>Check value after the calibration run; or correction value for RailCom</description>
+  </parameter>
+  <parameter nr=""137"" value=""0"" type=""Smoke generator characteristic"">
+    <description>Effects 72, 80: CV #137: PWM of FAx when stationary CV #138: PWM of FAx at a constant speed CV #139: PWM of FAx during acceleration</description>
+  </parameter>
+  <parameter nr=""138"" value=""0"" type=""Smoke generator characteristic"">
+    <description>Effects 72, 80: CV #137: PWM of FAx when stationary CV #138: PWM of FAx at a constant speed CV #139: PWM of FAx during acceleration</description>
+  </parameter>
+  <parameter nr=""139"" value=""0"" type=""Smoke generator characteristic"">
+    <description>Effects 72, 80: CV #137: PWM of FAx when stationary CV #138: PWM of FAx at a constant speed CV #139: PWM of FAx during acceleration</description>
+  </parameter>
+  <parameter nr=""140"" value=""0"" type=""Distance-controlled stop"">
+    <description>= 1: HLU or ABC = 2: manual = 3: both</description>
+  </parameter>
+  <parameter nr=""141"" value=""20"" type=""Distance-controlled stop"">
+    <description>the ""constant braking distance"": as a guide = 155: 500 m</description>
+  </parameter>
+  <parameter nr=""142"" value=""5"" type=""Distance-controlled stop"">
+    <description>High-speed compensation of the detection delay with ABC</description>
+  </parameter>
+  <parameter nr=""143"" value=""0"" type=""Distance-controlled stop"">
+    <description>High-speed compensation of the detection delay with HLU</description>
+  </parameter>
+  <parameter nr=""144"" value=""0"" type=""Programming / update lock"">
+    <description>= 0: no programming or update lock. Bit 3 = 1: ""OP PROG mode"" lock for writing CVs Bit 4 = 1: confirmation jingle when writing CVs Bit 5 = 1: ""service mode"" lock for reading CVs Bit 6 = 1: ""service mode"" lock for writing CVs Bit 7 = 1: update lock</description>
+  </parameter>
+  <parameter nr=""145"" value=""0"" type=""Special round motor, C-Sinus"">
+    <description>= 1: special control for the Fleischmann round motor = 10 - 13: C-Sinus motors; see chapter 6 (installation, ...)</description>
+  </parameter>
+  <parameter nr=""146"" value=""0"" type=""Backlash compensation"">
+    <description>Hundredths of a second: pre-turning time after a change of direction</description>
+  </parameter>
+  <parameter nr=""147"" value=""0"" type=""Experimental CVs"">
+    <description>Special settings for the motor control</description>
+  </parameter>
+  <parameter nr=""151"" value=""0"" type=""Motor brake"">
+    <description>= units digit (1 - 9): force and speed of the motor brake = tens digit (1 - 9): reduction of the control in a consist</description>
+  </parameter>
+  <parameter nr=""152"" value=""0"" type=""Dimming mask 2"">
+    <description>Exclusion of individual outputs from the dimming according to CV #60</description>
+  </parameter>
+  <parameter nr=""153"" value=""0"" type=""Continued running without signal"">
+    <description>0: feature not used 1 - 255: time in tenths of a second after which the decoder starts braking when there is no longer any DCC reception via its two rail contacts. During braking all braking CVs (e.g. CV #4) are taken into account. Usual CV values for CV #153 are either 0 or 10-20 (for 1.0 to 2.0 seconds).</description>
+  </parameter>
+  <parameter nr=""154"" value=""0"" type=""Misc. special and OEM bits"">
+    <description>For use only with certain special projects</description>
+  </parameter>
+  <parameter nr=""155"" value=""0"" type=""Half speed"">
+    <description>Selection of a function key (instead of CV #124)</description>
+  </parameter>
+  <parameter nr=""156"" value=""0"" type=""Acceleration deact."">
+    <description>Selection of a function key (instead of CV #124)</description>
+  </parameter>
+  <parameter nr=""157"" value=""0"" type=""MAN function"">
+    <description>Selection of a function key for the MAN function</description>
+  </parameter>
+  <parameter nr=""158"" value=""0"" type=""Various special bits + RailCom variants"">
+    <description>Bit 0 = 1: switch off the MX648 external electrolytic capacitor charging circuit (FA1) Bit 1 = 1: no motor brake with diesel-mechanical Bit 2 = 0: RailCom feedback, old ZIMO variant on ID 3 = 1: standard-compliant km/h feedback on ID 7 Bit 3 = 1: abort looped running sounds when changing to another sound Bit 4 = 1: fewer exhaust chuffs at high speed Bit 5 = 1: lowering of the diesel sound by one notch and lowering of the turbocharger sound if the loco was last braked Bit 6 = 1: the thyristor sound becomes louder when braking. MX645 ONLY: bit 7 = 1: light flashes with the electric loco tap changer on FA7</description>
+  </parameter>
+  <parameter nr=""159"" value=""0"" type=""Effects on FA7, FA8"">
+    <description>As CVs #125 - #132</description>
+  </parameter>
+  <parameter nr=""160"" value=""0"" type=""Effects on FA7, FA8"">
+    <description>As CVs #125 - #132</description>
+  </parameter>
+  <parameter nr=""161"" value=""0"" type=""Servo protocol"">
+    <description>Bit 0 = 0: positive pulses, = 1: negative pulses Bit 1 = 0: active only during movement, = 1: always</description>
+  </parameter>
+  <parameter nr=""162"" value=""49"" type=""Servo 1 end position left, servo 1 end position right, servo 1 centre position, servo 1 travel time"">
+    <description>Portion of the total range of rotation to be used. Portion of the total range of rotation to be used in the case of three-position operation. Tenths of a second: travel time from the left end position to the right end position</description>
+  </parameter>
+  <parameter nr=""163"" value=""205"" type=""Servo 1 end position left, servo 1 end position right, servo 1 centre position, servo 1 travel time"">
+    <description>Portion of the total range of rotation to be used. Portion of the total range of rotation to be used in the case of three-position operation. Tenths of a second: travel time from the left end position to the right end position</description>
+  </parameter>
+  <parameter nr=""164"" value=""127"" type=""Servo 1 end position left, servo 1 end position right, servo 1 centre position, servo 1 travel time"">
+    <description>Portion of the total range of rotation to be used. Portion of the total range of rotation to be used in the case of three-position operation. Tenths of a second: travel time from the left end position to the right end position</description>
+  </parameter>
+  <parameter nr=""165"" value=""10"" type=""Servo 1 end position left, servo 1 end position right, servo 1 centre position, servo 1 travel time"">
+    <description>Portion of the total range of rotation to be used. Portion of the total range of rotation to be used in the case of three-position operation. Tenths of a second: travel time from the left end position to the right end position</description>
+  </parameter>
+  <parameter nr=""166"" value=""49"" type=""Servo 2 end position left, servo 2 end position right, servo 2 centre position, servo 2 travel time"">
+    <description>Portion of the total range of rotation to be used. Portion of the total range of rotation to be used in the case of three-position operation. Tenths of a second: travel time from the left end position to the right end position</description>
+  </parameter>
+  <parameter nr=""167"" value=""205"" type=""Servo 2 end position left, servo 2 end position right, servo 2 centre position, servo 2 travel time"">
+    <description>Portion of the total range of rotation to be used. Portion of the total range of rotation to be used in the case of three-position operation. Tenths of a second: travel time from the left end position to the right end position</description>
+  </parameter>
+  <parameter nr=""168"" value=""127"" type=""Servo 2 end position left, servo 2 end position right, servo 2 centre position, servo 2 travel time"">
+    <description>Portion of the total range of rotation to be used. Portion of the total range of rotation to be used in the case of three-position operation. Tenths of a second: travel time from the left end position to the right end position</description>
+  </parameter>
+  <parameter nr=""169"" value=""10"" type=""Servo 2 end position left, servo 2 end position right, servo 2 centre position, servo 2 travel time"">
+    <description>Portion of the total range of rotation to be used. Portion of the total range of rotation to be used in the case of three-position operation. Tenths of a second: travel time from the left end position to the right end position</description>
+  </parameter>
+  <parameter nr=""170"" value=""49"" type=""Servo 3 end position left, servo 3 end position right, servo 3 centre position, servo 3 travel time"">
+    <description>Portion of the total range of rotation to be used. Portion of the total range of rotation to be used in the case of three-position operation. Tenths of a second: travel time from the left end position to the right end position</description>
+  </parameter>
+  <parameter nr=""171"" value=""205"" type=""Servo 3 end position left, servo 3 end position right, servo 3 centre position, servo 3 travel time"">
+    <description>Portion of the total range of rotation to be used. Portion of the total range of rotation to be used in the case of three-position operation. Tenths of a second: travel time from the left end position to the right end position</description>
+  </parameter>
+  <parameter nr=""172"" value=""127"" type=""Servo 3 end position left, servo 3 end position right, servo 3 centre position, servo 3 travel time"">
+    <description>Portion of the total range of rotation to be used. Portion of the total range of rotation to be used in the case of three-position operation. Tenths of a second: travel time from the left end position to the right end position</description>
+  </parameter>
+  <parameter nr=""173"" value=""10"" type=""Servo 3 end position left, servo 3 end position right, servo 3 centre position, servo 3 travel time"">
+    <description>Portion of the total range of rotation to be used. Portion of the total range of rotation to be used in the case of three-position operation. Tenths of a second: travel time from the left end position to the right end position</description>
+  </parameter>
+  <parameter nr=""174"" value=""49"" type=""Servo 4 end position left, servo 4 end position right, servo 4 centre position, servo 4 travel time"">
+    <description>Portion of the total range of rotation to be used. Portion of the total range of rotation to be used in the case of three-position operation. Tenths of a second: travel time from the left end position to the right end position</description>
+  </parameter>
+  <parameter nr=""175"" value=""205"" type=""Servo 4 end position left, servo 4 end position right, servo 4 centre position, servo 4 travel time"">
+    <description>Portion of the total range of rotation to be used. Portion of the total range of rotation to be used in the case of three-position operation. Tenths of a second: travel time from the left end position to the right end position</description>
+  </parameter>
+  <parameter nr=""176"" value=""127"" type=""Servo 4 end position left, servo 4 end position right, servo 4 centre position, servo 4 travel time"">
+    <description>Portion of the total range of rotation to be used. Portion of the total range of rotation to be used in the case of three-position operation. Tenths of a second: travel time from the left end position to the right end position</description>
+  </parameter>
+  <parameter nr=""177"" value=""10"" type=""Servo 4 end position left, servo 4 end position right, servo 4 centre position, servo 4 travel time"">
+    <description>Portion of the total range of rotation to be used. Portion of the total range of rotation to be used in the case of three-position operation. Tenths of a second: travel time from the left end position to the right end position</description>
+  </parameter>
+  <parameter nr=""178"" value=""0"" type=""Minimum voltage for pulling away, in tenths of a volt"">
+    <description>Works both in regulated and unregulated analogue operation, but only from software version 40.4 onwards, and only for non-sound decoders.</description>
+  </parameter>
+  <parameter nr=""179"" value=""0"" type=""Speed increase with the track voltage"">
+    <description>Suitable for setting the maximum speed in analogue operation. Works both in regulated and unregulated analogue operation, but only from software version 40.4 onwards, and only for non-sound decoders.</description>
+  </parameter>
+  <parameter nr=""181"" value=""0"" type=""Servo 1, servo 2, servo 3, servo 4"">
+    <description>Modes of operation (one-key, two-key, ...)</description>
+  </parameter>
+  <parameter nr=""182"" value=""0"" type=""Servo 1, servo 2, servo 3, servo 4"">
+    <description>Modes of operation (one-key, two-key, ...)</description>
+  </parameter>
+  <parameter nr=""183"" value=""0"" type=""Servo 1, servo 2, servo 3, servo 4"">
+    <description>Modes of operation (one-key, two-key, ...)</description>
+  </parameter>
+  <parameter nr=""184"" value=""0"" type=""Servo 1, servo 2, servo 3, servo 4"">
+    <description>Modes of operation (one-key, two-key, ...)</description>
+  </parameter>
+  <parameter nr=""185"" value=""0"" type=""Special, live steam locomotives"">
+    <description>Operating setting for a live-steam loco</description>
+  </parameter>
+  <parameter nr=""186"" value=""0"" type=""Special pantograph config"">
+    <description>Pantograph configuration for special projects (configured via ZSP)</description>
+  </parameter>
+  <parameter nr=""187"" value=""0"" type=""Special pantograph config"">
+    <description>Pantograph configuration for special projects (configured via ZSP)</description>
+  </parameter>
+  <parameter nr=""188"" value=""0"" type=""Special pantograph config"">
+    <description>Pantograph configuration for special projects (configured via ZSP)</description>
+  </parameter>
+  <parameter nr=""189"" value=""0"" type=""Special pantograph config"">
+    <description>Pantograph configuration for special projects (configured via ZSP)</description>
+  </parameter>
+  <parameter nr=""190"" value=""0"" type=""Fade in/out (effect 88)"">
+    <description>Time specifications for dimming up/down for effects 88, 89, 90</description>
+  </parameter>
+  <parameter nr=""191"" value=""1"" type=""Fade in/out (effect 88)"">
+    <description>Time specifications for dimming up/down for effects 88, 89, 90</description>
+  </parameter>
+  <parameter nr=""193"" value=""0"" type=""ABC shuttle operation dwell time"">
+    <description>= 0: no ABC shuttle operation = 1 ... 255: dwell time (in seconds) in the ABC stopping (= reversing) sections at the ends of the shuttle route.</description>
+  </parameter>
+  <parameter nr=""250"" type=""Decoder ID"">
+    <description>Serial number, assigned automatically during production. CV #250 also a code for the decoder series</description>
+  </parameter>
+  <parameter nr=""251"" type=""Decoder ID"">
+    <description>Serial number, assigned automatically during production. CV #250 also a code for the decoder series</description>
+  </parameter>
+  <parameter nr=""252"" type=""Decoder ID"">
+    <description>Serial number, assigned automatically during production. CV #250 also a code for the decoder series</description>
+  </parameter>
+  <parameter nr=""253"" type=""Decoder ID"">
+    <description>Serial number, assigned automatically during production. CV #250 also a code for the decoder series</description>
+  </parameter>
+  <parameter nr=""260"" type=""Load code"">
+    <description>The load code available for purchase, matching the decoder ID, entitles you to play ""coded"" sound projects of the bundle concerned.</description>
+  </parameter>
+  <parameter nr=""261"" type=""Load code"">
+    <description>The load code available for purchase, matching the decoder ID, entitles you to play ""coded"" sound projects of the bundle concerned.</description>
+  </parameter>
+  <parameter nr=""262"" type=""Load code"">
+    <description>The load code available for purchase, matching the decoder ID, entitles you to play ""coded"" sound projects of the bundle concerned.</description>
+  </parameter>
+  <parameter nr=""263"" type=""Load code"">
+    <description>The load code available for purchase, matching the decoder ID, entitles you to play ""coded"" sound projects of the bundle concerned.</description>
+  </parameter>
+  <parameter nr=""264"" value=""0"" type=""Low voltage on MX635V.., MX636V.."">
+    <description>= 0: 1.5 V | = 1: 3 V | = 2: 5 V | 3: 6.5 V | = 4: 12 V = 5: 14 V | = 6: 16 V | = 7: 17 V</description>
+  </parameter>
+</configuration>"

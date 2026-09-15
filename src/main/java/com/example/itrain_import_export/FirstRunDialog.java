@@ -34,11 +34,11 @@ import java.util.function.Consumer;
  * in der neuen Sprache erscheinen (Titel, Beschriftungen, Buttons), über
  * einen eigenen, beim Schließen wieder abgemeldeten Sprachwechsel-Listener.
  * <p>
- * 2) Eine Farbschema-Auswahl (hell/dunkel, identisch zum Reiter "Ansicht" in
- * den Voreinstellungen, siehe {@link ThemeListCell}) - wirkt sofort auf das
- * bereits sichtbare Hauptfenster UND auf diesen Dialog selbst, damit der
- * Nutzer das gewählte Farbschema direkt sieht, statt es erst nachträglich in
- * den Voreinstellungen zu entdecken.
+ * 2) Ein Knopf "Farbkombination" (identisch zum Reiter "Ansicht" in den
+ * Voreinstellungen, siehe {@link CustomColorDialog}) - die Wahl dort wirkt
+ * sofort auf das bereits sichtbare Hauptfenster UND auf diesen Dialog selbst,
+ * damit der Nutzer das gewählte Farbschema direkt sieht, statt es erst
+ * nachträglich in den Voreinstellungen zu entdecken.
  * <p>
  * 3) Je einen Pfadvorschlag für iTrain-/Export-/Backup-/Decoder-Ordner,
  * abhängig vom Betriebssystem unterhalb des Benutzerverzeichnisses
@@ -79,6 +79,7 @@ public final class FirstRunDialog {
         String suggestedExport = Paths.get(home, "iTrain", "export").toString();
         String suggestedBackup = Paths.get(home, "iTrain", "backup").toString();
         String suggestedDecoder = Paths.get(home, "iTrain", "Decoder").toString();
+        String suggestedSystemFiles = Paths.get(home, "iTrain", "System-Dateien").toString();
 
         Dialog<Void> dialog = new Dialog<>();
         dialog.initOwner(owner);
@@ -105,42 +106,36 @@ public final class FirstRunDialog {
             }
         });
 
-        // Farbschema-Auswahl - dieselbe Zellen-Darstellung ("Hell"/"Dunkel")
-        // wie im Voreinstellungen-Reiter "Ansicht", wirkt aber sofort auf das
-        // bereits sichtbare Hauptfenster UND diesen Dialog selbst (siehe
-        // Listener unten), damit der Nutzer die Wahl direkt sieht.
+        // Farbschema - wie im Voreinstellungen-Reiter "Ansicht" ein Knopf,
+        // der das Fenster "Farbkombination" oeffnet (siehe CustomColorDialog).
+        // Die Wahl dort wirkt sofort auf das bereits sichtbare Hauptfenster
+        // UND diesen Dialog selbst.
         Label themeCaption = new Label(i18n.t("settings.theme"));
-        ComboBox<String> themeCombo = new ComboBox<>(FXCollections.observableArrayList(
-                AppSettings.THEME_LIGHT, AppSettings.THEME_DARK));
-        themeCombo.setValue(settings.getTheme());
-        themeCombo.setCellFactory(list -> new ThemeListCell());
-        themeCombo.setButtonCell(new ThemeListCell());
-        themeCombo.valueProperty().addListener((obs, oldTheme, newTheme) -> {
-            if (newTheme != null) {
-                settings.setTheme(newTheme);
-                ThemeManager.applyToAllWindows(newTheme);
-            }
-        });
+        Button themeButton = new Button(i18n.t("settings.customColor"));
+        themeButton.setOnAction(e -> CustomColorDialog.show(owner));
 
         Label tcdCaption = new Label(i18n.t("settings.tcdPath"));
         Label exportCaption = new Label(i18n.t("settings.exportPath"));
         Label backupCaption = new Label(i18n.t("settings.backupPath"));
         Label decoderCaption = new Label(i18n.t("settings.decoderPath"));
+        Label systemFilesCaption = new Label(i18n.t("settings.systemFilesPath"));
 
         PathRow tcdRow = new PathRow(owner, i18n, suggestedTcd);
         PathRow exportRow = new PathRow(owner, i18n, suggestedExport);
         PathRow backupRow = new PathRow(owner, i18n, suggestedBackup);
         PathRow decoderRow = new PathRow(owner, i18n, suggestedDecoder);
+        PathRow systemFilesRow = new PathRow(owner, i18n, suggestedSystemFiles);
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(12);
         grid.addRow(0, languageCaption, languageCombo);
-        grid.addRow(1, themeCaption, themeCombo);
+        grid.addRow(1, themeCaption, themeButton);
         grid.addRow(2, tcdCaption, tcdRow.row);
         grid.addRow(3, exportCaption, exportRow.row);
         grid.addRow(4, backupCaption, backupRow.row);
         grid.addRow(5, decoderCaption, decoderRow.row);
+        grid.addRow(6, systemFilesCaption, systemFilesRow.row);
 
         VBox content = new VBox(12, introLabel, grid);
         content.setPadding(new Insets(15));
@@ -165,14 +160,12 @@ public final class FirstRunDialog {
             introLabel.setText(i18n.t("firstRun.intro"));
             languageCaption.setText(i18n.t("settings.language"));
             themeCaption.setText(i18n.t("settings.theme"));
-            // ThemeListCell übersetzt "Hell"/"Dunkel" erst beim (Neu-)Rendern
-            // der Zelle - ein neuer Button-Cell erzwingt das sofort, auch
-            // wenn sich die Auswahl selbst nicht geändert hat.
-            themeCombo.setButtonCell(new ThemeListCell());
+            themeButton.setText(i18n.t("settings.customColor"));
             tcdCaption.setText(i18n.t("settings.tcdPath"));
             exportCaption.setText(i18n.t("settings.exportPath"));
             backupCaption.setText(i18n.t("settings.backupPath"));
             decoderCaption.setText(i18n.t("settings.decoderPath"));
+            systemFilesCaption.setText(i18n.t("settings.systemFilesPath"));
             tcdRow.refreshText(i18n);
             exportRow.refreshText(i18n);
             backupRow.refreshText(i18n);
@@ -194,6 +187,7 @@ public final class FirstRunDialog {
                 applyPath(owner, i18n, settings, exportRow.getPath(), settings::setExportDirectory);
                 applyPath(owner, i18n, settings, backupRow.getPath(), settings::setBackupDirectory);
                 applyPath(owner, i18n, settings, decoderRow.getPath(), settings::setDecoderDirectory);
+                applyPath(owner, i18n, settings, systemFilesRow.getPath(), settings::setSystemFilesDirectory);
             }
             return null;
         });

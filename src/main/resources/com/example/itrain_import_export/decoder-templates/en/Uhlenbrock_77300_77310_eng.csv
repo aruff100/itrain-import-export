@@ -1,0 +1,588 @@
+﻿"Kategorie";"Typ";"Name";"Beschreibung";"XML"
+"decoder-configuration";"configuration";"Uhlenbrock digital 77 300, 77 310";"Uhlenbrock digital decoders 77 300 / 77 310 for locos of gauges 0 - IIm - CV tables from the operating manual, pages 54-73; the table for programming banks 1-4 is not included";"<configuration count=""195"">
+  <parameter nr=""1"" value=""3"">
+    <description>Address of the loco, DCC / address of the loco, Motorola</description>
+  </parameter>
+  <parameter nr=""2"" value=""1"">
+    <description>Minimum speed (change it until the loco just starts to move at speed step 1)</description>
+  </parameter>
+  <parameter nr=""3"" value=""10"">
+    <description>Acceleration delay: 1 means that the current internal speed is increased by / 1 every 5 ms. If the internal maximum speed is, for example, 200 (CV 5 = 50 or CV / 94 = 200), the acceleration time from 0 to Vmax is 1 second</description>
+  </parameter>
+  <parameter nr=""4"" value=""0"">
+    <description>Braking delay (time factor as in CV 3)</description>
+  </parameter>
+  <parameter nr=""5"" value=""48"">
+    <description>Maximum speed (must be greater than CV 2)</description>
+  </parameter>
+  <parameter nr=""6"" value=""24"">
+    <description>Medium speed (must be greater than CV 2 and lower than CV 5)</description>
+  </parameter>
+  <parameter nr=""7"">
+    <description>Software version currently in use</description>
+  </parameter>
+  <parameter nr=""8"" value=""133"">
+    <description>Manufacturer ID. Decoder reset, values as in CV 59</description>
+  </parameter>
+  <parameter nr=""12"" value=""255"">
+    <description>Modes of operation Value / Bit 0=1 DC (analogue operation, direct current) on 1* / Bit 1=1 AC (analogue operation, alternating current) on 2* / Bit 2=1 DCC data format on 4* / Bit 3=1 Motorola data format on 8* / Bit 4=1 Selectrix data format on 16* / Bit 5=1 mfx data format on 32* / If all data formats are switched off, the decoder can only be programmed / in digital operation.</description>
+  </parameter>
+  <parameter nr=""13"" value=""0"">
+    <description>Enable function keys in analogue operation / Bit 0-7 -&gt; F1 to F8; bit = 0 function off, bit = 1 function on</description>
+  </parameter>
+  <parameter nr=""14"" value=""1"">
+    <description>Enable function keys in analogue operation / Bit 0 and bits 4-7 -&gt; F0 and F9 to F12; bit = 0 function off, bit = 1 function on</description>
+  </parameter>
+  <parameter nr=""15"" value=""1"">
+    <description>Decoder programming lock</description>
+  </parameter>
+  <parameter nr=""16"" value=""1"">
+    <description>Decoder programming lock index number</description>
+  </parameter>
+  <parameter nr=""17"" value=""199"">
+    <description>Long loco address (128 - 9999, factory value 2000), 17 = high byte</description>
+  </parameter>
+  <parameter nr=""18"" value=""208"">
+    <description>18 = low byte</description>
+  </parameter>
+  <parameter nr=""19"" value=""0"">
+    <description>Consist address (double heading) / 0 = consist address (CADR) is not active. If bit 7 = 1 the direction of travel is / reversed, i.e. desired CADR + 128 = reversed direction of travel</description>
+  </parameter>
+  <parameter nr=""27"" value=""0"">
+    <description>Brake signal settings (automatic stopping) Value / Bit 0 = 1 -&gt; ABC right-hand rail more positive 1 / Bit 1 = 1 -&gt; ABC left-hand rail more positive 2 / Bit 4 = 1 -&gt; DC with opposite direction of travel 16 / Bit 5 = 1 -&gt; DC with the same direction of travel 32 / Bit 7 = 0 -&gt; ABC direction of travel forwards only, if bit 0 = 1 or bit 1 = 1 0 / Bit 7 = 1 -&gt; ABC direction of travel backwards only, if bit 0 = 1 or bit 1 = 1 128</description>
+  </parameter>
+  <parameter nr=""28"" value=""131"">
+    <description>RailCom® configuration Value / Bit 0 = 1 -&gt; channel 1 on 1* / Bit 1 = 1 -&gt; channel 2 on 2* / Bit 7 = 1 -&gt; RailCom Plus® on 128*</description>
+  </parameter>
+  <parameter nr=""29"" value=""14"">
+    <description>Configuration according to the DCC standard Value / Bit 0=0 normal direction of travel 0 / Bit 0=1 opposite direction of travel 1 / Bit 1=0 14 speed steps 0 / Bit 1=1 28 speed steps 2* / Bit 2=0 digital operation only 0 / Bit 2=1 automatic analogue/digital changeover 4* / Bit 3=0 RailCom® switched off 0 / Bit 3=1 RailCom® switched on 8* / Bit 4=0 speed steps via CV 2, 5 and 6 0 / Bit 4=1 use the speed curve from CV 67 - 94 16 / Bit 5=0 short address (CV 1) 0 / Bit 5=1 long address (CV 17/18) 32</description>
+  </parameter>
+  <parameter nr=""30"" value=""0"">
+    <description>Fault memory for the function outputs, motor and temperature monitoring / 1 = fault at the function outputs, 2 = motor fault, 4 = temperature exceeded</description>
+  </parameter>
+  <parameter nr=""31"" value=""0"">
+    <description>1st pointer CV for CV banks</description>
+  </parameter>
+  <parameter nr=""32"" value=""255"">
+    <description>2nd pointer CV for CV banks</description>
+  </parameter>
+  <parameter nr=""33"">
+    <description>Simple function mapping. See the explanation in the text section</description>
+  </parameter>
+  <parameter nr=""34"">
+    <description>Simple function mapping. See the explanation in the text section</description>
+  </parameter>
+  <parameter nr=""35"">
+    <description>Simple function mapping. See the explanation in the text section</description>
+  </parameter>
+  <parameter nr=""36"">
+    <description>Simple function mapping. See the explanation in the text section</description>
+  </parameter>
+  <parameter nr=""37"">
+    <description>Simple function mapping. See the explanation in the text section</description>
+  </parameter>
+  <parameter nr=""38"">
+    <description>Simple function mapping. See the explanation in the text section</description>
+  </parameter>
+  <parameter nr=""39"">
+    <description>Simple function mapping. See the explanation in the text section</description>
+  </parameter>
+  <parameter nr=""40"">
+    <description>Simple function mapping. See the explanation in the text section</description>
+  </parameter>
+  <parameter nr=""41"">
+    <description>Simple function mapping. See the explanation in the text section</description>
+  </parameter>
+  <parameter nr=""42"">
+    <description>Simple function mapping. See the explanation in the text section</description>
+  </parameter>
+  <parameter nr=""43"">
+    <description>Simple function mapping. See the explanation in the text section</description>
+  </parameter>
+  <parameter nr=""44"">
+    <description>Simple function mapping. See the explanation in the text section</description>
+  </parameter>
+  <parameter nr=""45"">
+    <description>Simple function mapping. See the explanation in the text section</description>
+  </parameter>
+  <parameter nr=""46"">
+    <description>Simple function mapping. See the explanation in the text section</description>
+  </parameter>
+  <parameter nr=""47"" value=""12"">
+    <description>Motorola 1st trinary address (only with the Motorola programming procedure)</description>
+  </parameter>
+  <parameter nr=""48"" value=""0"">
+    <description>Motorola 2nd trinary address (only with the Motorola programming procedure)</description>
+  </parameter>
+  <parameter nr=""49"" value=""0"">
+    <description>Motorola 3rd trinary address (only with the Motorola programming procedure)</description>
+  </parameter>
+  <parameter nr=""50"" value=""0"">
+    <description>Decoder configuration 1 Value / Bit 0=0 do not use Motorola 2nd address 0 / Bit 0=1 use Motorola 2nd address 1 / Bit 1=0 do not use Motorola 3rd address 0 / Bit 1=1 use Motorola 3rd address 2 / Bit 2=0 do not swap light outputs 0 / Bit 2=1 swap light outputs 4 / Bit 3=0 frequency of lights, A1 to A8 = 156 Hz 0 / Bit 3=1 frequency of lights, A1 to A5 = 24 kHz (A6 - A8 156 Hz) 8 / Bit 7=0 decoder-internal automatic mode off 0 / Bit 7=1 decoder-internal automatic mode on 128</description>
+  </parameter>
+  <parameter nr=""51"" value=""3"">
+    <description>Decoder configuration 2 Value / Bit 0=0 motor control off 0 / Bit 0=1 motor control on 1* / Bit 1=0 motor control PID controller 0 / Bit 1=1 motor control SX controller / Bit 2=0 no dynamic period for the motor control / Bit 2=1 dynamic period for the motor control / Bit 3=0 after a power failure: restore the speed, off / Bit 3=1 after a power failure: restore the speed, on / Bit 4=0 after a power failure: restore functions 0 - 12, off / Bit 4=1 after a power failure: restore functions 0 - 12, on / Bit 7=0 additional starting curve off / Bit 7=1 additional starting curve on</description>
+  </parameter>
+  <parameter nr=""53"" value=""40"">
+    <description>Period of the motor control in steps of 100 µs (1/10,000 s)</description>
+  </parameter>
+  <parameter nr=""54"" value=""100"">
+    <description>Motor control P constant of the PID controller</description>
+  </parameter>
+  <parameter nr=""55"" value=""40"">
+    <description>Motor control I constant of the PID controller</description>
+  </parameter>
+  <parameter nr=""56"" value=""32"">
+    <description>Motor control D constant of the PID controller</description>
+  </parameter>
+  <parameter nr=""57"" value=""6"">
+    <description>Controller offset</description>
+  </parameter>
+  <parameter nr=""58"" value=""8"">
+    <description>Measuring gap for the back-EMF measurement in steps of 100 µs (1/10,000 s)</description>
+  </parameter>
+  <parameter nr=""59"" value=""0"">
+    <description>Reset to the factory settings (also possible via CV8) / 1 = CV 0 - 256, and CV257 - 512 (RailCom® bank 7) / 2 = CV 257 - 512 (RailCom Plus® banks 5 &amp; 6) / 3 = CV 257 - 512 (extended function mapping banks 1 &amp; 2) / 4 = CV 257 - 512 (PWM modulation of the function outputs banks 3 &amp; 4)</description>
+  </parameter>
+  <parameter nr=""60"">
+    <description>Short-circuit monitoring of the motor and function outputs, / temperature monitoring switched on (do not change)</description>
+  </parameter>
+  <parameter nr=""61"">
+    <description>Constant for the temperature cut-out</description>
+  </parameter>
+  <parameter nr=""62"">
+    <description>Constant for short-circuit detection at the function outputs (do not change)</description>
+  </parameter>
+  <parameter nr=""63"">
+    <description>Constant for short-circuit detection at the motor output (do not change)</description>
+  </parameter>
+  <parameter nr=""64"" value=""0"">
+    <description>Page register for CV programming with a Motorola command station</description>
+  </parameter>
+  <parameter nr=""65"" value=""0"">
+    <description>Offset register for CV programming with a Motorola command station</description>
+  </parameter>
+  <parameter nr=""66"" value=""0"">
+    <description>Speed correction forwards</description>
+  </parameter>
+  <parameter nr=""67"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""68"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""69"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""70"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""71"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""72"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""73"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""74"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""75"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""76"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""77"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""78"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""79"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""80"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""81"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""82"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""83"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""84"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""85"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""86"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""87"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""88"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""89"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""90"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""91"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""92"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""93"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""94"">
+    <description>Extended speed curve for speed steps 1 - 28</description>
+  </parameter>
+  <parameter nr=""95"" value=""0"">
+    <description>Speed correction backwards</description>
+  </parameter>
+  <parameter nr=""96"" value=""0"">
+    <description>Type of function mapping 0 = simple, 1 = extended function mapping</description>
+  </parameter>
+  <parameter nr=""97"" value=""8"">
+    <description>ABC braking. The voltage difference for the diode section is approximately the CV value * 0.12 V</description>
+  </parameter>
+  <parameter nr=""98"" value=""30"">
+    <description>Speed in the ABC slow-running section</description>
+  </parameter>
+  <parameter nr=""100"" value=""0"">
+    <description>Function mapping shift. See the text section</description>
+  </parameter>
+  <parameter nr=""101"" value=""7"">
+    <description>Function mapping shift. See the text section</description>
+  </parameter>
+  <parameter nr=""102"" value=""30"">
+    <description>Analogue operation configuration Value / Bit 0/1 00 = max. speed, no control 0 / 01 = max. speed as CV106 1 / 10 = measure transformer voltage and use CV103 and CV104 2* / Bit 2 = 0: controller OFF, = 1: controller ON 4* / Bit 3 = 0: PID controller, = 1: SX controller 8* / Bit 4 = 1: dynamic repetition rate 16*</description>
+  </parameter>
+  <parameter nr=""103"" value=""150"">
+    <description>Analogue: minimum transformer voltage for target speed = 0</description>
+  </parameter>
+  <parameter nr=""104"" value=""180"">
+    <description>Analogue: maximum transformer voltage for target speed = Vmax</description>
+  </parameter>
+  <parameter nr=""105"" value=""30"">
+    <description>Analogue: hysteresis</description>
+  </parameter>
+  <parameter nr=""106"" value=""200"">
+    <description>Analogue: Vmax</description>
+  </parameter>
+  <parameter nr=""107"" value=""0"">
+    <description>Switch off the front lighting</description>
+  </parameter>
+  <parameter nr=""108"" value=""0"">
+    <description>Switch off the rear lighting</description>
+  </parameter>
+  <parameter nr=""109"" value=""0"">
+    <description>Flashing generator, assignment of phase 1 to the outputs / Bit 0-7 -&gt; A0 to A7; bit = 0 -&gt; flashing phase 1 off, bit = 1 -&gt; flashing phase 1 on</description>
+  </parameter>
+  <parameter nr=""110"" value=""0"">
+    <description>Flashing generator, assignment of phase 2 to the outputs / Bit 0-7 -&gt; A0 to A7; bit = 0 -&gt; flashing phase 2 off, bit = 1 -&gt; flashing phase 2 on</description>
+  </parameter>
+  <parameter nr=""111"" value=""5"">
+    <description>Flashing generator, on time in steps of 100 ms</description>
+  </parameter>
+  <parameter nr=""112"" value=""5"">
+    <description>Flashing generator, off time in steps of 100 ms</description>
+  </parameter>
+  <parameter nr=""113"" value=""0"">
+    <description>Switching off the function outputs A1 - A7 when running forwards / Bit 1-7 -&gt; A1 - A7; bit = 0 -&gt; output on, bit = 1 -&gt; output off</description>
+  </parameter>
+  <parameter nr=""114"" value=""0"">
+    <description>Switching off the function outputs A1 - A7 when running backwards / Bit 1-7 -&gt; A1 - A7; bit = 0 -&gt; output on, bit = 1 -&gt; output off</description>
+  </parameter>
+  <parameter nr=""116"" value=""63"">
+    <description>Dimming of the light and function outputs A1 - A7 / 0 = output off, 63 = output 100%</description>
+  </parameter>
+  <parameter nr=""117"" value=""63"">
+    <description>Dimming of the light and function outputs A1 - A7 / 0 = output off, 63 = output 100%</description>
+  </parameter>
+  <parameter nr=""118"" value=""63"">
+    <description>Dimming of the light and function outputs A1 - A7 / 0 = output off, 63 = output 100%</description>
+  </parameter>
+  <parameter nr=""119"" value=""63"">
+    <description>Dimming of the light and function outputs A1 - A7 / 0 = output off, 63 = output 100%</description>
+  </parameter>
+  <parameter nr=""120"" value=""63"">
+    <description>Dimming of the light and function outputs A1 - A7 / 0 = output off, 63 = output 100%</description>
+  </parameter>
+  <parameter nr=""121"" value=""63"">
+    <description>Dimming of the light and function outputs A1 - A7 / 0 = output off, 63 = output 100%</description>
+  </parameter>
+  <parameter nr=""122"" value=""63"">
+    <description>Dimming of the light and function outputs A1 - A7 / 0 = output off, 63 = output 100%</description>
+  </parameter>
+  <parameter nr=""123"" value=""63"">
+    <description>Dimming of the light and function outputs A1 - A7 / 0 = output off, 63 = output 100%</description>
+  </parameter>
+  <parameter nr=""124"" value=""1"">
+    <description>Coupling repetitions for electric couplers on A1 - A7, 0 = no coupler</description>
+  </parameter>
+  <parameter nr=""125"" value=""10"">
+    <description>On time of the coupler, value * 100 ms (with the PWM from CV117 - 123)</description>
+  </parameter>
+  <parameter nr=""126"" value=""20"">
+    <description>Hold time of the coupler, value * 100 ms</description>
+  </parameter>
+  <parameter nr=""127"" value=""10"">
+    <description>Pause time of the coupler, value * 100 ms</description>
+  </parameter>
+  <parameter nr=""128"" value=""30"">
+    <description>Holding PWM</description>
+  </parameter>
+  <parameter nr=""129"" value=""0"">
+    <description>Assignment of the outputs A1 - A7 to electric couplers (0 = no coupler) / Bit 1-7 -&gt; A1 - A7</description>
+  </parameter>
+  <parameter nr=""130"" value=""0"">
+    <description>Dynamic smoke generator control on A1 - A7 Value / 0 = no smoke generator operation 0 / Bit 0-3 -&gt; 1=A1, 2=A2, 3=A3, 4=A4, 5=A5, 6=A6, 7=A7 1-7 1-7 / Bit 4-7 = 1 -&gt; start-up time = value * 200 ms 16- / 240</description>
+  </parameter>
+  <parameter nr=""131"" value=""5"">
+    <description>Dynamic smoke generator control, load threshold</description>
+  </parameter>
+  <parameter nr=""132"" value=""16"">
+    <description>Dynamic smoke generator control, PWM in normal operation</description>
+  </parameter>
+  <parameter nr=""133"" value=""2"">
+    <description>Dynamic smoke generator control, PWM when idling (stationary)</description>
+  </parameter>
+  <parameter nr=""134"" value=""30"">
+    <description>Dynamic smoke generator control, start-up time in steps of 100 ms</description>
+  </parameter>
+  <parameter nr=""135"" value=""0"">
+    <description>Shunting tango (automatic uncoupling run), speed step (0 = off)</description>
+  </parameter>
+  <parameter nr=""136"" value=""10"">
+    <description>Shunting tango, push-up time T1 * 100 ms</description>
+  </parameter>
+  <parameter nr=""137"" value=""10"">
+    <description>Shunting tango, pull-away time T2 * 100 ms</description>
+  </parameter>
+  <parameter nr=""138"" value=""0"">
+    <description>Constant braking distance in cm, speed step threshold / Only above this is braking done with a constant braking distance (0 = off)</description>
+  </parameter>
+  <parameter nr=""139"" value=""50"">
+    <description>Constant braking distance in cm, first braking distance</description>
+  </parameter>
+  <parameter nr=""140"" value=""25"">
+    <description>Constant braking distance in cm, alternative braking distance (activated by the cross bit)</description>
+  </parameter>
+  <parameter nr=""141"" value=""40"">
+    <description>Constant braking distance in cm, maximum speed of the model loco in cm/s</description>
+  </parameter>
+  <parameter nr=""142"" value=""0"">
+    <description>Constant braking distance in cm, remainder of the determined maximum speed</description>
+  </parameter>
+  <parameter nr=""143"" value=""0"">
+    <description>Constant braking distance in cm, activation by (0 = off): / Bit 0 = 1 -&gt; target speed step = 0 / Bit 1 = 1 -&gt; ABC braking / Bit 2 = 1 -&gt; DC braking / Bit 3 = 1 -&gt; DCC brake signal</description>
+  </parameter>
+  <parameter nr=""144"" value=""12"">
+    <description>Acceleration delay 2 (as a replacement for CV3)</description>
+  </parameter>
+  <parameter nr=""145"" value=""12"">
+    <description>Braking delay 2 (as a replacement for CV4)</description>
+  </parameter>
+  <parameter nr=""146"" value=""24"">
+    <description>Acceleration delay 3 (as a replacement for CV3)</description>
+  </parameter>
+  <parameter nr=""147"" value=""24"">
+    <description>Braking delay 3 (as a replacement for CV4)</description>
+  </parameter>
+  <parameter nr=""148"" value=""255"">
+    <description>Function key number for ABV 2 (255 = off)</description>
+  </parameter>
+  <parameter nr=""149"" value=""255"">
+    <description>Function key number for ABV 3 (255 = off)</description>
+  </parameter>
+  <parameter nr=""150"" value=""10"">
+    <description>Second dimming of the light and function outputs A1 - A7. 0 = off, 63 = 100%</description>
+  </parameter>
+  <parameter nr=""151"" value=""10"">
+    <description>Second dimming of the light and function outputs A1 - A7. 0 = off, 63 = 100%</description>
+  </parameter>
+  <parameter nr=""152"" value=""10"">
+    <description>Second dimming of the light and function outputs A1 - A7. 0 = off, 63 = 100%</description>
+  </parameter>
+  <parameter nr=""153"" value=""10"">
+    <description>Second dimming of the light and function outputs A1 - A7. 0 = off, 63 = 100%</description>
+  </parameter>
+  <parameter nr=""154"" value=""10"">
+    <description>Second dimming of the light and function outputs A1 - A7. 0 = off, 63 = 100%</description>
+  </parameter>
+  <parameter nr=""155"" value=""10"">
+    <description>Second dimming of the light and function outputs A1 - A7. 0 = off, 63 = 100%</description>
+  </parameter>
+  <parameter nr=""156"" value=""10"">
+    <description>Second dimming of the light and function outputs A1 - A7. 0 = off, 63 = 100%</description>
+  </parameter>
+  <parameter nr=""157"" value=""10"">
+    <description>Second dimming of the light and function outputs A1 - A7. 0 = off, 63 = 100%</description>
+  </parameter>
+  <parameter nr=""159"" value=""0"">
+    <description>Marking of the functions F22 - F28 for transfer to SUSI / Bit 0-6; bit = 1 --&gt; F22 - F28 is passed on to SUSI</description>
+  </parameter>
+  <parameter nr=""160"" value=""20"">
+    <description>Servo control, servo 1 position 1 (function key off)</description>
+  </parameter>
+  <parameter nr=""161"" value=""200"">
+    <description>Servo control, servo 1 position 2 (function key on)</description>
+  </parameter>
+  <parameter nr=""162"" value=""30"">
+    <description>Servo control, servo 1 travel time in steps of 100 ms</description>
+  </parameter>
+  <parameter nr=""163"" value=""20"">
+    <description>Servo control, servo 2 position 1 (function key off)</description>
+  </parameter>
+  <parameter nr=""164"" value=""200"">
+    <description>Servo control, servo 2 position 2 (function key on)</description>
+  </parameter>
+  <parameter nr=""165"" value=""30"">
+    <description>Servo control, servo 2 travel time in steps of 100 ms</description>
+  </parameter>
+  <parameter nr=""166"" value=""9"">
+    <description>Function key number for servo 1</description>
+  </parameter>
+  <parameter nr=""167"" value=""10"">
+    <description>Function key number for servo 2</description>
+  </parameter>
+  <parameter nr=""168"" value=""0"">
+    <description>Servo 1: output value from the extended function mapping</description>
+  </parameter>
+  <parameter nr=""169"" value=""0"">
+    <description>Servo 2: output value from the extended function mapping</description>
+  </parameter>
+  <parameter nr=""170"" value=""0"">
+    <description>Assignment of the PWM curve for the light output, A1 - A7 / Curve 1 - 8, bit 7 = 1 -&gt; curve only active if the CROSS output bit is set</description>
+  </parameter>
+  <parameter nr=""171"" value=""0"">
+    <description>Assignment of the PWM curve for the light output, A1 - A7 / Curve 1 - 8, bit 7 = 1 -&gt; curve only active if the CROSS output bit is set</description>
+  </parameter>
+  <parameter nr=""172"" value=""0"">
+    <description>Assignment of the PWM curve for the light output, A1 - A7 / Curve 1 - 8, bit 7 = 1 -&gt; curve only active if the CROSS output bit is set</description>
+  </parameter>
+  <parameter nr=""173"" value=""0"">
+    <description>Assignment of the PWM curve for the light output, A1 - A7 / Curve 1 - 8, bit 7 = 1 -&gt; curve only active if the CROSS output bit is set</description>
+  </parameter>
+  <parameter nr=""174"" value=""0"">
+    <description>Assignment of the PWM curve for the light output, A1 - A7 / Curve 1 - 8, bit 7 = 1 -&gt; curve only active if the CROSS output bit is set</description>
+  </parameter>
+  <parameter nr=""175"" value=""0"">
+    <description>Assignment of the PWM curve for the light output, A1 - A7 / Curve 1 - 8, bit 7 = 1 -&gt; curve only active if the CROSS output bit is set</description>
+  </parameter>
+  <parameter nr=""176"" value=""0"">
+    <description>Assignment of the PWM curve for the light output, A1 - A7 / Curve 1 - 8, bit 7 = 1 -&gt; curve only active if the CROSS output bit is set</description>
+  </parameter>
+  <parameter nr=""177"" value=""0"">
+    <description>Assignment of the PWM curve for the light output, A1 - A7 / Curve 1 - 8, bit 7 = 1 -&gt; curve only active if the CROSS output bit is set</description>
+  </parameter>
+  <parameter nr=""178"" value=""15"">
+    <description>PWM curve, period of the playback (value * 64 ms)</description>
+  </parameter>
+  <parameter nr=""179"" value=""0"">
+    <description>PWM curve, phase position of the outputs / Bit 0-7 = 0 A0h - A7 -&gt; phase position 0° / Bit 0-7 = 1 A0h - A7 -&gt; phase position 180°</description>
+  </parameter>
+  <parameter nr=""180"" value=""0"">
+    <description>PWM curve, hold time after the CROSS output bit goes off (value * 0.1 s)</description>
+  </parameter>
+  <parameter nr=""181"" value=""0"">
+    <description>Firebox flicker of the light and function outputs A1 - A7 / Bit 0-7 -&gt; A0 - A7; bit = 0 -&gt; flicker off, bit = 1 -&gt; flicker on</description>
+  </parameter>
+  <parameter nr=""182"" value=""0"">
+    <description>Firebox flicker, flicker settings / Bit 0-3 -&gt; change the flicker rhythm (value range 1 to 15) / Bit 4-6 -&gt; change the brightness (value range 16, 32, 48, 64, 80, 96, 112) / Bit 7 = 1 -&gt; output always bright (can be combined with bits 4-6)</description>
+  </parameter>
+  <parameter nr=""183"" value=""0"">
+    <description>Energy-saving lamp effect of the light and function outputs A1 - A7 / Bit 0-7 -&gt; A0 - A7; bit = 0 -&gt; effect off, bit = 1 -&gt; effect on</description>
+  </parameter>
+  <parameter nr=""184"" value=""10"">
+    <description>Energy-saving lamp effect, basic brightness</description>
+  </parameter>
+  <parameter nr=""185"" value=""100"">
+    <description>Energy-saving lamp effect, time until maximum brightness is reached (value * 5 ms)</description>
+  </parameter>
+  <parameter nr=""186"" value=""0"">
+    <description>Fading the light and function outputs A1 - A7 in and out / Bit 0-7 -&gt; A0 - A7; bit = 0 -&gt; fade function off, bit = 1 -&gt; fade function on</description>
+  </parameter>
+  <parameter nr=""187"" value=""30"">
+    <description>Fading in and out, fade time (value * 10 ms)</description>
+  </parameter>
+  <parameter nr=""188"" value=""0"">
+    <description>Fluorescent tube switch-on effect of the light and function outputs A1 - A7 / Bit 0-7 -&gt; A0 - A7; bit = 0 -&gt; effect off, bit = 1 -&gt; effect on</description>
+  </parameter>
+  <parameter nr=""189"" value=""20"">
+    <description>Fluorescent tube switch-on effect, flash time (value * 0.005 s)</description>
+  </parameter>
+  <parameter nr=""190"" value=""20"">
+    <description>Fluorescent tube switch-on effect, maximum number of flashes</description>
+  </parameter>
+  <parameter nr=""191"" value=""11"">
+    <description>A8 function key assignment (simple function mapping)</description>
+  </parameter>
+  <parameter nr=""192"" value=""12"">
+    <description>A9 function key assignment (simple function mapping)</description>
+  </parameter>
+  <parameter nr=""193"" value=""13"">
+    <description>A10 function key assignment (simple function mapping)</description>
+  </parameter>
+  <parameter nr=""194"" value=""14"">
+    <description>A11 function key assignment (simple function mapping)</description>
+  </parameter>
+  <parameter nr=""200"" value=""10"">
+    <description>Motor control, speed-dependent period / Minimum speed step up to which the period is set to CV53</description>
+  </parameter>
+  <parameter nr=""201"" value=""150"">
+    <description>Maximum speed step from which the period is set to CV202</description>
+  </parameter>
+  <parameter nr=""202"" value=""250"">
+    <description>Maximum period in steps of 100 µs (1/10,000 s) (min = CV53)</description>
+  </parameter>
+  <parameter nr=""208"" value=""3"">
+    <description>Energy storage: start-up time until charging begins, in steps of seconds</description>
+  </parameter>
+  <parameter nr=""209"" value=""20"">
+    <description>Energy storage: maximum supply time in steps of 100 ms (0.1 s)</description>
+  </parameter>
+  <parameter nr=""210"" value=""20"">
+    <description>Servo control, servo 3 position 1 (function key off)</description>
+  </parameter>
+  <parameter nr=""211"" value=""200"">
+    <description>Servo control, servo 3 position 2 (function key on)</description>
+  </parameter>
+  <parameter nr=""212"" value=""30"">
+    <description>Servo control, servo 3 travel time in steps of 100 ms (0.1 s)</description>
+  </parameter>
+  <parameter nr=""213"" value=""20"">
+    <description>Servo control, servo 4 position 1 (function key off)</description>
+  </parameter>
+  <parameter nr=""214"" value=""200"">
+    <description>Servo control, servo 4 position 2 (function key on)</description>
+  </parameter>
+  <parameter nr=""215"" value=""30"">
+    <description>Servo control, servo 4 travel time in steps of 100 ms (0.1 s)</description>
+  </parameter>
+  <parameter nr=""216"" value=""27"">
+    <description>Function key number for servo 3</description>
+  </parameter>
+  <parameter nr=""217"" value=""18"">
+    <description>Function key number for servo 4</description>
+  </parameter>
+  <parameter nr=""218"" value=""0"">
+    <description>Servo 3: output value from the extended function mapping</description>
+  </parameter>
+  <parameter nr=""219"" value=""0"">
+    <description>Servo 4: output value from the extended function mapping</description>
+  </parameter>
+</configuration>"

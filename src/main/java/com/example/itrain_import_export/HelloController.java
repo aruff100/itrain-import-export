@@ -1,59 +1,35 @@
 package com.example.itrain_import_export;
 
+import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.stage.FileChooser;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
- * Verdrahtet das Hauptfenster: Menüzeile, Ribbon-Werkzeugleiste (Symbole für
- * Öffnen/Speichern/Voreinstellungen), Dateiname-Zeile sowie den Aufbau je
- * eines Reiters pro control-items-Kategorie (siehe {@link CategoryEditor}).
+ * Verdrahtet das Hauptfenster "Import/Export": Menüzeile, Ribbon-Werkzeugleiste,
+ * Dateiname-Zeile und die Reiter je control-items-Kategorie. Die eigentliche
+ * Dokumentlogik (Öffnen, Speichern, Backup, Rückgängig/Wiederholen,
+ * Reiteraufbau, Statuszeile) steckt seit dem Umbau auf drei Fenster in
+ * {@link DocumentSession} und wird vom Decoder-Fenster mitbenutzt - hier
+ * bleibt nur, was das Hauptfenster von den anderen unterscheidet.
+ * <p>
  * Alle sichtbaren Texte kommen aus {@link I18n}; bei Sprachwechsel wird die
  * komplette Oberfläche neu aufgebaut ({@link #applyLanguage()}).
- * <p>
- * Es werden immer alle bekannten Kategorien als Reiter angezeigt (siehe
- * {@link TcdDocument#TAB_DISPLAY_ORDER}), auch wenn die geladene Datei sie
- * nicht enthält - der Reiter bleibt dann einfach leer. Das zugehörige
- * XML-Element wird erst angelegt, sobald tatsächlich ein Eintrag hinzugefügt
- * oder importiert wird (siehe {@link CategoryEditor#ensureCategoryNode()}),
- * damit niemals leere Kategorien in eine Datei geschrieben werden, die sie
- * vorher nicht hatte.
  */
-public class HelloController {
-
-    /**
-     * Trennung der drei Angaben in der Statuszeile (Einträge / Ausgewählt /
-     * Verbundene Datensätze): breiter Abstand, senkrechter Strich, breiter
-     * Abstand.
-     */
-    private static final String STATUS_SEPARATOR = "      |      ";
+public class HelloController implements DocumentSession.Host {
 
     @FXML
     private TabPane tabPane;
@@ -72,6 +48,12 @@ public class HelloController {
 
     @FXML
     private MenuItem saveMenuItem;
+
+    @FXML
+    private MenuItem closeFileMenuItem;
+
+    @FXML
+    private MenuItem exitMenuItem;
 
     /**
      * Eigenständiges Untermenü "Zuletzt verwendet..." - Inhalt (bis zu 5
@@ -101,17 +83,31 @@ public class HelloController {
     @FXML
     private MenuItem centerWindowsMenuItem;
 
+    /** Seit 2.5: dieselben Aktionen wie die pastellfarbenen Ribbon-Knöpfe, siehe {@link #updateRibbonState()}. */
+    @FXML
+    private MenuItem editExportSelectedMenuItem;
+
+    @FXML
+    private MenuItem editImportCategoryMenuItem;
+
     @FXML
     private Menu settingsMenu;
 
     @FXML
     private MenuItem preferencesMenuItem;
 
+    /**
+     * Seit 2.5: führt zu den beiden anderen Programmteilen, mit derselben
+     * Öffnen-oder-nach-vorn-Wirkung wie die gleichnamigen Ribbon-Knöpfe.
+     */
     @FXML
-    private MenuItem decoderInstallMenuItem;
+    private Menu functionsMenu;
 
     @FXML
-    private MenuItem decoderTemplatesMenuItem;
+    private MenuItem functionsDecoderMenuItem;
+
+    @FXML
+    private MenuItem functionsSystemsMenuItem;
 
     @FXML
     private Menu helpMenu;
@@ -147,8 +143,8 @@ public class HelloController {
     private Button preferencesToolButton;
 
     /**
-     * Die vier Import-/Export-Schaltflächen im Ribbon. Sie standen früher in
-     * der Werkzeugleiste jedes Kategorie-Reiters; seit 01.08.2026 liegen sie
+     * Die Import-/Export-Schaltflächen im Ribbon. Sie standen früher in der
+     * Werkzeugleiste jedes Kategorie-Reiters; seit 01.08.2026 liegen sie
      * zentral im Ribbon (durch einen Trennstrich von den übrigen Symbolen
      * abgesetzt) und wirken auf den gerade sichtbaren Reiter. Ihr Zustand
      * wird bei jedem Reiterwechsel nachgeführt, siehe
@@ -160,14 +156,24 @@ public class HelloController {
     @FXML
     private Button importCategoryToolButton;
 
+    /**
+     * Die beiden Knöpfe rechts im Ribbon, abgesetzt durch einen breiten
+     * Trennstrich: Sie öffnen die Zusatzfenster "Decoder" und "Systeme"
+     * (seit 2.5). Bis 2.0.1 standen an dieser Stelle die drei Decoder-Knöpfe;
+     * die liegen jetzt im Ribbon des Decoder-Fensters.
+     */
     @FXML
-    private Button decoderExportToolButton;
+    private Button decoderWindowButton;
 
     @FXML
-    private Button decoderImportToolButton;
+    private Button systemsWindowButton;
+
+    /** Mitte des Fensters: Reiter und darüber das Startbild (siehe {@link #initStartImage()}). */
+    @FXML
+    private StackPane centerPane;
 
     @FXML
-    private Button decoderCaptureToolButton;
+    private ImageView startImage;
 
     // Die Adresse des Handbuchs stand hier früher fest im Quelltext. Sie
     // kommt jetzt zur Laufzeit aus dem Update-Manifest (siehe UpdateChecker)
@@ -178,59 +184,92 @@ public class HelloController {
     // in STATUS.md. An der Verteilung ändert sich dadurch nichts.
 
     /**
-     * Pastellfarben der vier Schaltflächen (auf Wunsch des Nutzers). Die
+     * Pastellfarben der Schaltflächen (auf Wunsch des Nutzers). Die
      * Schriftfarbe wird bewusst mitgesetzt: sonst wäre der Text im dunklen
      * Farbschema hell auf hellem Grund und damit unlesbar.
      */
-    private static final String STYLE_EXPORT_SELECTED =
+    static final String STYLE_EXPORT_SELECTED =
             "-fx-background-color: #c8e6c9; -fx-text-fill: #2b2b2b;";
-    private static final String STYLE_IMPORT_CATEGORY =
+    static final String STYLE_IMPORT_CATEGORY =
             "-fx-background-color: #f8d3dd; -fx-text-fill: #2b2b2b;";
-    private static final String STYLE_DECODER_EXPORT =
+    static final String STYLE_DECODER_EXPORT =
             "-fx-background-color: #cfe2f7; -fx-text-fill: #2b2b2b;";
-    private static final String STYLE_DECODER_IMPORT =
+    static final String STYLE_DECODER_IMPORT =
             "-fx-background-color: #ded3f0; -fx-text-fill: #2b2b2b;";
     /** Blassgelb für "Decoder erfassen" - hebt sich von den vier übrigen ab. */
-    private static final String STYLE_DECODER_CAPTURE =
+    static final String STYLE_DECODER_CAPTURE =
             "-fx-background-color: #faeec2; -fx-text-fill: #2b2b2b;";
+    // Die beiden Fensterknöpfe "Decoder" und "Systeme" bekommen bewusst KEINE
+    // Pastellfarbe: Sie führen keine Funktion aus, sondern öffnen ein
+    // Zusatzfenster, und sollen deshalb wie gewöhnliche Knöpfe aussehen.
+
+    /**
+     * Anteil der kleineren Fensterkante, den das Startbild einnimmt. Das
+     * Bild wächst und schrumpft mit dem Fenster; das Seitenverhältnis bleibt
+     * erhalten (preserveRatio im FXML).
+     */
+    private static final double START_IMAGE_SHARE = 0.6;
 
     private final I18n i18n = I18n.getInstance();
-    private TcdDocument document;
-    private final Map<Tab, CategoryEditor> editorsByTab = new HashMap<>();
 
-    /** Maximale Anzahl gespeicherter Rückgängig-Schritte (siehe {@link #recordUndoSnapshot()}). */
-    private static final int MAX_UNDO_STEPS = 50;
-    /**
-     * Rückgängig-/Wiederholen-Verlauf: jeder Eintrag ist eine tiefe Kopie
-     * aller Kategorie-Knoten unter control-items zu einem bestimmten
-     * Zeitpunkt. {@link #recordUndoSnapshot()} wird von jedem
-     * {@link CategoryEditor} VOR jeder tatsächlichen Änderung aufgerufen
-     * (Konstruktor-Parameter {@code beforeChange}) und sichert damit den
-     * Stand unmittelbar davor.
-     */
-    private final Deque<List<XmlNode>> undoStack = new ArrayDeque<>();
-    private final Deque<List<XmlNode>> redoStack = new ArrayDeque<>();
+    /** Dokument, Reiter, Rückgängig-Verlauf - siehe {@link DocumentSession}. */
+    private DocumentSession session;
 
     /**
-     * Zählt CSV-Importe innerhalb der aktuellen Sitzung (solange dieselbe
-     * Datei geöffnet bleibt) - liefert an {@link CategoryEditor} die Nummer
-     * für die zusätzliche "~1"/"~2"/...-Durchnummerierung bereits
-     * verknüpfter Einträge (siehe
-     * {@code CategoryEditor.renameLinkedEntriesForThisImport}), damit
-     * mehrere Importe in derselben Sitzung nicht kollidieren. 0 beim ersten
-     * Import (bleibt bei reinem "~"), wird beim Öffnen einer neuen Datei
-     * zurückgesetzt - überlebt aber (anders als der Undo-Verlauf) bewusst
-     * jeden {@code rebuildTabs()}, da dieses Feld hier in HelloController
-     * liegt, nicht im (dabei neu angelegten) CategoryEditor selbst.
+     * Fenster und Sitzung des Hauptfensters "Import/Export" - gesetzt von
+     * {@link HelloApplication#start} über {@link #registerMainWindow(Stage)},
+     * sobald die Bühne steht (bei {@code initialize()} gibt es noch keine).
+     * Das Decoder- und das Systeme-Fenster kennen ihr eigenes Fenster nur als
+     * Singleton (siehe deren {@code open}-Feld); für ihr Menü "Funktionen" →
+     * "Import/Export" brauchen sie dagegen einen Weg zurück zum Hauptfenster,
+     * das selbst kein solches Singleton-Muster hat - dafür sind diese beiden
+     * statischen Felder da.
      */
-    private int importCounter = 0;
+    private static Stage mainStage;
+    private static DocumentSession mainSession;
 
-    private int nextImportSuffix() {
-        return importCounter++;
+    /** Von {@link HelloApplication#start} aufgerufen, sobald die Bühne feststeht. */
+    void registerMainWindow(Stage stage) {
+        mainStage = stage;
+        mainSession = session;
+    }
+
+    /** Für das Menü "Funktionen" der Decoder- und Systeme-Fenster. */
+    static Stage getMainStage() {
+        return mainStage;
+    }
+
+    /** Für das Menü "Funktionen" → "Decoder" des Systeme-Fensters (Nebensitzung, siehe {@link DocumentSession#attachTo}). */
+    static DocumentSession getMainSession() {
+        return mainSession;
+    }
+
+    /**
+     * Holt das Hauptfenster in den Vordergrund (auch aus dem Symbol-Zustand)
+     * - das Gegenstück zu {@code DecoderWindow.show}/{@code SystemsWindow.show}
+     * für das Hauptfenster, das selbst kein Singleton-Öffnen kennt, weil es
+     * immer existiert, solange das Programm läuft.
+     */
+    static void focusMainWindow() {
+        if (mainStage == null) {
+            return;
+        }
+        if (mainStage.isIconified()) {
+            mainStage.setIconified(false);
+        }
+        if (!mainStage.isShowing()) {
+            mainStage.show();
+        }
+        mainStage.toFront();
+        mainStage.requestFocus();
     }
 
     @FXML
     private void initialize() {
+        // Hauptfenster: alle Kategorien (null = TAB_DISPLAY_ORDER plus
+        // unbekannte Kategorien aus der Datei).
+        session = new DocumentSession(tabPane, null, this);
+
         openMenuItem.setGraphic(loadIcon("icons/open-icon.png", 16));
         saveMenuItem.setGraphic(loadIcon("icons/save-icon.png", 16));
         // Gleiches Öffnen-Symbol wie bei "Öffnen..." - das Untermenü
@@ -249,24 +288,45 @@ public class HelloController {
 
         exportSelectedToolButton.setStyle(STYLE_EXPORT_SELECTED);
         importCategoryToolButton.setStyle(STYLE_IMPORT_CATEGORY);
-        decoderExportToolButton.setStyle(STYLE_DECODER_EXPORT);
-        decoderImportToolButton.setStyle(STYLE_DECODER_IMPORT);
-        decoderCaptureToolButton.setStyle(STYLE_DECODER_CAPTURE);
 
-        // Nur einmal registrieren (nicht in rebuildTabs(), das bei jedem
-        // Dateiöffnen/Sprachwechsel erneut läuft) - sonst würde sich bei
-        // jedem Aufruf ein weiterer Listener anhäufen.
-        tabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
-            updateStatusForSelectedTab();
-            updateRibbonState();
-        });
+        initStartImage();
+
         i18n.addLanguageChangeListener(this::applyLanguage);
         applyLanguage();
-        updateUndoRedoState();
+        undoRedoStateChanged(false, false);
         updateRibbonState();
     }
 
-    private static ImageView loadIcon(String resourcePath, int size) {
+    /**
+     * Startbild: das Programmsymbol (die Dampflok) mittig in der leeren
+     * Fenstermitte, solange keine Datei geladen ist. Die Größe ist an das
+     * Fenster gebunden ({@value #START_IMAGE_SHARE} der kleineren Kante), das
+     * Bild skaliert also beim Ziehen des Fensters mit. Sobald eine Datei
+     * geladen wird, verschwindet es ({@link #documentChanged(boolean)}).
+     * <p>
+     * Quelle ist dieselbe app-icon.png wie für Fenster- und Taskleisten-
+     * symbol - bewusst keine zweite Grafik, die getrennt gepflegt werden
+     * müsste.
+     */
+    private void initStartImage() {
+        try (InputStream in = HelloController.class.getResourceAsStream("app-icon.png")) {
+            if (in == null) {
+                startImage.setVisible(false);
+                return;
+            }
+            startImage.setImage(new Image(in));
+        } catch (Exception ex) {
+            startImage.setVisible(false);
+            return;
+        }
+        startImage.fitWidthProperty().bind(
+                Bindings.min(centerPane.widthProperty(), centerPane.heightProperty())
+                        .multiply(START_IMAGE_SHARE));
+        startImage.fitHeightProperty().bind(startImage.fitWidthProperty());
+        startImage.setVisible(!session.hasDocument());
+    }
+
+    static ImageView loadIcon(String resourcePath, int size) {
         try (InputStream in = HelloController.class.getResourceAsStream(resourcePath)) {
             if (in == null) {
                 return null;
@@ -285,6 +345,8 @@ public class HelloController {
         fileMenu.setText(i18n.t("menu.file"));
         openMenuItem.setText(i18n.t("menu.open"));
         saveMenuItem.setText(i18n.t("menu.saveAs"));
+        closeFileMenuItem.setText(i18n.t("menu.closeFile"));
+        exitMenuItem.setText(i18n.t("menu.exit"));
         recentFilesMenu.setText(i18n.t("menu.recentFiles"));
         loadBackupMenuItem.setText(i18n.t("menu.loadBackup"));
         exportFilesMenuItem.setText(i18n.t("menu.exportFiles"));
@@ -293,10 +355,13 @@ public class HelloController {
         undoMenuItem.setText(i18n.t("menu.undo"));
         redoMenuItem.setText(i18n.t("menu.redo"));
         centerWindowsMenuItem.setText(i18n.t("menu.centerWindows"));
+        editExportSelectedMenuItem.setText(i18n.t("editor.exportSelected"));
+        editImportCategoryMenuItem.setText(i18n.t("editor.import"));
         settingsMenu.setText(i18n.t("menu.settingsMenu"));
         preferencesMenuItem.setText(i18n.t("menu.preferences"));
-        decoderInstallMenuItem.setText(i18n.t("menu.decoderInstall"));
-        decoderTemplatesMenuItem.setText(i18n.t("menu.decoderTemplates"));
+        functionsMenu.setText(i18n.t("menu.functions"));
+        functionsDecoderMenuItem.setText(i18n.t("menu.programPart", i18n.t("window.decoder")));
+        functionsSystemsMenuItem.setText(i18n.t("menu.programPart", i18n.t("window.systems")));
         helpMenu.setText(i18n.t("menu.help"));
         helpMenuItem.setText(i18n.t("menu.helpItem"));
         manualMenuItem.setText(i18n.t("menu.manual"));
@@ -309,169 +374,117 @@ public class HelloController {
         redoToolButton.setTooltip(new Tooltip(i18n.t("menu.redo")));
         preferencesToolButton.setTooltip(new Tooltip(i18n.t("menu.preferences")));
 
-        // Die vier Import-/Export-Schaltflächen tragen ihren vollen Text
-        // (kein Symbol), damit ohne Erklärung klar ist, was sie tun.
+        // Die Import-/Export-Schaltflächen tragen ihren vollen Text (kein
+        // Symbol), damit ohne Erklärung klar ist, was sie tun.
         exportSelectedToolButton.setText(i18n.t("editor.exportSelected"));
         importCategoryToolButton.setText(i18n.t("editor.import"));
-        decoderExportToolButton.setText(i18n.t("editor.decoderExport"));
-        decoderImportToolButton.setText(i18n.t("editor.decoderImport"));
-        decoderCaptureToolButton.setText(i18n.t("menu.decoderCapture"));
+        decoderWindowButton.setText(i18n.t("window.decoder"));
+        decoderWindowButton.setTooltip(new Tooltip(i18n.t("window.decoderTooltip")));
+        systemsWindowButton.setText(i18n.t("window.systems"));
+        systemsWindowButton.setTooltip(new Tooltip(i18n.t("window.systemsTooltip")));
 
-        if (document == null) {
+        if (!session.hasDocument()) {
             fileNameLabel.setText(i18n.t("status.noFileLoaded"));
             statusLabel.setText("");
         }
-        rebuildTabs();
+        session.rebuildTabs();
     }
+
+    private Stage stageOf() {
+        return (Stage) tabPane.getScene().getWindow();
+    }
+
+    // ------------------------------------------------------------------
+    // DocumentSession.Host
+    // ------------------------------------------------------------------
+
+    @Override
+    public Stage stage() {
+        return stageOf();
+    }
+
+    @Override
+    public void showFileName(String text) {
+        fileNameLabel.setText(text);
+    }
+
+    @Override
+    public void showStatus(String text) {
+        statusLabel.setText(text);
+    }
+
+    @Override
+    public void undoRedoStateChanged(boolean canUndo, boolean canRedo) {
+        undoMenuItem.setDisable(!canUndo);
+        redoMenuItem.setDisable(!canRedo);
+        undoToolButton.setDisable(!canUndo);
+        redoToolButton.setDisable(!canRedo);
+    }
+
+    @Override
+    public void selectionChanged() {
+        updateRibbonState();
+    }
+
+    @Override
+    public void recentFilesChanged() {
+        refreshRecentFilesMenu();
+    }
+
+    @Override
+    public void documentChanged(boolean loaded) {
+        startImage.setVisible(!loaded);
+    }
+
+    // ------------------------------------------------------------------
+    // Menü Datei
+    // ------------------------------------------------------------------
 
     @FXML
     private void onOpenFile() {
-        FileChooser chooser = new FileChooser();
-        chooser.setTitle(i18n.t("dialog.openTitle"));
-        chooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("iTrain (*.tcd, *.tcdz)", "*.tcd", "*.tcdz"),
-                new FileChooser.ExtensionFilter("iTrain XML (*.tcd)", "*.tcd"),
-                new FileChooser.ExtensionFilter("iTrain ZIP (*.tcdz)", "*.tcdz"),
-                new FileChooser.ExtensionFilter("*.*", "*.*"));
-        applyDefaultTcdDirectory(chooser);
-
-        Stage stage = (Stage) tabPane.getScene().getWindow();
-        File file = chooser.showOpenDialog(stage);
-        if (file == null) {
-            return;
-        }
-        openFile(file, true);
+        session.openFileDialog();
     }
 
-    /**
-     * Menüpunkt "Backup laden...": öffnet einen normalen Datei-Dialog, der
-     * aber im Backup-Ordner (Einstellungen → Pfade) startet - Backup-Dateien
-     * heißen {@code <original>.<N>.bak} und tragen
-     * deshalb nie die Endung .tcd/.tcdz, tauchen im normalen
-     * "Öffnen"-Dialog also nicht auf. Die gewählte Datei wird danach ganz
-     * normal in die Ansicht geladen (siehe {@link #openFile}); ob es sich
-     * dabei um ein ursprüngliches .tcd oder .tcdz handelte, wird beim Laden
-     * anhand der Datei selbst erkannt (siehe {@link TcdDocument}), nicht
-     * anhand der .bak-Endung.
-     */
     @FXML
     private void onLoadBackup() {
-        FileChooser chooser = new FileChooser();
-        chooser.setTitle(i18n.t("menu.loadBackup"));
-        chooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Backup (*.bak)", "*.bak"),
-                new FileChooser.ExtensionFilter("*.*", "*.*"));
-        String backupDir = AppSettings.getInstance().getBackupDirectory();
-        if (backupDir != null && new File(backupDir).isDirectory()) {
-            chooser.setInitialDirectory(new File(backupDir));
-        }
-
-        Stage stage = (Stage) tabPane.getScene().getWindow();
-        File file = chooser.showOpenDialog(stage);
-        if (file == null) {
-            return;
-        }
-        // Bewusst NICHT zu "Zuletzt verwendet" hinzufügen - Backup-Dateinamen
-        // sind wenig aussagekräftig und würden die Liste nur unnötig
-        // zumüllen; für Backups gibt es ja bereits diesen eigenen Eintrag.
-        openFile(file, false);
+        session.loadBackupDialog();
     }
 
-    /**
-     * Menüpunkt "Export Dateien": der Export-Ordner enthält
-     * KEINE vollständigen .tcd/.tcdz-Dateien, sondern CSV-Exporte einzelner
-     * Einträge (siehe "Markierte exportieren"/"Importieren" je Kategorie-
-     * Reiter) - eine CSV-Datei lässt sich nicht wie ein normales Dokument
-     * laden (kein XML), sondern muss in ein bereits geöffnetes Dokument
-     * IMPORTIERT werden. Dieser Menüpunkt ist deshalb nur eine schnellere
-     * Zugriffsmöglichkeit auf genau denselben Import, den es je Reiter über
-     * den Button "Importieren" schon gibt (inkl. Start im Export-Ordner) -
-     * ohne dass man erst zu einem bestimmten Reiter wechseln muss, da jede
-     * CSV-Zeile ohnehin anhand ihrer eigenen Kategorie-Spalte einsortiert
-     * wird (siehe {@link CategoryEditor#triggerImport()}).
-     */
     @FXML
     private void onOpenExportFiles() {
-        if (document == null) {
-            new Alert(Alert.AlertType.INFORMATION, i18n.t("error.pleaseOpenFirst")).showAndWait();
-            return;
-        }
-        CategoryEditor editor = editorsByTab.get(tabPane.getSelectionModel().getSelectedItem());
-        if (editor == null) {
-            editor = editorsByTab.values().stream().findFirst().orElse(null);
-        }
-        if (editor != null) {
-            editor.triggerImport();
-        }
+        session.importIntoAnyEditor();
+    }
+
+    @FXML
+    private void onSaveAs() {
+        session.saveAsDialog();
+    }
+
+    /** "Aktuelle schließen": Datei verwerfen, Programm bleibt offen. */
+    @FXML
+    private void onCloseFile() {
+        session.closeDocument();
     }
 
     /**
-     * Wird von einem Eintrag in "Zuletzt verwendet..." aufgerufen. Existiert
-     * die Datei nicht mehr (verschoben/gelöscht), wird gewarnt und der
-     * Eintrag aus der Liste entfernt, statt einen unklaren Ladefehler zu
-     * zeigen.
+     * "Programm beenden": löst dieselbe Schließanfrage aus wie das X des
+     * Hauptfensters, damit HelloApplication seinen OnCloseRequest-Handler
+     * durchläuft (Backup aufräumen, Zusatzfenster mitschließen) - und
+     * schließt dann das Hauptfenster; mit dem letzten Fenster endet JavaFX.
      */
-    private void openRecentFile(String path) {
-        File file = new File(path);
-        if (!file.isFile()) {
-            new Alert(Alert.AlertType.WARNING, i18n.t("error.recentFileMissing", path)).showAndWait();
-            AppSettings.getInstance().removeRecentFile(path);
-            refreshRecentFilesMenu();
-            return;
-        }
-        openFile(file, true);
-    }
-
-    /**
-     * Gemeinsame Lade-Logik für "Öffnen...", "Zuletzt verwendet...",
-     * "Backup laden..." und "Export Dateien" - lädt {@code file} exakt
-     * gleich in die Ansicht, unabhängig davon, über welchen Menüpunkt die
-     * Datei gewählt wurde. {@code addToRecent} steuert, ob die Datei danach
-     * in "Zuletzt verwendet..." aufgenommen wird (bei Backup/Export-Dateien
-     * bewusst nicht, siehe {@link #onLoadBackup()}/{@link #onOpenExportFiles()}).
-     */
-    private void openFile(File file, boolean addToRecent) {
-        File backup = createBackup(file);
-
-        try {
-            TcdDocument newDocument = TcdDocument.load(file);
-            newDocument.setBackupFile(backup);
-            // Erst jetzt, nach erfolgreichem Laden, das Backup der bisher
-            // offenen Datei aufräumen (falls unbenutzt) und sie tatsächlich
-            // ersetzen - schlägt das Laden fehl, bleibt die bisherige Datei
-            // inkl. ihres Backups unangetastet geöffnet.
-            cleanupUnusedBackup(document);
-            document = newDocument;
-            // Rückgängig-Verlauf gehört zum bisherigen Dokument - mit einer
-            // neuen Datei ergibt er keinen Sinn mehr.
-            undoStack.clear();
-            redoStack.clear();
-            // Neue Datei = neue Sitzung für die Import-Nummerierung (siehe
-            // nextImportSuffix()).
-            importCounter = 0;
-            rebuildTabs();
-            fileNameLabel.setText(file.getName());
-            statusLabel.setText(i18n.t("status.fileLoaded", file.getName()));
-            updateUndoRedoState();
-            if (addToRecent) {
-                AppSettings.getInstance().addRecentFile(file.getAbsolutePath());
-                refreshRecentFilesMenu();
-            }
-        } catch (Exception ex) {
-            deleteQuietly(backup);
-            showError(i18n.t("error.loadTitle"), ex);
-        }
+    @FXML
+    private void onExit() {
+        Stage stage = stageOf();
+        stage.fireEvent(new javafx.stage.WindowEvent(stage, javafx.stage.WindowEvent.WINDOW_CLOSE_REQUEST));
+        stage.close();
     }
 
     /**
      * Baut den Inhalt des eigenständigen Untermenüs "Zuletzt verwendet..."
      * komplett neu auf: bis zu 5 zuletzt geöffnete Dateien, oder ein
-     * deaktivierter Platzhalter-Eintrag, falls die Liste leer ist. "Backup
-     * laden..." und "Export Dateien" sind eigene Menüpunkte direkt im
-     * Datei-Menü (siehe {@code loadBackupMenuItem}/{@code exportFilesMenuItem})
-     * und nicht mehr Teil dieses Untermenüs. Wird bei Sprachwechsel (für die
-     * übersetzten Texte) sowie nach jeder Änderung der Liste (neue/entfernte
-     * Datei) neu aufgerufen.
+     * deaktivierter Platzhalter-Eintrag, falls die Liste leer ist. Wird bei
+     * Sprachwechsel (für die übersetzten Texte) sowie nach jeder Änderung
+     * der Liste (neue/entfernte Datei) neu aufgerufen.
      */
     private void refreshRecentFilesMenu() {
         recentFilesMenu.getItems().clear();
@@ -484,234 +497,29 @@ public class HelloController {
         } else {
             for (String path : recentFiles) {
                 MenuItem item = new MenuItem(path);
-                item.setOnAction(e -> openRecentFile(path));
+                item.setOnAction(e -> session.openRecentFile(path));
                 recentFilesMenu.getItems().add(item);
             }
         }
     }
 
-    /** Maximale Anzahl gleichzeitiger Backup-Generationen je Originaldatei. */
-    private static final int MAX_BACKUP_GENERATIONS = 10;
-
-    /**
-     * Legt, falls ein Backup-Ordner eingestellt ist, eine unveränderte
-     * 1:1-Kopie der zu öffnenden Datei dort ab, bevor irgendetwas bearbeitet
-     * wird. Name: {@code <originalDateiname>.<N>.bak}, mit N von 1 bis
-     * {@value #MAX_BACKUP_GENERATIONS} durchnummeriert - wird dieselbe Datei
-     * erneut geöffnet, zählt N weiter hoch; nach Erreichen von
-     * {@value #MAX_BACKUP_GENERATIONS} beginnt die Zählung wieder bei 1 (die
-     * älteste Generation wird also überschrieben), sodass nie mehr als
-     * {@value #MAX_BACKUP_GENERATIONS} Backups derselben Datei im Ordner
-     * liegen - unterscheidbar dann nur noch über den Datei-Zeitstempel.
-     * Schlägt die Sicherung fehl, wird nur gewarnt; das eigentliche Öffnen
-     * der Datei wird dadurch nicht blockiert.
-     */
-    private File createBackup(File file) {
-        String backupDir = AppSettings.getInstance().getBackupDirectory();
-        if (backupDir == null || backupDir.isBlank()) {
-            return null;
-        }
-        File backupFolder = new File(backupDir);
-        if (!backupFolder.isDirectory()) {
-            return null;
-        }
-        try {
-            int nextNumber = nextBackupNumber(backupFolder, file.getName());
-            File target = new File(backupFolder, file.getName() + "." + nextNumber + ".bak");
-            Files.copy(file.toPath(), target.toPath(),
-                    StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
-            return target;
-        } catch (IOException ex) {
-            new Alert(Alert.AlertType.WARNING,
-                    i18n.t("error.backupFailed", ex.getMessage())).showAndWait();
-            return null;
-        }
-    }
-
-    /**
-     * Ermittelt anhand der zuletzt geänderten passenden Backup-Datei im
-     * Ordner die zuletzt für {@code originalName} verwendete Generation
-     * (1..{@value #MAX_BACKUP_GENERATIONS}) und gibt die nächste zurück -
-     * beginnend bei 1, nach Erreichen des Maximums wieder bei 1.
-     */
-    private static int nextBackupNumber(File backupFolder, String originalName) {
-        Pattern pattern = Pattern.compile(Pattern.quote(originalName) + "\\.(\\d{1,2})\\.bak");
-        File[] files = backupFolder.listFiles();
-        int lastNumber = 0;
-        long lastModified = -1;
-        if (files != null) {
-            for (File candidate : files) {
-                Matcher matcher = pattern.matcher(candidate.getName());
-                if (matcher.matches()) {
-                    int number = Integer.parseInt(matcher.group(1));
-                    if (number >= 1 && number <= MAX_BACKUP_GENERATIONS && candidate.lastModified() > lastModified) {
-                        lastModified = candidate.lastModified();
-                        lastNumber = number;
-                    }
-                }
-            }
-        }
-        return lastNumber == 0 ? 1 : (lastNumber % MAX_BACKUP_GENERATIONS) + 1;
-    }
-
-    /**
-     * Löscht das Backup eines Dokuments, falls seit dem Öffnen weder etwas
-     * geändert noch gespeichert wurde - dann ist die Sicherheitskopie
-     * überflüssig. Wird beim Öffnen einer anderen Datei (für das bisherige
-     * Dokument) sowie beim Beenden des Programms aufgerufen.
-     */
-    private void cleanupUnusedBackup(TcdDocument doc) {
-        if (doc == null) {
-            return;
-        }
-        File backup = doc.getBackupFile();
-        if (backup == null) {
-            return;
-        }
-        if (!doc.isDirty() && !doc.wasSavedSinceOpen()) {
-            deleteQuietly(backup);
-        }
-    }
-
-    private static void deleteQuietly(File file) {
-        if (file == null) {
-            return;
-        }
-        try {
-            Files.deleteIfExists(file.toPath());
-        } catch (IOException ignored) {
-            // Aufräumen ist best-effort - ein Fehlschlag soll den
-            // eigentlichen Workflow nicht blockieren.
-        }
-    }
-
     /** Wird beim Schließen des Programmfensters aufgerufen (siehe {@link HelloApplication}). */
     public void onAppClosing() {
-        cleanupUnusedBackup(document);
+        session.onClosing();
     }
 
-    @FXML
-    private void onSaveAs() {
-        if (document == null) {
-            new Alert(Alert.AlertType.INFORMATION, i18n.t("error.pleaseOpenFirst")).showAndWait();
-            return;
-        }
-
-        FileChooser chooser = new FileChooser();
-        chooser.setTitle(i18n.t("dialog.saveTitle"));
-        FileChooser.ExtensionFilter tcdFilter = new FileChooser.ExtensionFilter("iTrain XML (*.tcd)", "*.tcd");
-        FileChooser.ExtensionFilter tcdzFilter = new FileChooser.ExtensionFilter("iTrain ZIP (*.tcdz)", "*.tcdz");
-        chooser.getExtensionFilters().addAll(tcdzFilter, tcdFilter,
-                new FileChooser.ExtensionFilter("*.*", "*.*"));
-
-        boolean wasZipped = document.getFile() != null
-                && document.getFile().getName().toLowerCase().endsWith(".tcdz");
-        chooser.setSelectedExtensionFilter(wasZipped ? tcdzFilter : tcdFilter);
-
-        if (document.getFile() != null) {
-            chooser.setInitialDirectory(document.getFile().getParentFile());
-            chooser.setInitialFileName(document.getFile().getName());
-        } else {
-            applyDefaultTcdDirectory(chooser);
-        }
-
-        Stage stage = (Stage) tabPane.getScene().getWindow();
-        File target = chooser.showSaveDialog(stage);
-        if (target == null) {
-            return;
-        }
-
-        try {
-            document.save(target);
-            fileNameLabel.setText(target.getName());
-            statusLabel.setText(i18n.t("status.fileSaved", target.getName()));
-        } catch (Exception ex) {
-            showError(i18n.t("error.saveTitle"), ex);
-        }
-    }
-
-    private void applyDefaultTcdDirectory(FileChooser chooser) {
-        String tcdDir = AppSettings.getInstance().getTcdDirectory();
-        if (tcdDir != null && new File(tcdDir).isDirectory()) {
-            chooser.setInitialDirectory(new File(tcdDir));
-        }
-    }
-
-    @FXML
-    private void onPreferences() {
-        Stage stage = (Stage) tabPane.getScene().getWindow();
-        SettingsDialog.showPreferences(stage);
-        // Spaltensichtbarkeit, "Daten ändern"-Bereich usw. werden erst beim
-        // Aufbau eines CategoryEditor gelesen - nach Schließen des Dialogs
-        // alle Reiter neu aufbauen, damit Änderungen sofort sichtbar werden
-        // (wie beim Sprachwechsel).
-        rebuildTabs();
-    }
-
-    /**
-     * Wird von jedem {@link CategoryEditor} VOR jeder tatsächlichen
-     * inhaltlichen Änderung aufgerufen (Konstruktor-Parameter
-     * {@code beforeChange}) - sichert den aktuellen Stand aller
-     * Kategorie-Knoten für "Rückgängig", bevor die Änderung passiert. Ein
-     * neuer Änderungs-Vorgang macht den bisherigen Wiederholen-Verlauf
-     * ungültig, daher wird {@code redoStack} geleert.
-     */
-    private void recordUndoSnapshot() {
-        if (document == null) {
-            return;
-        }
-        undoStack.push(snapshotCurrentState());
-        while (undoStack.size() > MAX_UNDO_STEPS) {
-            undoStack.removeLast();
-        }
-        redoStack.clear();
-        updateUndoRedoState();
-    }
-
-    /** Tiefe Kopie aller aktuellen Kategorie-Knoten unter control-items. */
-    private List<XmlNode> snapshotCurrentState() {
-        XmlNode controlItems = document.getRoot().findChild("control-items");
-        List<XmlNode> snapshot = new ArrayList<>();
-        for (XmlNode category : controlItems.getChildren()) {
-            snapshot.add(category.deepCopy());
-        }
-        return snapshot;
-    }
-
-    /**
-     * Ersetzt den Inhalt von control-items durch eine (erneut tief kopierte)
-     * Momentaufnahme - so bleiben die im Undo-/Redo-Stack gespeicherten
-     * Zustände von der live bearbeiteten Baumstruktur unabhängig. Da alle
-     * Reiter über {@code CategoryEditor} an die bisherigen XmlNode-Objekte
-     * gebunden sind, müssen sie danach komplett neu aufgebaut werden.
-     */
-    private void restoreState(List<XmlNode> snapshot) {
-        XmlNode controlItems = document.getRoot().findChild("control-items");
-        controlItems.getChildren().clear();
-        for (XmlNode category : snapshot) {
-            controlItems.getChildren().add(category.deepCopy());
-        }
-        document.markDirty();
-        rebuildTabs();
-        updateUndoRedoState();
-    }
+    // ------------------------------------------------------------------
+    // Menü Bearbeiten / Einstellungen
+    // ------------------------------------------------------------------
 
     @FXML
     private void onUndo() {
-        if (document == null || undoStack.isEmpty()) {
-            return;
-        }
-        redoStack.push(snapshotCurrentState());
-        restoreState(undoStack.pop());
+        session.undo();
     }
 
     @FXML
     private void onRedo() {
-        if (document == null || redoStack.isEmpty()) {
-            return;
-        }
-        undoStack.push(snapshotCurrentState());
-        restoreState(redoStack.pop());
+        session.redo();
     }
 
     /**
@@ -724,53 +532,50 @@ public class HelloController {
      */
     @FXML
     private void onCenterWindows() {
-        Stage stage = (Stage) tabPane.getScene().getWindow();
-        int moved = WindowState.centerAll(stage);
+        int moved = WindowState.centerAll(stageOf());
         // Auch die gemerkte Verschiebung der Dialoge vergessen: Sonst käme
         // der nächste Dialog sofort wieder abseits heraus, obwohl der
         // Anwender gerade um das Gegenteil gebeten hat.
         DialogPlacement.resetOffset();
-        statusLabel.setText(I18n.getInstance().t("status.windowsCentered", moved));
+        statusLabel.setText(i18n.t("status.windowsCentered", moved));
     }
 
-    private void updateUndoRedoState() {
-        boolean canUndo = !undoStack.isEmpty();
-        boolean canRedo = !redoStack.isEmpty();
-        undoMenuItem.setDisable(!canUndo);
-        redoMenuItem.setDisable(!canRedo);
-        undoToolButton.setDisable(!canUndo);
-        redoToolButton.setDisable(!canRedo);
+    @FXML
+    private void onPreferences() {
+        SettingsDialog.showPreferences(stageOf());
+        // Spaltensichtbarkeit, "Daten ändern"-Bereich usw. werden erst beim
+        // Aufbau eines CategoryEditor gelesen - nach Schließen des Dialogs
+        // alle Reiter neu aufbauen, damit Änderungen sofort sichtbar werden
+        // (wie beim Sprachwechsel).
+        session.rebuildTabs();
+        // Falls der Decoder-Ordner geändert wurde: mitgelieferte Vorlagen
+        // dorthin übertragen (die Kennung enthält den Zielordner, bei
+        // unverändertem Ordner passiert nichts).
+        DecoderTemplateBundle.syncIfNeeded();
     }
+
+    // ------------------------------------------------------------------
+    // Ribbon: Import / Export / Decoder
+    // ------------------------------------------------------------------
 
     /**
-     * Liefert den Editor des gerade sichtbaren Kategorie-Reiters, oder
-     * {@code null}, wenn keine Datei geöffnet ist. Grundlage für die vier
-     * Ribbon-Schaltflächen, die immer auf den sichtbaren Reiter wirken.
-     */
-    private CategoryEditor currentEditor() {
-        return editorsByTab.get(tabPane.getSelectionModel().getSelectedItem());
-    }
-
-    /**
-     * Schaltet die vier Import-/Export-Schaltflächen im Ribbon passend zum
-     * sichtbaren Reiter: ohne geöffnete Datei sind alle vier gesperrt, die
-     * beiden Decoder-Schaltflächen zusätzlich in allen Kategorien außer
-     * Lokomotiven und Wagen (nur dort gibt es einen
-     * {@code <configuration>}-Knoten).
+     * Schaltet die Import-/Export-Schaltflächen im Ribbon passend zum
+     * sichtbaren Reiter: ohne geöffnete Datei sind beide gesperrt. Die
+     * Fensterknöpfe "Decoder" und "Systeme" sind immer benutzbar - die
+     * Fenster arbeiten unabhängig von der hier geladenen Datei.
      */
     private void updateRibbonState() {
-        CategoryEditor editor = currentEditor();
+        CategoryEditor editor = session.currentEditor();
         boolean hasCategory = editor != null;
         exportSelectedToolButton.setDisable(!hasCategory);
         importCategoryToolButton.setDisable(!hasCategory);
-        boolean decoder = hasCategory && editor.supportsDecoderConfiguration();
-        decoderExportToolButton.setDisable(!decoder);
-        decoderImportToolButton.setDisable(!decoder);
+        editExportSelectedMenuItem.setDisable(!hasCategory);
+        editImportCategoryMenuItem.setDisable(!hasCategory);
     }
 
     @FXML
     private void onExportSelected() {
-        CategoryEditor editor = currentEditor();
+        CategoryEditor editor = session.currentEditor();
         if (editor != null) {
             editor.triggerExport();
         }
@@ -778,64 +583,39 @@ public class HelloController {
 
     @FXML
     private void onImportCategory() {
-        CategoryEditor editor = currentEditor();
+        CategoryEditor editor = session.currentEditor();
         if (editor != null) {
             editor.triggerImport();
         }
     }
 
-    @FXML
-    private void onDecoderExport() {
-        CategoryEditor editor = currentEditor();
-        if (editor != null && editor.supportsDecoderConfiguration()) {
-            editor.triggerDecoderExport();
-        }
-    }
-
-    @FXML
-    private void onDecoderImport() {
-        CategoryEditor editor = currentEditor();
-        if (editor != null && editor.supportsDecoderConfiguration()) {
-            editor.triggerDecoderImport();
-        }
-    }
+    // ------------------------------------------------------------------
+    // Ribbon: Zusatzfenster
+    // ------------------------------------------------------------------
 
     /**
-     * "Decoder erfassen": öffnet das eigenständige Fenster zum Anlegen einer
-     * neuen Decoder-Vorlage neben der Hersteller-Anleitung (siehe
-     * {@link DecoderCaptureWindow}). Bewusst UNABHÄNGIG vom geöffneten
-     * Dokument nutzbar - hier wird eine Vorlagen-Datei erstellt, keine
-     * iTrain-Datei verändert.
+     * Knopf "Decoder": öffnet das Decoder-Fenster (oder holt es nach vorn,
+     * falls es schon offen ist). Es arbeitet auf einer eigenen Datei - siehe
+     * {@link DecoderWindow}.
      */
     @FXML
-    private void onDecoderCapture() {
-        Stage stage = (Stage) tabPane.getScene().getWindow();
-        // Auch hier der Hinweistext, solange er nicht abgeschaltet wurde -
-        // "Decoder erfassen" ist für viele der erste Kontakt mit der Funktion.
-        if (!DecoderHintsDialog.confirm(stage)) {
-            return;
-        }
-        DecoderCaptureWindow.show(stage);
+    private void onOpenDecoderWindow() {
+        DecoderWindow.show(stageOf(), session);
     }
 
-    /** Einstellungen → "Decoder-Vorlagen installieren" (siehe {@link DecoderTemplateInstaller}). */
+    /** Knopf "Systeme": öffnet das Systeme-Fenster - siehe {@link SystemsWindow}. */
     @FXML
-    private void onDecoderInstall() {
-        Stage stage = (Stage) tabPane.getScene().getWindow();
-        DecoderTemplateInstaller.install(stage);
+    private void onOpenSystemsWindow() {
+        SystemsWindow.show(stageOf());
     }
 
-    /** Einstellungen → "Decoder-Vorlagen": Übersichtsfenster (siehe {@link DecoderTemplateBrowser}). */
-    @FXML
-    private void onDecoderTemplates() {
-        Stage stage = (Stage) tabPane.getScene().getWindow();
-        DecoderTemplateBrowser.show(stage);
-    }
+    // ------------------------------------------------------------------
+    // Menü Hilfe
+    // ------------------------------------------------------------------
 
     @FXML
     private void onHelp() {
-        Stage stage = (Stage) tabPane.getScene().getWindow();
-        HelpDialog.show(stage);
+        HelpDialog.show(stageOf());
     }
 
     /**
@@ -853,7 +633,7 @@ public class HelloController {
      */
     @FXML
     private void onOpenManual() {
-        Stage stage = (Stage) tabPane.getScene().getWindow();
+        Stage stage = stageOf();
         UpdateChecker.resolveLinkAsync(UpdateChecker.Link.MANUAL, url -> {
             if (url == null) {
                 // Beim allerersten Aufruf ohne Netz gibt es noch keine
@@ -871,8 +651,7 @@ public class HelloController {
 
     @FXML
     private void onAbout() {
-        Stage stage = (Stage) tabPane.getScene().getWindow();
-        AboutDialog.show(stage);
+        AboutDialog.show(stageOf());
     }
 
     /**
@@ -887,7 +666,7 @@ public class HelloController {
      */
     @FXML
     private void onCheckForUpdate() {
-        Stage stage = (Stage) tabPane.getScene().getWindow();
+        Stage stage = stageOf();
         updateMenuItem.setDisable(true);
         UpdateChecker.checkAsync(result -> {
             updateMenuItem.setDisable(false);
@@ -899,91 +678,5 @@ public class HelloController {
                 UpdateDialog.showUpToDate(stage, result.currentVersion);
             }
         });
-    }
-
-    private void rebuildTabs() {
-        tabPane.getTabs().clear();
-        editorsByTab.clear();
-        if (document == null) {
-            return;
-        }
-        XmlNode controlItems = document.getRoot().findChild("control-items");
-        if (controlItems == null) {
-            new Alert(Alert.AlertType.WARNING, i18n.t("error.noControlItems")).showAndWait();
-            return;
-        }
-
-        Set<String> created = new LinkedHashSet<>();
-
-        // Immer alle bekannten Kategorien als Reiter anzeigen, auch wenn die
-        // Datei sie (noch) nicht enthält - der Reiter bleibt dann leer, bis
-        // ein Eintrag hinzugefügt oder importiert wird.
-        for (String categoryName : TcdDocument.TAB_DISPLAY_ORDER) {
-            addCategoryTab(controlItems, categoryName);
-            created.add(categoryName);
-        }
-
-        // Zusätzliche, uns nicht bekannte Kategorien (kommt vor, falls
-        // künftige iTrain-Versionen neue Kategorien einführen) werden
-        // ebenfalls angezeigt, in der Reihenfolge, in der sie in der Datei
-        // stehen - ihre Position beim Speichern bleibt unverändert (siehe
-        // TcdDocument.reorderChildren).
-        for (XmlNode categoryNode : controlItems.getChildren()) {
-            if (!created.contains(categoryNode.getTagName())) {
-                addCategoryTab(controlItems, categoryNode.getTagName());
-                created.add(categoryNode.getTagName());
-            }
-        }
-
-        if (!tabPane.getTabs().isEmpty()) {
-            tabPane.getSelectionModel().select(0);
-        }
-        updateStatusForSelectedTab();
-        updateRibbonState();
-    }
-
-    private void addCategoryTab(XmlNode controlItems, String categoryName) {
-        CategoryEditor editor = new CategoryEditor(categoryName, controlItems, document::markDirty,
-                this::rebuildTabs, this::recordUndoSnapshot, this::nextImportSuffix);
-        Tab tab = editor.createTab();
-        editorsByTab.put(tab, editor);
-        editor.entryCountProperty().addListener((obs, oldV, newV) -> {
-            if (tabPane.getSelectionModel().getSelectedItem() == tab) {
-                updateStatusForSelectedTab();
-            }
-        });
-        editor.selectedCountProperty().addListener((obs, oldV, newV) -> {
-            if (tabPane.getSelectionModel().getSelectedItem() == tab) {
-                updateStatusForSelectedTab();
-            }
-        });
-        editor.linkedCountProperty().addListener((obs, oldV, newV) -> {
-            if (tabPane.getSelectionModel().getSelectedItem() == tab) {
-                updateStatusForSelectedTab();
-            }
-        });
-        tabPane.getTabs().add(tab);
-    }
-
-    private void updateStatusForSelectedTab() {
-        Tab selected = tabPane.getSelectionModel().getSelectedItem();
-        CategoryEditor editor = editorsByTab.get(selected);
-        if (editor != null) {
-            String entryCountText = i18n.t("status.entryCount", editor.getDisplayName(), editor.entryCountProperty().get());
-            String selectedCountText = i18n.t("status.selectedCount", editor.selectedCountProperty().get());
-            String linkedCountText = i18n.t("status.linkedCount", editor.linkedCountProperty().get());
-            // Deutlich getrennte Angaben: breiter Abstand plus "|" als
-            // Trennzeichen, damit die drei Zahlen nicht ineinander laufen.
-            statusLabel.setText(entryCountText + STATUS_SEPARATOR + selectedCountText
-                    + STATUS_SEPARATOR + linkedCountText);
-        } else {
-            statusLabel.setText("");
-        }
-    }
-
-    private void showError(String title, Exception ex) {
-        Alert alert = new Alert(Alert.AlertType.ERROR, title + ":\n" + ex.getMessage());
-        alert.setHeaderText(title);
-        alert.showAndWait();
     }
 }

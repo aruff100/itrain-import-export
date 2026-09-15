@@ -1,0 +1,183 @@
+﻿"Kategorie";"Typ";"Name";"Beschreibung";"XML"
+"decoder-configuration";"configuration";"Tams Lokdecoder Serie 30 plus";"Tams Elektronik loco decoders, 30 plus series (LD-G-31 plus items 41-03310/41-03312/41-03313, LD-G-33 plus and others) - CV table from the instructions, pages 59-65";"<configuration count=""60"">
+  <parameter nr=""1"" value=""3"" type=""Base address"">
+    <description>Value range in DCC format: 1 ... 127</description>
+  </parameter>
+  <parameter nr=""2"" value=""6"" type=""Starting voltage (starting speed)"">
+    <description>= voltage applied to the motor at speed step 1. 0 = 0 volts 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""3"" value=""10"" type=""Acceleration rate (acceleration delay)"">
+    <description>= length of the waiting time that elapses each time before stepping to the next higher / lower speed step while the loco accelerates / brakes. The waiting time is calculated as follows: (value of CV 3) x 0.9 sec. / number of speed steps</description>
+  </parameter>
+  <parameter nr=""4"" value=""5"" type=""Braking rate (deceleration)"">
+    <description></description>
+  </parameter>
+  <parameter nr=""5"" value=""255"" type=""Maximum voltage (top speed)"">
+    <description>= voltage applied to the motor at the highest speed step. 2 = 0.8 % of the maximum voltage 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""6"" value=""100"" type=""Medium voltage (medium speed)"">
+    <description>= voltage applied to the motor at the medium speed step. 2 = 0.8 % of the maximum voltage 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""7"" type=""Version"">
+    <description>Can only be read out in DCC format!</description>
+  </parameter>
+  <parameter nr=""8"" value=""62"" type=""Manufacturer"">
+    <description>Can only be read out in DCC format!</description>
+  </parameter>
+  <parameter nr=""9"" value=""0"" type=""Motor frequency"">
+    <description>= frequency at which the motor is driven. 0 = 30 kHz 255 = 58 Hz For values &gt; 0: frequency [Hz] = 30,000 / (2 x value of CV 9)</description>
+  </parameter>
+  <parameter nr=""11"" value=""5"" type=""Packet time out for analogue detection"">
+    <description>The higher the value set, the more time passes after the last digital signal is received before the decoder switches over to analogue operation automatically.</description>
+  </parameter>
+  <parameter nr=""12"" value=""1"" type=""Analogue mode"">
+    <description>= method that triggers a change of direction in analogue operation. Overvoltage pulse (AC layouts) 0 Change of polarity (DC layouts) 1</description>
+  </parameter>
+  <parameter nr=""13"" value=""0"" type=""Functions active in analogue operation (only for F1 to F8, not for F9 to F28)"">
+    <description>F1 on 1 / F2 on 2 / F3 on 4 / F4 on 8 / F5 on 16 / F6 on 32 / F7 on 64 / F8 on 128</description>
+  </parameter>
+  <parameter nr=""17"" value=""192"" type=""Extended address"">
+    <description>For DCC format only. With most command stations it is possible to enter extended addresses directly. CVs 17, 18 and 29 are then set correctly by the command station automatically.</description>
+  </parameter>
+  <parameter nr=""18"" value=""255"">
+    <description></description>
+  </parameter>
+  <parameter nr=""19"" value=""0"" type=""Consist address"">
+    <description>= 2nd address. In DCC format only!</description>
+  </parameter>
+  <parameter nr=""26"" value=""0"">
+    <description>Number of the CV</description>
+  </parameter>
+  <parameter nr=""27"" value=""0"" type=""Braking behaviour with DC voltage"">
+    <description>No braking with DC voltage 0 / braking with negative DC voltage 32 / braking with positive DC voltage 64</description>
+  </parameter>
+  <parameter nr=""28"" value=""131"" type=""RailCom settings"">
+    <description>No feedback 0 / channel 1 on 1 / channel 2 on 2 / RailComPlus on 128</description>
+  </parameter>
+  <parameter nr=""29"" value=""14"" type=""Configuration data 1"">
+    <description>Direction of travel ""standard"" 0 / invert direction of travel 1 / 14 speed steps 0 / 28 or 128 speed steps 2 / analogue detection off 0 / analogue detection on 4 / RailCom off 0 / RailCom on 8 / linear speed curve 0 / alternative speed curve 16 / basic addresses 0 / extended addresses 32</description>
+  </parameter>
+  <parameter nr=""30"" value=""0"">
+    <description>Value of the CV</description>
+  </parameter>
+  <parameter nr=""31"" value=""0"" type=""Index for higher CV pages"">
+    <description>Fixed setting. For reading out RailCom-relevant information. In DCC format only.</description>
+  </parameter>
+  <parameter nr=""32"" value=""255"">
+    <description>Makes it possible to enter values &gt; 80 or 99 on command stations that only permit entries from 0 or 1 to 80 or 99.</description>
+  </parameter>
+  <parameter nr=""47"" value=""4"" type=""2nd Motorola address"">
+    <description>= address via which additional functions are switched in Motorola format. Functions F5 to F8 are reached via F1 to F4, function F9 via F0.</description>
+  </parameter>
+  <parameter nr=""48"" value=""45"" type=""Shutdown on overload (does not apply to LD-G-31 plus and LD-G-34 plus)"">
+    <description>Determines the current at which the overload protection responds. 45 = 1,500 mA. The higher the value, the higher the current at which the overload protection responds. The value of 45 should only be changed in exceptional cases.</description>
+  </parameter>
+  <parameter nr=""49"" value=""73"" type=""Configuration data 2"">
+    <description>Load control off 0 / load control on 1 / shunting mode with F1 2 / shunting mode with F2 4 / shunting mode with F3 8 / shunting mode with F4 16 / acceleration/braking delay switchable with F3 32 / acceleration/braking delay switchable with F4 64</description>
+  </parameter>
+  <parameter nr=""50"" value=""16"" type=""Load control parameter KP"">
+    <description>= proportional component of the load control.</description>
+  </parameter>
+  <parameter nr=""51"" value=""14"" type=""Load control parameter KI"">
+    <description>= integral component of the load control.</description>
+  </parameter>
+  <parameter nr=""52"" value=""8"" type=""Load control parameter KD"">
+    <description>= derivative component of the load control.</description>
+  </parameter>
+  <parameter nr=""65"" value=""0"" type=""Starting kick"">
+    <description>= brief increase of the motor voltage when starting, in order to overcome the breakaway torque</description>
+  </parameter>
+  <parameter nr=""68"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""69"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""70"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""71"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""72"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""73"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""74"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""75"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""76"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""77"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""78"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""79"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""80"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""81"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""82"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""83"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""84"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""85"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""86"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""87"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""88"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""89"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""90"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""91"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""92"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""93"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""94"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""95"" type=""Alternative speed curve (only in 28 speed step mode)"">
+    <description>= speed table for the alternative speed curve. A motor voltage is assigned to each of the 28 speed steps. 0 = voltage of ""0"" 255 = maximum voltage</description>
+  </parameter>
+  <parameter nr=""165"" value=""4"" type=""Motor adaptation 1"">
+    <description>= factor by which the value of the load control is multiplied</description>
+  </parameter>
+  <parameter nr=""166"" value=""1"" type=""Motor adaptation 2"">
+    <description>= number of averagings of the measured values of the load control</description>
+  </parameter>
+  <parameter nr=""199"" value=""100"" type=""Intensity of the changeover pulse (for analogue AC voltage)"">
+    <description>0 = minimum voltage 255 = maximum voltage</description>
+  </parameter>
+</configuration>"

@@ -53,6 +53,11 @@
     -fx-text-fill: #e0e0e0;
 }
 
+/* Jede zweite Zeile abgesetzt - siehe CustomColorTheme fuer das Gegenstueck. */
+.table-row-cell:odd, .list-cell:odd {
+    -fx-background-color: #313335;
+}
+
 .table-row-cell:selected, .tree-cell:selected, .list-cell:selected {
     -fx-background-color: #3574c9;
 }
@@ -69,6 +74,22 @@
 
 .button:hover {
     -fx-background-color: #55595a;
+}
+
+/*
+ * Ribbon-Knoepfe mit erhabenem 3D-Rahmen (hell oben/links, dunkel
+ * unten/rechts; beim Druecken umgekehrt) - ohne ihn gingen sie auf dem
+ * dunklen Grund optisch unter. Gleiche Regel in CustomColorTheme.
+ */
+.tool-bar .button {
+    -fx-border-color: #9a9a9a #101010 #101010 #9a9a9a;
+    -fx-border-width: 2;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+}
+
+.tool-bar .button:pressed {
+    -fx-border-color: #101010 #9a9a9a #9a9a9a #101010;
 }
 
 .split-pane, .split-pane-divider {

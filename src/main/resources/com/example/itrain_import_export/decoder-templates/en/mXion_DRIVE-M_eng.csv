@@ -1,0 +1,513 @@
+﻿"Kategorie";"Typ";"Name";"Beschreibung";"XML"
+"decoder-configuration";"configuration";"mXion DRIVE-M";"mXion DRIVE-M";"<configuration count=""170"">
+  <parameter nr=""1"" value=""3"" type=""Locomotive address"">
+    <description>if CV 29 bit 5 = 0 (automatic)</description>
+  </parameter>
+  <parameter nr=""2"" value=""5"" type=""Starting voltage"">
+    <description>CV2 x (1/255 track voltage)</description>
+  </parameter>
+  <parameter nr=""3"" value=""20"" type=""Acceleration delay"">
+    <description>CV3 x 2 ms x (1/255 track voltage)</description>
+  </parameter>
+  <parameter nr=""4"" value=""20"" type=""Deceleration"">
+    <description>CV4 x 2 ms x (1/255 track voltage)</description>
+  </parameter>
+  <parameter nr=""5"" value=""220"" type=""Maximum travel speed"">
+    <description>CV5 x (1/255 track voltage)</description>
+  </parameter>
+  <parameter nr=""6"" value=""70"" type=""Medium travel speed"">
+    <description>CV6 x (1/255 track voltage)</description>
+  </parameter>
+  <parameter nr=""7"" type=""Software version"">
+    <description>read only (10 = 1.0)</description>
+  </parameter>
+  <parameter nr=""8"" value=""160"" type=""Manufacturer ID"">
+    <description>read only / 0 = 16 kHz / 1 = 2 kHz</description>
+  </parameter>
+  <parameter nr=""9"" value=""0"" type=""Motor frequency"">
+    <description>2 = 250 Hz / 3 = 60 Hz / 4 = 100 kHz</description>
+  </parameter>
+  <parameter nr=""11"" value=""30"" type=""Analogue changeover"">
+    <description>1 ms per value</description>
+  </parameter>
+  <parameter nr=""13"" type=""Function of the function outputs"">
+    <description>Add up the values of the functions you want! / A1 = 1, A2 = 2, A3 = 4, A4 = 8, / A5 = 16, A6 = 32</description>
+  </parameter>
+  <parameter nr=""15"" value=""205"" type=""Programming lock (key)"">
+    <description>To lock, change only this one</description>
+  </parameter>
+  <parameter nr=""16"" value=""205"" type=""Programming lock (lock)"">
+    <description>Changing this changes CV 15</description>
+  </parameter>
+  <parameter nr=""17"" value=""128"" type=""Long locomotive address (high)"">
+    <description>Active only if CV 29 bit 5 = 1 / (automatic when CV 17/18 is changed)</description>
+  </parameter>
+  <parameter nr=""18"" type=""Long locomotive address (low)"">
+    <description></description>
+  </parameter>
+  <parameter nr=""19"" value=""0"" type=""Multiple traction address"">
+    <description>Loco address for multiple-unit operation / +128 = reversed direction</description>
+  </parameter>
+  <parameter nr=""20"" value=""5"" type=""Wheel slip effect"">
+    <description>A larger number means more wheel slip</description>
+  </parameter>
+  <parameter nr=""23"" value=""0"" type=""Smart start function"">
+    <description>0 = inactive, 1 = active</description>
+  </parameter>
+  <parameter nr=""24"" value=""30"" type=""Disable coupling waltz"">
+    <description>see appendix 4, switch off the waltz</description>
+  </parameter>
+  <parameter nr=""26"" value=""2"" type=""Interference suppression filter"">
+    <description>The greater the value, the more filtering</description>
+  </parameter>
+  <parameter nr=""27"" value=""0"" type=""Stop configuration"">
+    <description>Bitwise programming / 0) ON / stop ABC right / stop ABC left / stop HLU / stop DC right / stop DC left</description>
+  </parameter>
+  <parameter nr=""29"" value=""2"" type=""NMRA configuration"">
+    <description>Bitwise programming / 0) ON / reversed direction / 28/128 speed steps / digital + analogue operation / programmed speed curve (CV67-94) / (CV 1) long loco address (CV 17/18)</description>
+  </parameter>
+  <parameter nr=""30"" value=""28"" type=""Switch command shuttle operation"">
+    <description>see appendix 1</description>
+  </parameter>
+  <parameter nr=""31"" value=""26"" type=""Light suppression front"">
+    <description>see appendix 1</description>
+  </parameter>
+  <parameter nr=""32"" value=""27"" type=""Light suppression rear"">
+    <description>see appendix 1</description>
+  </parameter>
+  <parameter nr=""34"" value=""1"" type=""SUSI function key, analogue"">
+    <description>For analogue, always active (e.g. sound on) / 0 - 68 F key, 128 = switched off</description>
+  </parameter>
+  <parameter nr=""35"" value=""5"" type=""K1 switching time in reed mode"">
+    <description>Switch-off time for REED, 0.25 s per value</description>
+  </parameter>
+  <parameter nr=""36"" value=""5"" type=""K2 switching time in reed mode"">
+    <description>Switch-off time for REED, 0.25 s per value</description>
+  </parameter>
+  <parameter nr=""37"" value=""2"" type=""K1 function key for reed mode"">
+    <description>0 - 68 F key, 128 = switched off</description>
+  </parameter>
+  <parameter nr=""38"" value=""2"" type=""K2 function key for reed mode"">
+    <description>0 - 68 F key, 128 = switched off</description>
+  </parameter>
+  <parameter nr=""39"" value=""0"" type=""IntelliSound4 SUSI bank"">
+    <description>SUSI bank address</description>
+  </parameter>
+  <parameter nr=""40"" value=""10"" type=""Fan speed at standstill"">
+    <description>in % relative to the dimming value of the output</description>
+  </parameter>
+  <parameter nr=""41"" value=""100"" type=""Fan speed when starting"">
+    <description>in % relative to the dimming value of the output</description>
+  </parameter>
+  <parameter nr=""42"" value=""70"" type=""Fan speed when running"">
+    <description>in % relative to the dimming value of the output</description>
+  </parameter>
+  <parameter nr=""43"" value=""30"" type=""Fan speed when coasting"">
+    <description>in % relative to the dimming value of the output</description>
+  </parameter>
+  <parameter nr=""44"" value=""0"" type=""Cycle register fan"">
+    <description>0 = every cycle, 1 ... 10 every nth cycle</description>
+  </parameter>
+  <parameter nr=""45"" value=""20"" type=""Fan start-up output"">
+    <description>100 ms per value, emission when starting</description>
+  </parameter>
+  <parameter nr=""46"" value=""50"" type=""Fan cycle time"">
+    <description>1 ms per value, cycle time per exhaust chuff</description>
+  </parameter>
+  <parameter nr=""47"" value=""5"" type=""Buffer run-on time"">
+    <description>1 sec per value</description>
+  </parameter>
+  <parameter nr=""48"" value=""0"" type=""K1/2 mode"">
+    <description>0 = drive stop / 1 = PZB infrared detection / 2 = shuttle control contacts / 3 = K1/K2 for REED for SX6</description>
+  </parameter>
+  <parameter nr=""49"" value=""20"" type=""mXion configuration"">
+    <description>Bitwise programming / 0) ON / off. Digital load control on / off. Analogue load control on / SUSI on / Märklin train bus on / motor brake on / light outputs inverted / Swiss mapping (SM) / keep the digital direction</description>
+  </parameter>
+  <parameter nr=""50"" value=""0"" type=""LV switch command assignment"">
+    <description>see appendix 1</description>
+  </parameter>
+  <parameter nr=""51"" value=""15"" type=""LV dimming value"">
+    <description>see appendix 2, set to 5 V</description>
+  </parameter>
+  <parameter nr=""52"" value=""1"" type=""LV condition"">
+    <description>see appendix 3</description>
+  </parameter>
+  <parameter nr=""53"" value=""64"" type=""LV special function"">
+    <description>see appendix 4</description>
+  </parameter>
+  <parameter nr=""54"" value=""10"" type=""LV time value for special function"">
+    <description>Time base 0.1 sec per value</description>
+  </parameter>
+  <parameter nr=""55"" value=""0"" type=""LH switch command assignment"">
+    <description>see appendix 1</description>
+  </parameter>
+  <parameter nr=""56"" value=""15"" type=""LH dimming value"">
+    <description>see appendix 2, set to 5 V</description>
+  </parameter>
+  <parameter nr=""57"" value=""2"" type=""LH condition"">
+    <description>see appendix 3</description>
+  </parameter>
+  <parameter nr=""58"" value=""64"" type=""LH special function"">
+    <description>see appendix 4</description>
+  </parameter>
+  <parameter nr=""59"" value=""10"" type=""LH time value for special function"">
+    <description>Time base 0.1 sec per value</description>
+  </parameter>
+  <parameter nr=""60"" value=""1"" type=""Load control: readjustment"">
+    <description>larger value = firmer control</description>
+  </parameter>
+  <parameter nr=""61"" value=""0"" type=""Load control: delay"">
+    <description>larger value = slower control</description>
+  </parameter>
+  <parameter nr=""62"" value=""4"" type=""Load control: limitation"">
+    <description>larger value = slower limiting</description>
+  </parameter>
+  <parameter nr=""63"" value=""0"" type=""Monoflop function for CV96"">
+    <description>0 = permanently normal function / 1 - 255 switch-off after CV63 * 1 sec.</description>
+  </parameter>
+  <parameter nr=""64"" value=""5"" type=""Servo oscillation mode"">
+    <description>After-oscillation for the servo mode / ""swinging"" (e.g. bells)</description>
+  </parameter>
+  <parameter nr=""65"" value=""50"" type=""Internal speed step for"">
+    <description>Reduced speed when the supply is empty, with the special function of servo consumption simulation</description>
+  </parameter>
+  <parameter nr=""66"" value=""255"" type=""Forward trim"">
+    <description>Reduction of the maximum speed forwards (CV66 * CV5 / 255)</description>
+  </parameter>
+  <parameter nr=""67"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""68"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""69"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""70"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""71"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""72"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""73"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""74"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""75"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""76"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""77"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""78"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""79"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""80"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""81"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""82"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""83"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""84"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""85"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""86"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""87"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""88"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""89"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""90"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""91"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""92"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""93"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""94"" type=""Freely programmable speed curve"">
+    <description>see appendix 6</description>
+  </parameter>
+  <parameter nr=""95"" value=""255"" type=""Reverse trim"">
+    <description>Reduction of the maximum speed backwards (CV95 * CV5 / 255)</description>
+  </parameter>
+  <parameter nr=""96"" value=""12"" type=""Handbrake switch command"">
+    <description>see appendix 1</description>
+  </parameter>
+  <parameter nr=""97"" value=""14"" type=""High beam switch command"">
+    <description>see appendix 1, appendix 4</description>
+  </parameter>
+  <parameter nr=""98"" value=""0"" type=""Random generator"">
+    <description>Add up the values of the functions you want! / 0 = inactive / A1 = 1, A2 = 2, A3 = 4, A4 = 8, / A5 = 16, A6 = 32, A7 = 64, / A8 = 128</description>
+  </parameter>
+  <parameter nr=""99"" value=""0"" type=""Waiting time on direction change"">
+    <description>Time base 0.5 sec per value</description>
+  </parameter>
+  <parameter nr=""100"" value=""15"" type=""Shunting mode"">
+    <description>see appendix 1</description>
+  </parameter>
+  <parameter nr=""101"" value=""16"" type=""Switchable deceleration times"">
+    <description>see appendix 1</description>
+  </parameter>
+  <parameter nr=""102"" value=""100"" type=""Shuttle operation speed step"">
+    <description>Speed</description>
+  </parameter>
+  <parameter nr=""103"" value=""5"" type=""Shuttle operation running time"">
+    <description>0 = shuttle operation inactive / 1 - 255 running time, time base 5 sec per value</description>
+  </parameter>
+  <parameter nr=""104"" value=""5"" type=""Shuttle operation stop time"">
+    <description>Dwell time, time base 5 sec per value</description>
+  </parameter>
+  <parameter nr=""107"" value=""10"" type=""SM 3x white/2x red to 3x white/1x white"">
+    <description>see appendix 1, if CV49 bit 1 is active</description>
+  </parameter>
+  <parameter nr=""108"" value=""11"" type=""SM switch off cab 1"">
+    <description>see appendix 1, if CV49 bit 1 is active</description>
+  </parameter>
+  <parameter nr=""109"" value=""12"" type=""SM switch off cab 2"">
+    <description>see appendix 1, if CV49 bit 1 is active</description>
+  </parameter>
+  <parameter nr=""110"" value=""13"" type=""SM double-A emergency red or"">
+    <description>see appendix 1, if CV49 bit 1 is active. SM / double A emergency red, otherwise double A white</description>
+  </parameter>
+  <parameter nr=""112"" value=""5"" type=""Coupling waltz push-together time"">
+    <description>Push-up time in seconds</description>
+  </parameter>
+  <parameter nr=""113"" value=""5"" type=""Coupling waltz pull-away time"">
+    <description>Departure time in seconds</description>
+  </parameter>
+  <parameter nr=""114"" value=""30"" type=""Coupling waltz speed"">
+    <description>Speed</description>
+  </parameter>
+  <parameter nr=""115"" value=""5"" type=""Cycle register control"">
+    <description>0 = external cycle, 1 = internal cycle simulation</description>
+  </parameter>
+  <parameter nr=""116"" value=""50"" type=""Cycle simulation correction"">
+    <description>Cycle simulation correction</description>
+  </parameter>
+  <parameter nr=""120"" value=""1"" type=""A1 Switch command assignment"">
+    <description>see appendix 1</description>
+  </parameter>
+  <parameter nr=""121"" value=""100"" type=""A1 Dimming value"">
+    <description>see appendix 2</description>
+  </parameter>
+  <parameter nr=""122"" value=""0"" type=""A1 Condition"">
+    <description>see appendix 3</description>
+  </parameter>
+  <parameter nr=""123"" value=""0"" type=""A1 Special function"">
+    <description>see appendix 4</description>
+  </parameter>
+  <parameter nr=""124"" value=""5"" type=""A1 Time value for special function"">
+    <description>Time base 0.1 sec per value</description>
+  </parameter>
+  <parameter nr=""125"" value=""1"" type=""A1 Servo speed"">
+    <description>Time base 1 ms per value</description>
+  </parameter>
+  <parameter nr=""126"" value=""200"" type=""A1 Servo end position right"">
+    <description>Value in degrees</description>
+  </parameter>
+  <parameter nr=""127"" value=""20"" type=""A1 Servo end position left"">
+    <description>Value in degrees</description>
+  </parameter>
+  <parameter nr=""128"" value=""0"" type=""A1 Servo inverted"">
+    <description>The servo is operated inversely if the value = 1</description>
+  </parameter>
+  <parameter nr=""129"" value=""1"" type=""A1 Switch servo off"">
+    <description>The servo is switched off if the value = 1</description>
+  </parameter>
+  <parameter nr=""130"" value=""2"" type=""A2 Switch command assignment"">
+    <description>see appendix 1</description>
+  </parameter>
+  <parameter nr=""131"" value=""100"" type=""A2 Dimming value"">
+    <description>see appendix 2</description>
+  </parameter>
+  <parameter nr=""132"" value=""0"" type=""A2 Condition"">
+    <description>see appendix 3</description>
+  </parameter>
+  <parameter nr=""133"" value=""0"" type=""A2 Special function"">
+    <description>see appendix 4</description>
+  </parameter>
+  <parameter nr=""134"" value=""5"" type=""A2 Time value for special function"">
+    <description>Time base 0.1 sec per value</description>
+  </parameter>
+  <parameter nr=""135"" value=""1"" type=""A2 Servo speed"">
+    <description>Time base 1 ms per value</description>
+  </parameter>
+  <parameter nr=""136"" value=""200"" type=""A2 Servo end position right"">
+    <description>Value in degrees</description>
+  </parameter>
+  <parameter nr=""137"" value=""20"" type=""A2 Servo end position left"">
+    <description>Value in degrees</description>
+  </parameter>
+  <parameter nr=""138"" value=""0"" type=""A2 Servo inverted"">
+    <description>The servo is operated inversely if the value = 1</description>
+  </parameter>
+  <parameter nr=""139"" value=""1"" type=""A2 Switch servo off"">
+    <description>The servo is switched off if the value = 1</description>
+  </parameter>
+  <parameter nr=""140"" value=""3"" type=""A3 Switch command assignment"">
+    <description>see appendix 1</description>
+  </parameter>
+  <parameter nr=""141"" value=""100"" type=""A3 Dimming value"">
+    <description>see appendix 2</description>
+  </parameter>
+  <parameter nr=""142"" value=""0"" type=""A3 Condition"">
+    <description>see appendix 3</description>
+  </parameter>
+  <parameter nr=""143"" value=""0"" type=""A3 Special function"">
+    <description>see appendix 4</description>
+  </parameter>
+  <parameter nr=""144"" value=""5"" type=""A3 Time value for special function"">
+    <description>Time base 0.1 sec per value</description>
+  </parameter>
+  <parameter nr=""145"" value=""1"" type=""A3 Servo speed"">
+    <description>Time base 1 ms per value</description>
+  </parameter>
+  <parameter nr=""146"" value=""200"" type=""A3 Servo end position right"">
+    <description>Value in degrees</description>
+  </parameter>
+  <parameter nr=""147"" value=""20"" type=""A3 Servo end position left"">
+    <description>Value in degrees</description>
+  </parameter>
+  <parameter nr=""148"" value=""1"" type=""A3 Servo inverted"">
+    <description>The servo is operated inversely if the value = 1</description>
+  </parameter>
+  <parameter nr=""149"" value=""1"" type=""A3 Switch servo off"">
+    <description>The servo is switched off if the value = 1</description>
+  </parameter>
+  <parameter nr=""150"" value=""4"" type=""A4 Switch command assignment"">
+    <description>see appendix 1</description>
+  </parameter>
+  <parameter nr=""151"" value=""100"" type=""A4 Dimming value"">
+    <description>see appendix 2</description>
+  </parameter>
+  <parameter nr=""152"" value=""0"" type=""A4 Condition"">
+    <description>see appendix 3</description>
+  </parameter>
+  <parameter nr=""153"" value=""0"" type=""A4 Special function"">
+    <description>see appendix 4</description>
+  </parameter>
+  <parameter nr=""154"" value=""5"" type=""A4 Time value for special function"">
+    <description>Time base 0.1 sec per value</description>
+  </parameter>
+  <parameter nr=""155"" value=""1"" type=""A4 Servo speed"">
+    <description>Time base 1 ms per value</description>
+  </parameter>
+  <parameter nr=""156"" value=""200"" type=""A4 Servo end position right"">
+    <description>Value in degrees</description>
+  </parameter>
+  <parameter nr=""157"" value=""20"" type=""A4 Servo end position left"">
+    <description>Value in degrees</description>
+  </parameter>
+  <parameter nr=""158"" value=""1"" type=""A4 Servo inverted"">
+    <description>The servo is operated inversely if the value = 1</description>
+  </parameter>
+  <parameter nr=""159"" value=""1"" type=""A4 Switch servo off"">
+    <description>The servo is switched off if the value = 1</description>
+  </parameter>
+  <parameter nr=""160"" value=""5"" type=""A5 Switch command assignment"">
+    <description>see appendix 1</description>
+  </parameter>
+  <parameter nr=""161"" value=""100"" type=""A5 Dimming value"">
+    <description>see appendix 2</description>
+  </parameter>
+  <parameter nr=""162"" value=""0"" type=""A5 Condition"">
+    <description>see appendix 3</description>
+  </parameter>
+  <parameter nr=""163"" value=""0"" type=""A5 Special function"">
+    <description>see appendix 4</description>
+  </parameter>
+  <parameter nr=""164"" value=""5"" type=""A5 Time value for special function"">
+    <description>Time base 0.1 sec per value</description>
+  </parameter>
+  <parameter nr=""165"" value=""1"" type=""A5 Servo speed"">
+    <description>Time base 1 ms per value</description>
+  </parameter>
+  <parameter nr=""166"" value=""200"" type=""A5 Servo end position right"">
+    <description>Value in degrees</description>
+  </parameter>
+  <parameter nr=""167"" value=""20"" type=""A5 Servo end position left"">
+    <description>Value in degrees</description>
+  </parameter>
+  <parameter nr=""168"" value=""1"" type=""A5 Servo inverted"">
+    <description>The servo is operated inversely if the value = 1</description>
+  </parameter>
+  <parameter nr=""169"" value=""1"" type=""A5 Switch servo off"">
+    <description>The servo is switched off if the value = 1</description>
+  </parameter>
+  <parameter nr=""170"" value=""6"" type=""A6 Switch command assignment"">
+    <description>see appendix 1</description>
+  </parameter>
+  <parameter nr=""171"" value=""100"" type=""A6 Dimming value"">
+    <description>see appendix 2</description>
+  </parameter>
+  <parameter nr=""172"" value=""0"" type=""A6 Condition"">
+    <description>see appendix 3</description>
+  </parameter>
+  <parameter nr=""173"" value=""0"" type=""A6 Special function"">
+    <description>see appendix 4</description>
+  </parameter>
+  <parameter nr=""174"" value=""5"" type=""A6 Time value for special function"">
+    <description>Time base 0.1 sec per value</description>
+  </parameter>
+  <parameter nr=""175"" value=""1"" type=""A6 Servo speed"">
+    <description>Time base 1 ms per value</description>
+  </parameter>
+  <parameter nr=""176"" value=""200"" type=""A6 Servo end position right"">
+    <description>Value in degrees</description>
+  </parameter>
+  <parameter nr=""177"" value=""20"" type=""A6 Servo end position left"">
+    <description>Value in degrees</description>
+  </parameter>
+  <parameter nr=""178"" value=""1"" type=""A6 Servo inverted"">
+    <description>The servo is operated inversely if the value = 1</description>
+  </parameter>
+  <parameter nr=""179"" value=""1"" type=""A6 Switch servo off"">
+    <description>The servo is switched off if the value = 1</description>
+  </parameter>
+  <parameter nr=""180"" value=""65"" type=""Brake level active"">
+    <description>Speed step (internal) at which the brake light is enabled</description>
+  </parameter>
+  <parameter nr=""181"" value=""2"" type=""Brake level difference"">
+    <description>Difference between the target and actual speed at which braking is triggered</description>
+  </parameter>
+  <parameter nr=""182"" value=""0"" type=""Trigger sound"">
+    <description>0 = inactive, 1 = trigger active (only with diesel, electric locos, only if CV115 = 1)</description>
+  </parameter>
+  <parameter nr=""183"" value=""0"" type=""Brake light at standstill active"">
+    <description>0 = standing sound off, 1 = standing sound on</description>
+  </parameter>
+  <parameter nr=""184"" value=""0"" type=""Load control whisper mode"">
+    <description>0 = normal, 1 = whisper mode</description>
+  </parameter>
+</configuration>"

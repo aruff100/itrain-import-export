@@ -26,12 +26,21 @@ public final class AppSettings {
     private static final String KEY_AUTO_UPDATE_CHECK = "autoUpdateCheck";
     private static final String KEY_SHOW_DECODER_HINTS = "showDecoderHints";
     private static final String KEY_DECODER_DIRECTORY = "decoderDirectory";
+    private static final String KEY_SYSTEM_FILES_DIRECTORY = "systemFilesDirectory";
     private static final String KEY_DECODER_PACK_VERSION = "decoderPackVersion";
     private static final String KEY_DECODER_PACK_INSTALLED = "decoderPackInstalled";
     private static final String KEY_PREFERRED_SCREEN = "preferredScreen";
     private static final String KEY_DIALOG_OFFSET = "dialogOffset";
     private static final String KEY_CACHED_MANUAL_URL = "cachedManualUrl";
     private static final String KEY_CACHED_DECODER_URL = "cachedDecoderUrl";
+    private static final String KEY_BUNDLED_TEMPLATES_FINGERPRINT = "bundledTemplatesFingerprint";
+    private static final String KEY_BIDIB_LOCAL_UID = "bidibLocalUid";
+    private static final String KEY_BIDIB_USER_NAME = "bidibUserName";
+    private static final String KEY_BIDIB_LAST_IP = "bidibLastIp";
+    private static final String KEY_BIDIB_LAST_PORT = "bidibLastPort";
+    private static final String KEY_CUSTOM_COLOR_ACTIVE = "customColorActive";
+    private static final String KEY_CUSTOM_BACKGROUND_COLOR = "customBackgroundColor";
+    private static final String KEY_CUSTOM_TEXT_COLOR = "customTextColor";
 
     /**
      * Vorsatz für die gemerkte Fensterlage. Je Fenster ein eigener Eintrag
@@ -56,6 +65,17 @@ public final class AppSettings {
     private static AppSettings instance;
 
     private final Preferences prefs = Preferences.userNodeForPackage(AppSettings.class);
+
+    /**
+     * Einstellungszweig des fruegeren, eigenstaendigen BiDiB-Programms
+     * (iTrain_import_export_BiDiB). Aus ihm werden die netBiDiB-Werte einmalig
+     * uebernommen, falls hier noch keine stehen - siehe
+     * {@link #inheritedBidibValue}.
+     */
+    private static final String BIDIB_LEGACY_PREFS_NODE = "com/example/itrain_import_export_bidib";
+
+    /** Merker, dass die netBiDiB-Werte aus dem alten Zweig bereits geholt wurden. */
+    private static final String KEY_BIDIB_LEGACY_MIGRATED = "bidibLegacyMigrated";
 
     private AppSettings() {
     }
@@ -105,6 +125,147 @@ public final class AppSettings {
 
     public void setTheme(String theme) {
         prefs.put(KEY_THEME, theme);
+    }
+
+    /**
+     * Ob statt Hell/Dunkel eine eigene, vom Anwender per {@code
+     * CustomColorDialog} gewaehlte Hintergrund-/Textfarbe gilt. Diese wirkt
+     * ueberall dort, wo sonst Hell/Dunkel wirkt (siehe {@link ThemeManager}),
+     * und wird abgeschaltet, sobald in der Farbschema-Auswahl erneut "Hell"
+     * oder "Dunkel" gewaehlt wird.
+     */
+    public boolean isCustomColorActive() {
+        return prefs.getBoolean(KEY_CUSTOM_COLOR_ACTIVE, false);
+    }
+
+    public void setCustomColorActive(boolean active) {
+        prefs.putBoolean(KEY_CUSTOM_COLOR_ACTIVE, active);
+    }
+
+    /**
+     * Eigene, dauerhaft gemerkte netBiDiB-Unique-ID dieses Programms (7 Byte,
+     * als Hex-Text), oder {@code null}, wenn noch keine erzeugt wurde - siehe
+     * {@link BidibConnectionDialog}. Muss über Neustarts hinweg stabil
+     * bleiben, weil die Pairing-Vertrauensstellung an genau diese ID gebunden
+     * ist (bei jedem Programmstart eine neue UID würde bei jedem Verbinden
+     * ein erneutes Pairing verlangen).
+     */
+    public String getBidibLocalUid() {
+        return inheritedBidibValue(KEY_BIDIB_LOCAL_UID);
+    }
+
+    /**
+     * Liest einen netBiDiB-Wert - und holt ihn einmalig aus dem Zweig des
+     * fruegeren BiDiB-Programms, wenn hier noch keiner steht.
+     * <p>
+     * Wichtig fuer die eigene Unique-ID: Das Pairing im Geraet haengt an
+     * genau dieser Kennung. Eine hier neu erzeugte ID kennt das Geraet nicht,
+     * es antwortet dann mit "unpaired" und verlangt trotz gefuelltem
+     * Pairing-Speicher eine neue Bestaetigung. Mit der uebernommenen ID
+     * erkennt es das Programm dagegen wieder.
+     */
+    private String inheritedBidibValue(String key) {
+        migrateBidibValuesOnce();
+        return prefs.get(key, null);
+    }
+
+    /**
+     * Holt die netBiDiB-Werte EINMALIG aus dem Zweig des frueheren
+     * BiDiB-Programms - auch dann, wenn hier bereits welche stehen.
+     * <p>
+     * Genau das ist der Punkt: Beim ersten Verbindungsversuch im Hauptprogramm
+     * wurde bereits eine neue Unique-ID erzeugt und gespeichert. Ein Rueckfall
+     * "nur wenn hier nichts steht" haette danach nie mehr in den alten Zweig
+     * gesehen - und das Geraet haette das Programm bei jedem Verbinden erneut
+     * als fremd behandelt und ein Pairing verlangt. Die Uebernahme laeuft
+     * deshalb einmalig ueber einen eigenen Merker und ersetzt dabei die
+     * inzwischen erzeugte Kennung.
+     */
+    private void migrateBidibValuesOnce() {
+        if (prefs.getBoolean(KEY_BIDIB_LEGACY_MIGRATED, false)) {
+            return;
+        }
+        try {
+            Preferences legacy = Preferences.userRoot().node(BIDIB_LEGACY_PREFS_NODE);
+            for (String key : new String[]{KEY_BIDIB_LOCAL_UID, KEY_BIDIB_USER_NAME}) {
+                String value = legacy.get(key, null);
+                if (value != null && !value.isBlank()) {
+                    prefs.put(key, value);
+                }
+            }
+        } catch (Exception ignored) {
+            // Kein Zugriff auf den alten Zweig: dann bleibt es bei den eigenen Werten.
+        }
+        prefs.putBoolean(KEY_BIDIB_LEGACY_MIGRATED, true);
+    }
+
+    public void setBidibLocalUid(String hex) {
+        prefs.put(KEY_BIDIB_LOCAL_UID, hex);
+    }
+
+    /**
+     * Name, mit dem sich dieses Programm bei anderen netBiDiB-Teilnehmern
+     * vorstellt (DESCRIPTOR_USER_STRING), oder {@code null} für den
+     * Standardvorschlag (Rechnername) - siehe {@link BidibConnectionDialog}.
+     */
+    public String getBidibUserName() {
+        return inheritedBidibValue(KEY_BIDIB_USER_NAME);
+    }
+
+    public void setBidibUserName(String name) {
+        if (name == null || name.isBlank()) {
+            prefs.remove(KEY_BIDIB_USER_NAME);
+        } else {
+            prefs.put(KEY_BIDIB_USER_NAME, name);
+        }
+    }
+
+    /**
+     * Zuletzt verwendete netBiDiB-Adresse/Port (siehe {@link BidibConnectionDialog}) -
+     * damit die IP-Adresse nicht bei jedem Programmstart neu eingetippt werden
+     * muss. {@code null}/leer, wenn noch nie verbunden wurde.
+     */
+    public String getBidibLastIp() {
+        return prefs.get(KEY_BIDIB_LAST_IP, null);
+    }
+
+    public void setBidibLastIp(String ip) {
+        if (ip == null || ip.isBlank()) {
+            prefs.remove(KEY_BIDIB_LAST_IP);
+        } else {
+            prefs.put(KEY_BIDIB_LAST_IP, ip);
+        }
+    }
+
+    /** Zuletzt verwendeter netBiDiB-Port, oder {@code null} für den Standard (62875). */
+    public String getBidibLastPort() {
+        return prefs.get(KEY_BIDIB_LAST_PORT, null);
+    }
+
+    public void setBidibLastPort(String port) {
+        if (port == null || port.isBlank()) {
+            prefs.remove(KEY_BIDIB_LAST_PORT);
+        } else {
+            prefs.put(KEY_BIDIB_LAST_PORT, port);
+        }
+    }
+
+    /** Gemerkte eigene Hintergrundfarbe als Web-Farbwert ({@code "#rrggbb"}), oder null falls nie gespeichert. */
+    public String getCustomBackgroundColor() {
+        return prefs.get(KEY_CUSTOM_BACKGROUND_COLOR, null);
+    }
+
+    public void setCustomBackgroundColor(String webColor) {
+        prefs.put(KEY_CUSTOM_BACKGROUND_COLOR, webColor);
+    }
+
+    /** Gemerkte eigene Textfarbe als Web-Farbwert ({@code "#rrggbb"}), oder null falls nie gespeichert. */
+    public String getCustomTextColor() {
+        return prefs.get(KEY_CUSTOM_TEXT_COLOR, null);
+    }
+
+    public void setCustomTextColor(String webColor) {
+        prefs.put(KEY_CUSTOM_TEXT_COLOR, webColor);
     }
 
     /** Ob die Typ-Spalte in der Kategorie-Tabelle angezeigt wird. Standard: ausgeblendet. */
@@ -224,6 +385,31 @@ public final class AppSettings {
     }
 
     /**
+     * Ordner fuer System-Dateien (seit 2.5): Dort legt das Systeme-Fenster
+     * die ausgelesenen Interfaces samt Knoten ab ("Speichern" im Knotenbaum),
+     * und von dort oeffnet "Interface Datei oeffnen" sie wieder. Oder null,
+     * falls nicht gesetzt. Standardvorschlag {@code <Benutzerverzeichnis>/
+     * iTrain/System-Dateien} - wie die uebrigen Pfade unterhalb des
+     * iTrain-Ordners, siehe {@link FirstRunDialog} und Voreinstellungen → Pfade.
+     */
+    public String getSystemFilesDirectory() {
+        return prefs.get(KEY_SYSTEM_FILES_DIRECTORY, null);
+    }
+
+    public void setSystemFilesDirectory(String path) {
+        prefs.put(KEY_SYSTEM_FILES_DIRECTORY, path);
+    }
+
+    /** Zuletzt benutzte IP-Adresse einer ESU ECoS (siehe EcosConnectionDialog). */
+    public String getEcosHost() {
+        return prefs.get("ecosHost", "192.168.0.99");
+    }
+
+    public void setEcosHost(String host) {
+        prefs.put("ecosHost", host);
+    }
+
+    /**
      * Versionskennung der zuletzt installierten decoder.zip - stammt aus der
      * Datei {@code version.txt} im Archiv (siehe
      * {@link DecoderTemplateInstaller}). Fehlt sie im Archiv, bleibt der Wert
@@ -262,6 +448,25 @@ public final class AppSettings {
             prefs.remove(KEY_CACHED_DECODER_URL);
         } else {
             prefs.put(KEY_CACHED_DECODER_URL, url);
+        }
+    }
+
+    /**
+     * Kennung des zuletzt in den Decoder-Ordner übertragenen Satzes
+     * mitgelieferter Vorlagen (Sprachordner + Zielordner + Inhalts-Hash,
+     * siehe {@link DecoderTemplateBundle}). Weicht die Kennung des
+     * laufenden Programms davon ab - neue Version, andere Sprache, anderer
+     * Ordner -, werden die Vorlagen erneut übertragen.
+     */
+    public String getBundledTemplatesFingerprint() {
+        return prefs.get(KEY_BUNDLED_TEMPLATES_FINGERPRINT, null);
+    }
+
+    public void setBundledTemplatesFingerprint(String fingerprint) {
+        if (fingerprint == null || fingerprint.isBlank()) {
+            prefs.remove(KEY_BUNDLED_TEMPLATES_FINGERPRINT);
+        } else {
+            prefs.put(KEY_BUNDLED_TEMPLATES_FINGERPRINT, fingerprint);
         }
     }
 

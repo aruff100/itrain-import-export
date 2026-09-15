@@ -1,0 +1,411 @@
+﻿"Kategorie";"Typ";"Name";"Beschreibung";"XML"
+"decoder-configuration";"configuration";"ESU LokSound 5";"ESU LokSound 5 - list of all supported CVs from the operating manual (edition 16), pages 102-109";"<configuration count=""136"">
+  <parameter nr=""1"" value=""3"" type=""Locomotive address"">
+    <description>Address of the locomotive (multi-protocol decoder: range 1-255 for Motorola)</description>
+  </parameter>
+  <parameter nr=""2"" value=""3"" type=""Starting voltage"">
+    <description>Sets the minimum speed of the locomotive</description>
+  </parameter>
+  <parameter nr=""3"" value=""28"" type=""Acceleration time"">
+    <description>Value multiplied by 0.25 = time from stop to maximum speed. LokSound 5 DCC only: unit is 0.896 seconds</description>
+  </parameter>
+  <parameter nr=""4"" value=""21"" type=""Braking time"">
+    <description>Value multiplied by 0.25 = time from maximum speed to stop. LokSound 5 DCC only: unit is 0.896 seconds</description>
+  </parameter>
+  <parameter nr=""5"" value=""255"" type=""Maximum speed"">
+    <description>The maximum speed of the locomotive</description>
+  </parameter>
+  <parameter nr=""6"" type=""Medium speed"">
+    <description>Medium speed when the 3-point speed table is active. For LokSound 5 DCC only</description>
+  </parameter>
+  <parameter nr=""7"" type=""Version number"">
+    <description>Internal software version of the decoder</description>
+  </parameter>
+  <parameter nr=""8"" type=""Manufacturer ID"">
+    <description>Manufacturer number (ID) of ESU - writing the value 8 resets all CVs to the factory settings</description>
+  </parameter>
+  <parameter nr=""9"" value=""40"" type=""Motor PWM frequency"">
+    <description>Motor PWM frequency as a multiple of 1000 Hz.</description>
+  </parameter>
+  <parameter nr=""13"" value=""1"" type=""Analogue mode F1-F8"">
+    <description>State of functions F1 to F8 in analogue mode. See section 12.7.</description>
+  </parameter>
+  <parameter nr=""14"" value=""1"" type=""Analogue mode FL, F9-F15"">
+    <description>State of functions F0, F9 to F15 in analogue mode. See section 12.7.</description>
+  </parameter>
+  <parameter nr=""15"" value=""0"" type=""Decoder lock"">
+    <description>Decoder lock function according to NMRA. For details see http://www.nmra.org/standards/DCC/WGpublic/0305051/0305051.html</description>
+  </parameter>
+  <parameter nr=""16"" value=""0"" type=""Decoder lock"">
+    <description>Decoder lock function according to NMRA. For details see http://www.nmra.org/standards/DCC/WGpublic/0305051/0305051.html</description>
+  </parameter>
+  <parameter nr=""17"" value=""192"" type=""Extended locomotive address"">
+    <description>Long address of the locomotive. See section 9.2.</description>
+  </parameter>
+  <parameter nr=""18"" value=""192"" type=""Extended locomotive address"">
+    <description>Long address of the locomotive. See section 9.2.</description>
+  </parameter>
+  <parameter nr=""19"" value=""0"" type=""Consist address"">
+    <description>Additional address for running in a consist (multiple-unit operation). The value 0 or 128 means: consist address inactive 1 - 127 consist address normal direction of travel 129 - 255 consist address reversed direction of travel</description>
+  </parameter>
+  <parameter nr=""21"" value=""0"" type=""Consist mode F1-F8"">
+    <description>State of functions F1 to F8 in consist mode (multiple unit). Meaning of the bits as in CV 13.</description>
+  </parameter>
+  <parameter nr=""22"" value=""0"" type=""Consist mode FL, F9-F12"">
+    <description>State of functions F0, F9 to F15 in consist mode (multiple unit). Meaning of the bits as in CV 14.</description>
+  </parameter>
+  <parameter nr=""23"" value=""0"" type=""Adjust acceleration"">
+    <description>Factor for adjusting the acceleration time CV 3. Values from 0 to 127 are added to CV 3. If the values are to be subtracted, additionally set bit 7 (value 128).</description>
+  </parameter>
+  <parameter nr=""24"" value=""0"" type=""Adjust braking"">
+    <description>Factor for adjusting the braking time CV 4. Values from 0 to 127 are added to CV 4. If the values are to be subtracted, additionally set bit 7 (value 128).</description>
+  </parameter>
+  <parameter nr=""27"" value=""28"" type=""Brake mode"">
+    <description>Permitted braking modes | Bit Function Value | 0 ABC braking, voltage on the right-hand side higher 1 | 1 ABC braking, voltage on the left-hand side higher 2 | 2 ZIMO HLU braking active 4 | 3 Brake on DC if the polarity is opposite to the direction of travel 8 | 4 Brake on DC if the polarity is the same as the direction of travel 16 | 5 Selectrix brake diode, loco brakes if the polarity is opposite to the direction of travel 32 | 6 Selectrix brake diode, loco brakes if the polarity is the same as the direction of travel 64 | 7 Loco brakes with a constant braking distance if FS=0 128</description>
+  </parameter>
+  <parameter nr=""28"" value=""131"" type=""RailCom® configuration"">
+    <description>Settings for RailCom® | Bit Function Value | 0 Channel 1 enabled for address broadcast 1 | 1 Data transmission on channel 2 permitted 2 | 7 RailCom® Plus automatic loco registration active 128</description>
+  </parameter>
+  <parameter nr=""29"" value=""12"" type=""Configuration register"">
+    <description>This register brings together important information, some of which is only relevant in DCC operation | Bit Function Value | 0 normal direction behaviour reversed direction behaviour 0 1 | 1 14 speed steps DCC 28 or 128 speed steps DCC 0 2 | 2 disable analogue operation permit analogue operation 0 4 | 3 RailCom® is switched off permit RailCom® 0 8 | 4 Motor characteristic by CV 67 - 94. With LokSound 5 multi-protocol decoders ALWAYS ACTIVE 16 | 5 Short addresses (CV 1) in DCC operation Long addresses (CV 17+18) in DCC operation 0 32</description>
+  </parameter>
+  <parameter nr=""31"" value=""16"" type=""Index register H"">
+    <description>Selection of the memory page for CV257-512. With the LokSound 5 normally always set to 16</description>
+  </parameter>
+  <parameter nr=""32"" value=""0"" type=""Index register L"">
+    <description>Selection of the memory page for CV257-512</description>
+  </parameter>
+  <parameter nr=""47"" value=""15"" type=""Protocol selection"">
+    <description>Which protocols are active. Please note chapter 9.5. | Bit Function Value | 0 DCC protocol active 1 | 1 M4 protocol active (not for LokSound 5 DCC) 2 | 2 Motorola® protocol active (not for LokSound 5 DCC) 4 | 3 Selectrix® protocol active (not for LokSound 5 DCC) 8</description>
+  </parameter>
+  <parameter nr=""49"" value=""19"" type=""Extended configuration #1"">
+    <description>0 Load control active load control off 1 0 | 1 Reserved 2 | 2 Reserved 4 | 3 Märklin® consecutive addresses, ""low"" bit 0, 8 | 4 Automatic speed step detection speed step detection DCC format switched off speed step detection DCC format switched on 0 16 | 5 LGB® function key mode LGB® mode switched off LGB® mode switched on 0 32 | 6 Reserved 64 | 7 Märklin® consecutive addresses, ""high"" bit. See chapter 9.3.1. for an explanation of bits 3, 7 0, 128</description>
+  </parameter>
+  <parameter nr=""50"" value=""3"" type=""Analogue mode"">
+    <description>Determines which analogue modes are permitted | Bit Function Value | 0 AC analogue mode AC analogue mode switched off AC analogue mode switched on 0 1 | 1 DC analogue mode DC analogue mode switched off DC analogue mode switched on 0 2 | 2 QSI Quantum Engineer in DC analogue operation QSI Quantum Engineer detection switched off QSI Quantum Engineer detection switched on 0 4</description>
+  </parameter>
+  <parameter nr=""51"" value=""10"" type=""«K slow» cutoff"">
+    <description>Internal speed step up to which ""K Slow"" applies</description>
+  </parameter>
+  <parameter nr=""52"" value=""10"" type=""Load control param. «K slow»"">
+    <description>""K"" component of the internal PI controller for the low speed steps</description>
+  </parameter>
+  <parameter nr=""53"" value=""130"" type=""Control reference"">
+    <description>Determines the level of the back-EMF voltage the motor is expected to deliver at maximum speed. The better the efficiency of the motor, the higher this value can be. If the loco does not reach its maximum speed, increase this parameter.</description>
+  </parameter>
+  <parameter nr=""54"" value=""50"" type=""Load control param. „K“"">
+    <description>""K"" component of the internal PI controller. Determines how firm the control is. The greater the value, the more strongly the decoder controls the motor.</description>
+  </parameter>
+  <parameter nr=""55"" value=""100"" type=""Load control param. „I“"">
+    <description>""I"" component of the internal PI controller. Determines the inertia of the motor. The more sluggish the motor is (i.e. if there is a lot of flywheel mass or the motor has a large diameter), the greater the value must be.</description>
+  </parameter>
+  <parameter nr=""56"" value=""255"" type=""Control influence at Vmin"">
+    <description>0 - 100 %. Determines how strong the load control is at the lowest speed step.</description>
+  </parameter>
+  <parameter nr=""57"" value=""30"" type=""Chuff synchronisation #1"">
+    <description>Defines the steam synchronisation. For details see chapter 13.3.</description>
+  </parameter>
+  <parameter nr=""58"" value=""20"" type=""Chuff synchronisation #2"">
+    <description>Defines the steam synchronisation. For details see chapter 13.3.</description>
+  </parameter>
+  <parameter nr=""63"" value=""128"" type=""Sound volume «master»"">
+    <description>Master volume control for all sounds.</description>
+  </parameter>
+  <parameter nr=""64"" value=""60"" type=""Brake sound threshold «Brake On»"">
+    <description>If the actual speed step of the loco is less than or equal to the value set here, the brake sound will be played. See chapter 13.4.</description>
+  </parameter>
+  <parameter nr=""65"" value=""7"" type=""Brake sound threshold «Brake Off»"">
+    <description>If the actual speed step is lower than the value set here (normalised to 255), the brake sound is switched off again. See chapter 13.4.</description>
+  </parameter>
+  <parameter nr=""66"" value=""128"" type=""Forward trim"">
+    <description>Divided by 128 this gives the factor by which the motor voltage is multiplied when running forwards. The value zero disables the trim.</description>
+  </parameter>
+  <parameter nr=""67"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""68"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""69"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""70"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""71"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""72"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""73"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""74"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""75"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""76"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""77"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""78"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""79"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""80"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""81"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""82"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""83"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""84"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""85"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""86"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""87"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""88"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""89"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""90"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""91"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""92"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""93"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""94"" type=""Speed table"">
+    <description>Assigns a motor voltage to the speed steps. The values in between are interpolated.</description>
+  </parameter>
+  <parameter nr=""95"" value=""128"" type=""Reverse trim"">
+    <description>Divided by 128 this gives the factor by which the motor voltage is multiplied when running backwards. The value zero disables the trim.</description>
+  </parameter>
+  <parameter nr=""101"" value=""64"" type=""Trim shunting mode"">
+    <description>Divided by 128 this gives the factor by which the motor voltage is multiplied when shunting mode is active. See section 10.1.2.</description>
+  </parameter>
+  <parameter nr=""102"" value=""12"" type=""Brake section release delay"">
+    <description>Time as a multiple of 16 milliseconds that must elapse before a detected braking section is left again. See section 10.4.6.</description>
+  </parameter>
+  <parameter nr=""103"" value=""0"" type=""Load adaptation „alternative load”"">
+    <description>Divided by 128 this gives the factor by which CV3, CV4 and the sound sequence are changed when ""alternative load"" is active. See section 10.7.</description>
+  </parameter>
+  <parameter nr=""104"" value=""255"" type=""Load adaptation „heavy load”"">
+    <description>Divided by 128 this gives the factor by which CV3, CV4 and the sound sequence are changed when ""heavy load"" is active. See section 10.7.</description>
+  </parameter>
+  <parameter nr=""105"" value=""0"" type=""User ID #1"">
+    <description>Space for your own entries. Not evaluated by the decoder.</description>
+  </parameter>
+  <parameter nr=""106"" value=""0"" type=""User ID #2"">
+    <description>Space for your own entries. Not evaluated by the decoder.</description>
+  </parameter>
+  <parameter nr=""111"" value=""0"" type=""Gearbox load compensation"">
+    <description>Time as a multiple of 16 ms for which the motor runs at minimum speed after a change of direction, in order to prevent a jerk on starting caused by gear backlash.</description>
+  </parameter>
+  <parameter nr=""112"" value=""20"" type=""Duration of flashing effects"">
+    <description>Flashing frequency of the strobe effects. Always a multiple of 0.065536 seconds. See section 12.5.4.</description>
+  </parameter>
+  <parameter nr=""113"" value=""32"" type=""Power fail bypass"">
+    <description>Time the decoder bridges from the PowerPack after an interruption of the power supply. Unit: multiple of 0.032768 seconds. See 6.12.2.</description>
+  </parameter>
+  <parameter nr=""116"" value=""50"" type=""Back-EMF sampling period (sampling rate) at Vmin"">
+    <description>Frequency of the back-EMF measurement in 0.1 milliseconds at speed step 1</description>
+  </parameter>
+  <parameter nr=""117"" value=""150"" type=""Back-EMF sampling period (sampling rate) at Vmax"">
+    <description>Frequency of the back-EMF measurement in 0.1 milliseconds at speed step 255</description>
+  </parameter>
+  <parameter nr=""118"" value=""15"" type=""Length of the back-EMF blanking gap at Vmin"">
+    <description>Length of the measuring gap in 0.1 milliseconds at speed step 1</description>
+  </parameter>
+  <parameter nr=""119"" value=""20"" type=""Length of the back-EMF blanking gap at Vmax"">
+    <description>Length of the measuring gap in 0.1 milliseconds at speed step 255</description>
+  </parameter>
+  <parameter nr=""123"" value=""100"" type=""ABC mode „slow speed”"">
+    <description>Speed that applies in the slow-running section with ABC braking</description>
+  </parameter>
+  <parameter nr=""124"" value=""28"" type=""Extended configuration #2"">
+    <description>Further important settings of the decoder | Bit Description Value | 0 Wrong-direction bit: keep the direction of travel when the direction is changed. Do not keep the direction of travel 1 0 | 1 SUSI slave protocol switched off SUSI slave protocol switched on. 0 2 | 2 Disable start-up delay Enable start-up delay 0 4 | 3 SUSI serial protocol switched off SUSI serial protocol switched on 0 8 | 4 Output AUX10 is active (LokSound 5 H0 only) Wheel sensor input is switched on (LokSound 5 H0 only) 0 16 | 5 Motor protection when stalled The motor is not switched off when stalled The motor is switched off for a few seconds when stalled in order to prevent burn-out 0 32 | 6 Parking brake switched off Parking brake switched on (active back-EMF brake when stopped) 0 64 | 7 Reserved 128</description>
+  </parameter>
+  <parameter nr=""125"" value=""90"" type=""Starting voltage analogue DC"">
+    <description>See chapter 10.8.</description>
+  </parameter>
+  <parameter nr=""126"" value=""130"" type=""Maximum speed analogue DC"">
+    <description>See chapter 10.8.</description>
+  </parameter>
+  <parameter nr=""127"" value=""90"" type=""Starting voltage analogue AC"">
+    <description>See chapter 10.8.</description>
+  </parameter>
+  <parameter nr=""128"" value=""130"" type=""Maximum speed analogue AC"">
+    <description>See chapter 10.8.</description>
+  </parameter>
+  <parameter nr=""129"" value=""15"" type=""Analogue functions „hysteresis”"">
+    <description>Offset voltage for functions in analogue mode. Chapter 10.8.</description>
+  </parameter>
+  <parameter nr=""130"" value=""5"" type=""Analogue motor „hysteresis”"">
+    <description>Offset voltage for the motor function in analogue mode. Chapter 10.8.</description>
+  </parameter>
+  <parameter nr=""132"" value=""80"" type=""Grade crossing hold time"">
+    <description>Grade crossing hold time. See section 12.5.3.</description>
+  </parameter>
+  <parameter nr=""133"" value=""128"" type=""Sound fader"">
+    <description>Volume when the sound fader is active. See chapter 13.5.</description>
+  </parameter>
+  <parameter nr=""134"" value=""10"" type=""ABC mode „sensitivity”"">
+    <description>Response threshold from which asymmetry is to be detected as ABC.</description>
+  </parameter>
+  <parameter nr=""138"" value=""128"" type=""Smoke unit trim fan"">
+    <description>Divided by 128 this gives the factor by which the fan speed of clocked smoke generators can be adjusted.</description>
+  </parameter>
+  <parameter nr=""139"" value=""128"" type=""Smoke unit trim temperature"">
+    <description>Divided by 128 this gives the factor by which the temperature of clocked smoke generators can be adjusted.</description>
+  </parameter>
+  <parameter nr=""140"" value=""255"" type=""Smoke time out"">
+    <description>Time until the smoke generator is switched off automatically.</description>
+  </parameter>
+  <parameter nr=""141"" value=""10"" type=""Smoke chuff min"">
+    <description>Minimum duration of a steam chuff of an external smoke generator, in a resolution of 0.041 seconds.</description>
+  </parameter>
+  <parameter nr=""142"" value=""125"" type=""Smoke chuff max"">
+    <description>Maximum duration of a steam chuff of an external smoke generator, in a resolution of 0.041 seconds.</description>
+  </parameter>
+  <parameter nr=""143"" value=""100"" type=""Smoke chuff length"">
+    <description>Divided by 128 this gives the factor by which the duration of the steam chuffs can be adjusted relative to the trigger pulses.</description>
+  </parameter>
+  <parameter nr=""144"" value=""150"" type=""Smoke pre-heat temperature"">
+    <description>Pre-heating temperature in degrees Celsius for secondary smoke generators (cylinder steam)</description>
+  </parameter>
+  <parameter nr=""149"" value=""255"" type=""ABC shuttle train waiting time"">
+    <description>Time in seconds waited in ABC shuttle-train operation before the direction of travel is reversed. See section 10.4.4.3.</description>
+  </parameter>
+  <parameter nr=""150"" value=""42"" type=""HLU speed limit 1"">
+    <description>HLU speed limit 1. Internal speed step.</description>
+  </parameter>
+  <parameter nr=""151"" value=""85"" type=""HLU speed limit 2 (U)"">
+    <description>HLU speed limit 2 (U). Internal speed step.</description>
+  </parameter>
+  <parameter nr=""152"" value=""127"" type=""HLU speed limit 3"">
+    <description>HLU speed limit 3. Internal speed step.</description>
+  </parameter>
+  <parameter nr=""153"" value=""170"" type=""HLU speed limit 4 (L)"">
+    <description>HLU speed limit 4 (L). Internal speed step.</description>
+  </parameter>
+  <parameter nr=""154"" value=""212"" type=""HLU speed limit 5"">
+    <description>HLU speed limit 5. Internal speed step.</description>
+  </parameter>
+  <parameter nr=""155"" value=""0"" type=""Sound CV 1 - sound CV 16"">
+    <description>16 CVs for selecting sounds that may be assigned within sound projects. Please refer to the documentation of the sound project.</description>
+  </parameter>
+  <parameter nr=""156"" value=""0"" type=""Sound CV 1 - sound CV 16"">
+    <description>16 CVs for selecting sounds that may be assigned within sound projects. Please refer to the documentation of the sound project.</description>
+  </parameter>
+  <parameter nr=""157"" value=""0"" type=""Sound CV 1 - sound CV 16"">
+    <description>16 CVs for selecting sounds that may be assigned within sound projects. Please refer to the documentation of the sound project.</description>
+  </parameter>
+  <parameter nr=""158"" value=""0"" type=""Sound CV 1 - sound CV 16"">
+    <description>16 CVs for selecting sounds that may be assigned within sound projects. Please refer to the documentation of the sound project.</description>
+  </parameter>
+  <parameter nr=""159"" value=""0"" type=""Sound CV 1 - sound CV 16"">
+    <description>16 CVs for selecting sounds that may be assigned within sound projects. Please refer to the documentation of the sound project.</description>
+  </parameter>
+  <parameter nr=""160"" value=""0"" type=""Sound CV 1 - sound CV 16"">
+    <description>16 CVs for selecting sounds that may be assigned within sound projects. Please refer to the documentation of the sound project.</description>
+  </parameter>
+  <parameter nr=""161"" value=""0"" type=""Sound CV 1 - sound CV 16"">
+    <description>16 CVs for selecting sounds that may be assigned within sound projects. Please refer to the documentation of the sound project.</description>
+  </parameter>
+  <parameter nr=""162"" value=""0"" type=""Sound CV 1 - sound CV 16"">
+    <description>16 CVs for selecting sounds that may be assigned within sound projects. Please refer to the documentation of the sound project.</description>
+  </parameter>
+  <parameter nr=""163"" value=""0"" type=""Sound CV 1 - sound CV 16"">
+    <description>16 CVs for selecting sounds that may be assigned within sound projects. Please refer to the documentation of the sound project.</description>
+  </parameter>
+  <parameter nr=""164"" value=""0"" type=""Sound CV 1 - sound CV 16"">
+    <description>16 CVs for selecting sounds that may be assigned within sound projects. Please refer to the documentation of the sound project.</description>
+  </parameter>
+  <parameter nr=""165"" value=""0"" type=""Sound CV 1 - sound CV 16"">
+    <description>16 CVs for selecting sounds that may be assigned within sound projects. Please refer to the documentation of the sound project.</description>
+  </parameter>
+  <parameter nr=""166"" value=""0"" type=""Sound CV 1 - sound CV 16"">
+    <description>16 CVs for selecting sounds that may be assigned within sound projects. Please refer to the documentation of the sound project.</description>
+  </parameter>
+  <parameter nr=""167"" value=""0"" type=""Sound CV 1 - sound CV 16"">
+    <description>16 CVs for selecting sounds that may be assigned within sound projects. Please refer to the documentation of the sound project.</description>
+  </parameter>
+  <parameter nr=""168"" value=""0"" type=""Sound CV 1 - sound CV 16"">
+    <description>16 CVs for selecting sounds that may be assigned within sound projects. Please refer to the documentation of the sound project.</description>
+  </parameter>
+  <parameter nr=""169"" value=""0"" type=""Sound CV 1 - sound CV 16"">
+    <description>16 CVs for selecting sounds that may be assigned within sound projects. Please refer to the documentation of the sound project.</description>
+  </parameter>
+  <parameter nr=""170"" value=""0"" type=""Sound CV 1 - sound CV 16"">
+    <description>16 CVs for selecting sounds that may be assigned within sound projects. Please refer to the documentation of the sound project.</description>
+  </parameter>
+  <parameter nr=""179"" value=""80"" type=""Brake function 1 braking time"">
+    <description>Value from which 33% of CV 4 is subtracted when brake function 1 is active. See section 10.6.</description>
+  </parameter>
+  <parameter nr=""180"" value=""40"" type=""Brake function 2 braking time"">
+    <description>Value from which 33% of CV 4 is subtracted when brake function 2 is active. See section 10.6.</description>
+  </parameter>
+  <parameter nr=""181"" value=""40"" type=""Brake function 3 braking time"">
+    <description>Value from which 33% of CV 4 is subtracted when brake function 3 is active. See section 10.6.</description>
+  </parameter>
+  <parameter nr=""182"" value=""0"" type=""Brake function 1 max. speed"">
+    <description>Highest speed step that can be reached when brake function 1 is active.</description>
+  </parameter>
+  <parameter nr=""183"" value=""126"" type=""Brake function 2 max. speed"">
+    <description>Highest speed step that can be reached when brake function 2 is active.</description>
+  </parameter>
+  <parameter nr=""184"" value=""126"" type=""Brake function 3 max. speed"">
+    <description>Highest speed step that can be reached when brake function 3 is active.</description>
+  </parameter>
+  <parameter nr=""246"" value=""0"" type=""Automatic uncoupling travel speed"">
+    <description>Speed at which the loco runs while uncoupling. The greater the value, the faster the loco. The value 0 disables automatic uncoupling. Automatic uncoupling is only active if the function output is set to ""pulse"" or ""coupler"".</description>
+  </parameter>
+  <parameter nr=""247"" value=""0"" type=""Uncoupling - pull-away time"">
+    <description>This value multiplied by 0.016 defines the time for which the loco moves away from the train while pulling away (automatic uncoupling).</description>
+  </parameter>
+  <parameter nr=""248"" value=""0"" type=""Uncoupling - push-together time"">
+    <description>This value multiplied by 0.016 defines the time for which the loco pushes against the train while pushing up (automatic uncoupling).</description>
+  </parameter>
+  <parameter nr=""249"" value=""0"" type=""Minimum chuff interval"">
+    <description>Minimum interval between two steam chuffs, independent of sensor data. See chapter 13.3.</description>
+  </parameter>
+  <parameter nr=""250"" value=""0"" type=""Secondary chuff trigger"">
+    <description>defines the interval between two consecutive steam chuffs for the secondary chuff generator. The value states by how many per mille the intervals between the steam chuffs of the secondary chuff generator are to be shorter than those of the primary chuff generator. Required for steam locos with two independent bogies, e.g. ""Big Boy"" or ""Mallet"".</description>
+  </parameter>
+  <parameter nr=""253"" value=""0"" type=""Constant brake mode"">
+    <description>Determines the type of constant braking mode. Only active if CV254 &gt;0 | Function | CV 253 = 0: decoder brakes linearly CV 253 &gt; 0: decoder brakes constant linear</description>
+  </parameter>
+  <parameter nr=""254"" value=""0"" type=""Constant braking distance forward"">
+    <description>A value &gt; 0 specifies a braking distance that is maintained independently of the speed.</description>
+  </parameter>
+  <parameter nr=""255"" value=""0"" type=""Constant braking distance reverse"">
+    <description>Constant braking distance when running backwards. Active if the value is &gt; 0, otherwise the value of CV 254 is used. Useful for push-pull trains</description>
+  </parameter>
+</configuration>"

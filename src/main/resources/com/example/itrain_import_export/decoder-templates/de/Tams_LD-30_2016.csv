@@ -1,0 +1,156 @@
+﻿"Kategorie";"Typ";"Name";"Beschreibung";"XML"
+"decoder-configuration";"configuration";"Tams Lokdecoder 30er Serie (Ausgabe 2016)";"Tams Elektronik Lokdecoder 30er Serie (LD-G-30 Art. 41-01301/41-01302, LD-G-32.2 Art. 41-01420 u.a.) - CV-Tabelle aus der Anleitung, Ausgabe 05/2016, Seiten 34-39";"<configuration count=""51"">
+  <parameter nr=""1"" value=""3"" type=""Basisadresse"">
+    <description>Wertebereich im DCC-Format: 1 ... 127</description>
+  </parameter>
+  <parameter nr=""2"" value=""5"" type=""Startspannung (Anfahrgeschwindigkeit)"">
+    <description>= Spannung, die bei Fahrstufe 1 an den Motor ausgegeben wird. 0 = 0 Volt 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""3"" value=""20"" type=""Beschleunigungsrate (Anfahrverzögerung)"">
+    <description>= Länge der Wartezeit, die beim Beschleunigen / Bremsen der Lok jeweils vor dem Schalten zur nächst höheren / niedrigeren Fahrstufe vergeht. Die Wartezeit wird wie folgt berechnet: (Wert von CV#3) x 0,9 sec. / Anzahl der Fahrstufen</description>
+  </parameter>
+  <parameter nr=""4"" value=""15"" type=""Bremsrate (Bremsverzögerung)"">
+    <description></description>
+  </parameter>
+  <parameter nr=""5"" value=""0"" type=""Maximalspannung (Höchstgeschwindigkeit)"">
+    <description>= Spannung, die bei der höchsten Fahrstufe an den Motor ausgegeben wird. 2 = 0,8 % der max. Spannung 255 = max. Spannung</description>
+  </parameter>
+  <parameter nr=""7"" type=""Version"">
+    <description>Nur im DCC-Format auslesbar!</description>
+  </parameter>
+  <parameter nr=""8"" value=""62"" type=""Hersteller"">
+    <description>Nur im DCC-Format auslesbar!</description>
+  </parameter>
+  <parameter nr=""9"" value=""0"" type=""Motorfrequenz (LD-W-32.2)"">
+    <description>= Frequenz, mit der der Motor angesteuert wird. / 480 Hz 0 / 60 Hz 0</description>
+  </parameter>
+  <parameter nr=""12"" value=""0"" type=""Analogmodus"">
+    <description>= Methode, die im Analogbetrieb einen Richtungswechsel auslöst / Überspannungsimpuls (Wechselstromanlagen) 0 / Polaritätswechsel (Gleichstromanlagen) 1</description>
+  </parameter>
+  <parameter nr=""13"" value=""0"" type=""im Analogbetrieb aktive Funktionen (nur für F1 bis F8, nicht für F9 bis F12)"">
+    <description>F1 ein 1 / F2 ein 2 / F3 ein 4 / F4 ein 8 / F5 ein 16 / F6 ein 32 / F7 ein 64 / F8 ein 128</description>
+  </parameter>
+  <parameter nr=""17"" value=""192"" type=""Erweiterte Adresse"">
+    <description>Nur für DCC-Format. Bei den meisten Zentralen ist es mögl. erweiterte Adressen direkt einzugeben. Die CVs 17, 18 und 29 werden von der Zentrale automatisch richtig eingestellt.</description>
+  </parameter>
+  <parameter nr=""18"" value=""255"">
+    <description></description>
+  </parameter>
+  <parameter nr=""19"" value=""0"" type=""Consistadresse"">
+    <description>= 2. Adresse Nur im DCC-Format!</description>
+  </parameter>
+  <parameter nr=""27"" value=""0"" type=""Bremsverhalten bei Gleich-Spannung"">
+    <description>Kein Bremsen bei Gleichspannung 0 / Bremsen bei negativer Gleichspannung 32 / Bremsen bei positiver Gleichspannung 64</description>
+  </parameter>
+  <parameter nr=""29"" value=""14"" type=""Konfigurationsdaten 1"">
+    <description>Fahrtrichtung ""Standard"" 0 / Fahrtrichtung invertieren 1 / 14 Fahrstufen 0 / 28 oder 128 Fahrstufen 2 / Analogerkennung aus 0 / Analogerkennung ein 4 / RailCom aus 0 / RailCom ein 8 / Lineare Geschwindigkeitskennlinie 0 / Alternative Geschwindigkeitskennlinie 16 / Basisadressen 0 / Erweiterte Adressen 32</description>
+  </parameter>
+  <parameter nr=""49"" value=""73"" type=""Konfigurationsdaten 2"">
+    <description>Lastregelung aus 0 / Nur LD-G-Decoder: Lastregelung ein 1 / Rangiergang mit F1 2 / Rangiergang mit F2 4 / Rangiergang mit F3 8 / Rangiergang mit F4 16 / Anfahr- / Bremsverzögerung schaltbar mit F3 32 / Anfahr- / Bremsverzögerung schaltbar mit F4 64 / Notstop bei Richtungswechsel aus 128</description>
+  </parameter>
+  <parameter nr=""50"" value=""40"" type=""Lastregelparameter KP (LD-G-Decoder)"">
+    <description>= Proportionaler Anteil der Lastregelung.</description>
+  </parameter>
+  <parameter nr=""51"" value=""30"" type=""Lastregelparameter KI (LD-G-Decoder)"">
+    <description>= Integraler Anteil der Lastregelung.</description>
+  </parameter>
+  <parameter nr=""52"" value=""40"" type=""Lastregelparameter KD (LD-G-Decoder)"">
+    <description>= Differentieller Anteil der Lastregelung.</description>
+  </parameter>
+  <parameter nr=""65"" value=""0"" type=""Anfahr-Kick"">
+    <description>= kurzzeitige Erhöhung der Motorspannung beim Anfahren zur Überwindung des Losbrechmoments</description>
+  </parameter>
+  <parameter nr=""68"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""69"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""70"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""71"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""72"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""73"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""74"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""75"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""76"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""77"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""78"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""79"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""80"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""81"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""82"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""83"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""84"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""85"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""86"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""87"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""88"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""89"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""90"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""91"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""92"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""93"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""94"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""95"" type=""Alternative Kennlinie (nur bei Modus 28 Fahrstufen)"">
+    <description>= Geschwindigkeitstabelle für alternative Geschwindigkeitskennlinie. Jeder der 28 Fahrstufen wird eine Motorspannung zugeordnet. 0 = Spannung von ""0"" 255 = maximale Spannung</description>
+  </parameter>
+  <parameter nr=""114"" value=""4"" type=""2te Motorola-Adresse"">
+    <description>= Adresse, über die im Motorola-Format zusätzliche Funktionen geschaltet werden. Die Funktionen F5 bis F8 werden über F1 bis F4, die Funktion F9 über F0 erreicht.</description>
+  </parameter>
+  <parameter nr=""117"" value=""64"" type=""Abschalten bei Überlast (nur LD-G-30)"">
+    <description>Legt fest, bei welchem Strom der Überlastschutz anspricht. 64 = 700 mA</description>
+  </parameter>
+  <parameter nr=""124"" value=""3"" type=""Optimierung Lastregelung (LD-G-Decoder)"">
+    <description>Passt die Lastregelung an die individuelle Motorspannung an.</description>
+  </parameter>
+</configuration>"

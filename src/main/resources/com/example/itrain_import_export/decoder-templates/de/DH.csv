@@ -1,0 +1,396 @@
+﻿"Kategorie";"Typ";"Name";"Beschreibung";"XML"
+"decoder-configuration";"configuration";"D&H";"Doehler & Haass - vollstaendige CV-Tabelle von doehler-haass.de (Fahrzeugdecoder, Stand August 2026)";"<configuration count=""131"">
+  <parameter nr=""1"" value=""3"" type=""Adresse"">
+    <description>Adressen größer als 127 sind nur im MM-Betrieb verwendbar (Nicht relevant für PD*) Wertebereich 1 – 255, Vorgabe 3.</description>
+  </parameter>
+  <parameter nr=""2"" value=""0"" type=""Offset für Sollwert Gegen-EMK bei Fahrstufe 1"">
+    <description>Hiermit kann für Fahrstufe 1 eine höhere Geschwindigkeit vorgegeben werden Wertebereich 0 – 15, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""3"" value=""3"" type=""Beschleunigungszeit"">
+    <description>Der Wert entspricht der Zeit in Sekunden vom Stillstand bis zur Höchstgeschwindigkeit Wertebereich 0 – 255, Vorgabe 3.</description>
+  </parameter>
+  <parameter nr=""4"" value=""3"" type=""Bremszeit"">
+    <description>Der Wert entspricht der Zeit in Sekunden von der Höchstgeschwindigkeit bis zum Stillstand Wertebereich 0 – 255, Vorgabe 3.</description>
+  </parameter>
+  <parameter nr=""5"" value=""92"" type=""Regelungsreferenz Gegen-EMK"">
+    <description>(Siehe Anhang 2) Eingestellt wird der Referenzwert für die Regelung der Gegen-EMK des Motors bei höchster Fahrstufe („0“ entspricht etwa 1,2V, „127“ entspricht etwa 10V Gegen-EMK), für Rangiergang siehe CV61 Wertebereich 0 – 127, Vorgabe 92.</description>
+  </parameter>
+  <parameter nr=""7"" value=""0"" type=""Versionsnummer"">
+    <description>(Nur lesen) 3 = 3.00.092, 3.01.023, 3.02.053, 3.02.073 oder 3.03.014 (nur durch par106 unterscheidbar) 15 = 3.05.015, 16 = 3.15.016, 26 = 3.06.026, 27 = 3.08.027, 48 = 3.10.048, 50 = 3.12.050, 53 = 3.13.053, 54 = 3.04.054, 66 = 3.07.066, 95 = 3.14.095, 98 = 3.11.098, 104 = 3.05.104, 114 = 3.05.114, 117 = 3.09.117</description>
+  </parameter>
+  <parameter nr=""8"" value=""0"" type=""Herstellerkennung"">
+    <description>(Nur lesen) 97 = Doehler &amp; Haass (Decoder Reset mit „8“)</description>
+  </parameter>
+  <parameter nr=""9"" value=""1"" type=""Motorfrequenz"">
+    <description>Bit 0 = 0 = 32 kHz, 1 = 16 kHz (Wert 1); Bit 1 = 0 = 16/32 kHz, 1 = niederfrequent (Wert 2); Bit 2 = Proportionalteilbegrenzung (Wert 4); Bit 3 = Kurzschlusssicherung ausschalten (Wert 8). (Nicht relevant für FH*) Wertebereich 0 – 15, Vorgabe 1.</description>
+  </parameter>
+  <parameter nr=""12"" value=""1"" type=""MM-Einstellungen"">
+    <description>(Nicht relevant für PD*) 0 = MM-Betrieb deaktiviert 1 = MM-Betrieb ohne Zusatzadresse 2 = MM-Betrieb mit einer Zusatzadresse 3 = MM-Betrieb mit zwei Zusatzadressen 4 = MM-Betrieb mit drei Zusatzadressen 5 = MM-Betrieb mit vier Zusatzadressen 6 = MM-Betrieb mit fünf Zusatzadressen 7 = MM-Betrieb mit sechs Zusatzadressen Bit 3 = decoderinterne Verwendung: Fahrtrichtung bei MM1/AC-analog Wertebereich 0 – 15, Vorgabe 1.</description>
+  </parameter>
+  <parameter nr=""13"" value=""1"" type=""Analogmodus F1 – F8"">
+    <description>Bit 0 = F1 (Wert 1); Bit 1 = F2 (Wert 2); Bit 2 = F3 (Wert 4); Bit 3 = F4 (Wert 8); Bit 4 = F5 (Wert 16); Bit 5 = F6 (Wert 32); Bit 6 = F7 (Wert 64); Bit 7 = F8 (Wert 128). (Nicht relevant für PD05A) Diese Einstellung gilt auch für MM1-Betrieb. Wertebereich 0 – 255, Vorgabe 1.</description>
+  </parameter>
+  <parameter nr=""14"" value=""3"" type=""Analogmodus F0, F9 – F12"">
+    <description>Bit 0 = F0(f) (Wert 1); Bit 1 = F0(r) (Wert 2); Bit 2 = F9 (Wert 4); Bit 3 = F10 (Wert 8); Bit 4 = F11 (Wert 16); Bit 5 = F12 (Wert 32). (Nicht relevant für PD05A) Diese Einstellung gilt auch für MM1-Betrieb. Wertebereich 0 – 63, Vorgabe 3.</description>
+  </parameter>
+  <parameter nr=""17"" value=""195"" type=""Erweiterte Lokadresse (CV17)"">
+    <description>CV17 enthält das höherwertige Byte, CV18 enthält das niederwertige Byte. Nur, wenn durch CV29 aktiviert Wertebereich 0 – 255, Vorgabe 195.</description>
+  </parameter>
+  <parameter nr=""18"" value=""232"" type=""Erweiterte Lokadresse (CV18)"">
+    <description>CV17 enthält das höherwertige Byte, CV18 enthält das niederwertige Byte. Nur, wenn durch CV29 aktiviert Wertebereich 0 – 255, Vorgabe 232.</description>
+  </parameter>
+  <parameter nr=""19"" value=""0"" type=""Verbundadresse"">
+    <description>Mehrere Loks im Verbund unter dieser Adresse (1 – 127) 0, 128 = Inaktiv Wert + 128 = Inverse Fahrtrichtung Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""21"" value=""0"" type=""Verbundmodus F1 – F8"">
+    <description>Bit 0 = F1 (Wert 1); Bit 1 = F2 (Wert 2); Bit 2 = F3 (Wert 4); Bit 3 = F4 (Wert 8); Bit 4 = F5 (Wert 16); Bit 5 = F6 (Wert 32); Bit 6 = F7 (Wert 64); Bit 7 = F8 (Wert 128) Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""22"" value=""0"" type=""Verbundmodus F0, F9 – F12"">
+    <description>Bit 0 = F0(f) (Wert 1); Bit 1 = F0(r) (Wert 2); Bit 2 = F9 (Wert 4); Bit 3 = F10 (Wert 8); Bit 4 = F11 (Wert 16); Bit 5 = F12 (Wert 32) Wertebereich 0 – 63, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""27"" value=""64"" type=""Bremseinstellungen"">
+    <description>Bit 0 = Asymmetrie normal (Wert 1); Bit 1 = Asymmetrie invers (Wert 2); Bit 2 = Derzeit ohne Funktion (Wert 4); Bit 3 = Derzeit ohne Funktion (Wert 8); Bit 4 = Negative Spannung (Wert 16); Bit 5 = Positive Spannung (Wert 32); Bit 6 = SX-Bremsdiode normal (Wert 64); Bit 7 = SX-Bremsdiode invers (Wert 128) Wertebereich 0 – 243, Vorgabe 64.</description>
+  </parameter>
+  <parameter nr=""28"" value=""3"" type=""Rückmeldeeinstellungen"">
+    <description>Bit 0 = Kanal 1 (Lokadressausgabe) erlaubt (Wert 1); Bit 1 = Kanal 2 (POM-Auslesen usw.) erlaubt (Wert 2); Bit 2 = Dynamische Kanalnutzung (Wert 4) Wertebereich 0 – 7, Vorgabe 3.</description>
+  </parameter>
+  <parameter nr=""29"" value=""0"" type=""Konfigurationsregister"">
+    <description>Bit 0 = Richtung umkehren (Wird im Pendelbetrieb automatisch bedient, siehe CV60) (Wert 1); Bit 1 = 14 Fahrstufen (Wert 0); Bit 1 = 28/126 Fahrstufen (Wert 2); Bit 2 = Analogbetrieb erlaubt (Nicht relevant für PD05A) (Wert 4); Bit 3 = Rückmeldung erlaubt (Bei FH* standardmäßig deaktiviert) (Wert 8); Bit 5 = Lokadresse nach CV17/18 (Wert 32) Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""33"" value=""1"" type=""Funktionszuordnung F0(f)"">
+    <description>(Siehe Anhang 1) Wertebereich 0 – 255, Vorgabe 1.</description>
+  </parameter>
+  <parameter nr=""34"" value=""2"" type=""Funktionszuordnung F0(r)"">
+    <description>(Siehe Anhang 1) Wertebereich 0 – 255, Vorgabe 2.</description>
+  </parameter>
+  <parameter nr=""35"" value=""4"" type=""Funktionszuordnung F1(f+r)"">
+    <description>(Siehe Anhang 1) Wird CV35 gesetzt, wird CV47 genauso gesetzt Wertebereich 0 – 255, Vorgabe 4.</description>
+  </parameter>
+  <parameter nr=""36"" value=""8"" type=""Funktionszuordnung F2(f+r)"">
+    <description>(Siehe Anhang 1) Wird CV36 gesetzt, wird CV64 genauso gesetzt Wertebereich 0 – 255, Vorgabe 8.</description>
+  </parameter>
+  <parameter nr=""37"" value=""16"" type=""Funktionszuordnung F3"">
+    <description>(Siehe Anhang 1) Wertebereich 0 – 255, Vorgabe 16.</description>
+  </parameter>
+  <parameter nr=""38"" value=""128"" type=""Funktionszuordnung F4"">
+    <description>(Siehe Anhang 1) Wertebereich 0 – 255, Vorgabe 128.</description>
+  </parameter>
+  <parameter nr=""39"" value=""32"" type=""Funktionszuordnung F5"">
+    <description>(Siehe Anhang 1) Wertebereich 0 – 255, Vorgabe 32.</description>
+  </parameter>
+  <parameter nr=""40"" value=""0"" type=""Funktionszuordnung F6"">
+    <description>(Siehe Anhang 1) Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""41"" value=""0"" type=""Funktionszuordnung F7"">
+    <description>(Siehe Anhang 1) Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""42"" value=""64"" type=""Funktionszuordnung F8"">
+    <description>(Siehe Anhang 1) Wertebereich 0 – 255, Vorgabe 64.</description>
+  </parameter>
+  <parameter nr=""43"" value=""0"" type=""Funktionszuordnung F9"">
+    <description>(Siehe Anhang 1) Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""44"" value=""0"" type=""Funktionszuordnung F10"">
+    <description>(Siehe Anhang 1) Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""45"" value=""0"" type=""Funktionszuordnung F11"">
+    <description>(Siehe Anhang 1) Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""46"" value=""0"" type=""Funktionszuordnung F12"">
+    <description>(Siehe Anhang 1) Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""47"" value=""4"" type=""Funktionszuordnung F1(r)"">
+    <description>(Siehe Anhang 1) Soll CV47 einen anderen Wert als CV35 haben, muss CV35 vor CV47 programmiert werden Wertebereich 0 – 255, Vorgabe 4.</description>
+  </parameter>
+  <parameter nr=""48"" value=""5"" type=""Kennlinie für Gegen-EMK"">
+    <description>(Siehe Anhang 2) Durchbiegung der Fahrstufenkennlinie, 0 = gerade ... 7 = stark gekrümmt Wertebereich 0 – 7, Vorgabe 5.</description>
+  </parameter>
+  <parameter nr=""49"" value=""1"" type=""Impulsbreite"">
+    <description>(Nicht relevant für FH*) 0 = 1 ms, 1 = 2 ms, 2 = 4 ms, 3 = 8 ms Wertebereich 0 – 3, Vorgabe 1.</description>
+  </parameter>
+  <parameter nr=""50"" value=""2"" type=""Regelvariante"">
+    <description>(Nicht relevant für FH*) 0 = Einstellung durch CV56 ff., 1 = Hart, 2 = Weich, 3 = Sehr weich Wertebereich 0 – 3, Vorgabe 2.</description>
+  </parameter>
+  <parameter nr=""51"" value=""0"" type=""Vertauschungen"">
+    <description>Bit 0 = Motoranschlüsse (Nicht relevant für FH*) (Wert 1); Bit 1 = Lichtanschlüsse (Wert 2); Bit 2 = Gleisanschlüsse (Wert 4) Wertebereich 0 – 7, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""52"" value=""31"" type=""Dimmung LV/LR"">
+    <description>0 = dunkel … 31 = volle Helligkeit Wertebereich 0 – 31, Vorgabe 31.</description>
+  </parameter>
+  <parameter nr=""53"" value=""15"" type=""Dimmung Abblendlicht"">
+    <description>(Siehe CV156) 0 = dunkel … 31 = volle Helligkeit Wertebereich 0 – 31, Vorgabe 15.</description>
+  </parameter>
+  <parameter nr=""54"" value=""31"" type=""Dimmung AUX1"">
+    <description>0 = dunkel … 31 = volle Helligkeit Wertebereich 0 – 31, Vorgabe 31.</description>
+  </parameter>
+  <parameter nr=""55"" value=""31"" type=""Dimmung AUX2"">
+    <description>0 = dunkel … 31 = volle Helligkeit Wertebereich 0 – 31, Vorgabe 31.</description>
+  </parameter>
+  <parameter nr=""56"" value=""3"" type=""Motorregelung Proportionalteil"">
+    <description>(Nicht relevant für FH*) Nur bei CV50 = 0, siehe www.doehler-haass.de / „Häufige Fragen“ Wertebereich 0 – 7, Vorgabe 3.</description>
+  </parameter>
+  <parameter nr=""57"" value=""3"" type=""Motorregelung Integralteil"">
+    <description>(Wie bei CV56) Wertebereich 0 – 3, Vorgabe 3.</description>
+  </parameter>
+  <parameter nr=""58"" value=""1"" type=""Motorregelung Messzeit"">
+    <description>(Wie bei CV56) Wertebereich 0 – 3, Vorgabe 1.</description>
+  </parameter>
+  <parameter nr=""59"" value=""3"" type=""Motorregelung Impulsbreite"">
+    <description>(Wie bei CV56) Wertebereich 0 – 7, Vorgabe 3.</description>
+  </parameter>
+  <parameter nr=""60"" value=""0"" type=""Einstellungen"">
+    <description>Bit 0 = 0 = einteilige SX-Bremsabschnitte 1 = zweiteilige SX-Bremsabschnitte (siehe CV65) Nur bei SX-Bremsdiode (CV27 Bits 6 und 7) (Wert 1); Bit 1 = Mindestfahrstufe für Bremsrampe aktiv (siehe CV65) (Wert 2). 2:3 Pendelbetrieb deaktiviert 0 Pendelbetrieb ohne Zwischenhalt (siehe CV63) (Halt führt zur Fahrtrichtungsumkehr, Langsamfahrt zur Langsamfahrt) 4 Pendelbetrieb mit manuellem Zwischenhalt (siehe CV63) (Halt führt zum Halt bis zur Aufhebung, Langsamfahrt zur Fahrtrichtungsumkehr) 8 Pendelbetrieb mit automatischen Zwischenhalt (siehe CV63) (Halt führt zum Halt mit Wiederanfahrt, Langsamfahrt zur Fahrtrichtungsumkehr) 12 Nur mit geeigneten Asymmetrie-Bremsmodulen (CV27 Bits 0 und 1) Wertebereich 0 – 15, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""61"" value=""63"" type=""Rangiergang Regelungsreferenz Gegen-EMK"">
+    <description>(Siehe Anhang 2) Eingestellt wird der Referenzwert für die Regelung der Gegen-EMK des Motors bei höchster Fahrstufe im Rangiergang („0“ entspricht etwa 1,2V, „127“ entspricht etwa 10V Gegen-EMK), siehe CV05 Wertebereich 0 – 127, Vorgabe 63.</description>
+  </parameter>
+  <parameter nr=""62"" value=""1"" type=""Rangiergang Verzögerungszeit"">
+    <description>(Wie bei CV03) Wertebereich 0 – 255, Vorgabe 1.</description>
+  </parameter>
+  <parameter nr=""63"" value=""0"" type=""Anfahrverzögerung / Aufenthaltsdauer"">
+    <description>(Siehe CV60) Eingestellt wird je nach dem, ob der Pendelbetrieb aktiv ist (CV60 Bits 2 und 3) eine zusätzliche Wartezeit bevor der Decoder mit der Anfahrt beginnt (je 100 ms) (siehe CV124) oder die Aufenthaltsdauer bevor der Decoder den Fahrtrichtungswechsel durchführt (je 1 s) und die Aufenthaltsdauer bevor der Decoder die Wiederanfahrt durchführt (je 0,5 s) Wertebereich 0 – 250, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""64"" value=""8"" type=""Funktionszuordnung F2(r)"">
+    <description>(Siehe Anhang 1) Soll CV64 einen anderen Wert als CV36 haben, muss CV36 vor CV64 programmiert werden Wertebereich 0 – 255, Vorgabe 8.</description>
+  </parameter>
+  <parameter nr=""65"" value=""12"" type=""Fahrstufe in Bremsabschnitten"">
+    <description>(Siehe CV60) Eingestellt wird je nach dem, ob die Bremsrampe aktiv ist (CV60 Bit 1) die maximale Fahrstufe in zweiteiligen SX-Bremsabschnitten (siehe CV27 Bits 6 und 7 und CV60 Bit 0) oder die minimale Fahrstufe ab der die Bremsrampe aktiv wird (siehe CV154/CV155) Wertebereich 0 – 127, Vorgabe 12.</description>
+  </parameter>
+  <parameter nr=""66"" value=""0"" type=""Vorwärts-Trim"">
+    <description>0 = ausgeschaltet, kleiner 128 Reduktion, größer 128 Erhöhung der Geschwindigkeit Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""95"" value=""0"" type=""Rückwärts-Trim"">
+    <description>(Siehe CV66) Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""98"" value=""10"" type=""Funktionszuordnung AUX7"">
+    <description>(Nur relevant für DH21B/DH22B/DH24A) 0 = deaktiviert, 1 … 28 = F1 … F28, 29 = F0 (Licht) Wertebereich 0 – 29, Vorgabe 10.</description>
+  </parameter>
+  <parameter nr=""99"" value=""11"" type=""Funktionszuordnung AUX8"">
+    <description>(Wie bei CV98) Wertebereich 0 – 29, Vorgabe 11.</description>
+  </parameter>
+  <parameter nr=""101"" value=""12"" type=""Funktionszuordnung AUX10"">
+    <description>(Wie bei CV98) Wertebereich 0 – 29, Vorgabe 12.</description>
+  </parameter>
+  <parameter nr=""102"" value=""13"" type=""Funktionszuordnung AUX11"">
+    <description>(Wie bei CV98) Wertebereich 0 – 29, Vorgabe 13.</description>
+  </parameter>
+  <parameter nr=""103"" value=""14"" type=""Funktionszuordnung AUX12"">
+    <description>(Wie bei CV98) Wertebereich 0 – 29, Vorgabe 14.</description>
+  </parameter>
+  <parameter nr=""105"" value=""0"" type=""Benutzerkennzeichen 1"">
+    <description>Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""106"" value=""0"" type=""Benutzerkennzeichen 2"">
+    <description>Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""112"" value=""15"" type=""Geschwindigkeitsminderung Analogbetrieb"">
+    <description>(Nicht relevant für FH*/PD05A) 0 = geringe Minderung … 127 = starke Minderung Wertebereich 0 – 127, Vorgabe 15.</description>
+  </parameter>
+  <parameter nr=""113"" value=""0"" type=""Ausschaltfunktion für LV"">
+    <description>Bit 0 = F1 ... Bit 7 = F8 Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""114"" value=""0"" type=""Ausschaltfunktion für LR"">
+    <description>Bit 0 = F1 ... Bit 7 = F8 Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""115"" value=""0"" type=""Ausschaltfunktion für AUX1"">
+    <description>Bit 0 = F1 ... Bit 7 = F8 Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""116"" value=""0"" type=""Ausschaltfunktion für AUX2"">
+    <description>Bit 0 = F1 ... Bit 7 = F8 Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""117"" value=""0"" type=""Timer für Ausschalten AUX1"">
+    <description>Je 100 ms, 0 = ausgeschaltet Wertebereich 0 – 250, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""118"" value=""0"" type=""Timer für Ausschalten AUX2"">
+    <description>Je 100 ms, 0 = ausgeschaltet Wertebereich 0 – 250, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""119"" value=""0"" type=""Timer für Ausschalten AUX3"">
+    <description>Je 100 ms, 0 = ausgeschaltet Wertebereich 0 – 250, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""120"" value=""0"" type=""Timer für Ausschalten AUX4"">
+    <description>Je 100 ms, 0 = ausgeschaltet Wertebereich 0 – 250, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""121"" value=""0"" type=""Funktionszuordnung LV+LR ein/AUX1+AUX2 aus"">
+    <description>Bit 0 = F1 … Bit 7 = F8 Nur bei F0 (Licht) ein Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""122"" value=""0"" type=""Funktionszuordnung AUX1+AUX2 ein/LV+LR aus"">
+    <description>Bit 0 = F1 … Bit 7 = F8 Nur bei F0 (Licht) aus Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""123"" value=""63"" type=""Langsamfahrt Geschwindigkeit"">
+    <description>(Siehe CV27) Nur mit geeigneten Asymmetrie-Bremsmodulen (CV27 Bits 0 und 1) Wertebereich 0 – 127, Vorgabe 63.</description>
+  </parameter>
+  <parameter nr=""124"" value=""0"" type=""Funktionszuordnung Anfahrverzögerung"">
+    <description>(Siehe CV63) Bit 0 = F1 … Bit 7 = F8 Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""125"" value=""0"" type=""Ausschaltfunktion für AUX3"">
+    <description>Bit 0 = F1 ... Bit 7 = F8 Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""126"" value=""0"" type=""Ausschaltfunktion für AUX4"">
+    <description>Bit 0 = F1 ... Bit 7 = F8 Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""127"" value=""0"" type=""Ausschaltfunktion für AUX5"">
+    <description>Bit 0 = F1 ... Bit 7 = F8 Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""128"" value=""0"" type=""Ausschaltfunktion für AUX6"">
+    <description>Bit 0 = F1 ... Bit 7 = F8 Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""129"" value=""0"" type=""Timer für Ausschalten AUX5"">
+    <description>Je 100 ms, 0 = ausgeschaltet Wertebereich 0 – 250, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""130"" value=""0"" type=""Timer für Ausschalten AUX6"">
+    <description>Je 100 ms, 0 = ausgeschaltet Wertebereich 0 – 250, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""131"" value=""8"" type=""Funktionszuordnung Abblendlicht"">
+    <description>(Nicht relevant für PD*) 0 = deaktiviert, 1 … 28 = F1 … F28, 29 = F0 (Licht) Nur bei CV137 Bit 4 = 1 Wertebereich 0 – 29, Vorgabe 8.</description>
+  </parameter>
+  <parameter nr=""132"" value=""4"" type=""Funktionszuordnung Rangiergang"">
+    <description>(Wie bei CV131) Wertebereich 0 – 29, Vorgabe 4.</description>
+  </parameter>
+  <parameter nr=""133"" value=""9"" type=""Funktionszuordnung Verzögerungen ausschalten"">
+    <description>(Wie bei CV131) Wertebereich 0 – 29, Vorgabe 9.</description>
+  </parameter>
+  <parameter nr=""134"" value=""6"" type=""Entscheidungsschwelle für Asymmetrie"">
+    <description>(Siehe CV27) Der Standardwert 6 entspricht in etwa 0,7 Volt Asymmetrie und damit der Vorwärtsspannung einer Siliciumdiode. Werte kleiner als 3 sind nicht sinnvoll, Werte größer als 6 bei Bedarf. Wertebereich 0 – 15, Vorgabe 6.</description>
+  </parameter>
+  <parameter nr=""135"" value=""0"" type=""Multiplikation Geschwindigkeitsrückmeldung"">
+    <description>0 = ausgeschaltet Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""136"" value=""0"" type=""Division Geschwindigkeitsrückmeldung"">
+    <description>0 = /1, 1 = /2, 2 = /4, 3 = /8, 4 = /16, 5 = /32, 6 = /64 Wertebereich 0 – 6, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""137"" value=""0"" type=""Einstellungen"">
+    <description>Bit 0 = Unverstärkte Funktionsausgänge anstelle von ZCLK und ZDAT (Nicht relevant für PD*) (Bei DH18A/FH18A standardmäßig aktiviert) (Wert 1); Bit 1 = Energiesparmodus ausschalten (Wert 2); Bit 2 = SUSI-Fahrtrichtung invertieren (Nicht relevant für PD*) (Wert 4); Bit 3 = SUSI-Anfahrverzögerung ausschalten (Nicht relevant für PD*) (Wert 8); Bit 4 = Erweiterte Funktionszuordnungen aktivieren (Nicht relevant für PD*) (Wert 16); Bit 5 = 0 = AUX3 und AUX4 an ZCLK und ZDAT, 1 = AUX5 und AUX6 an ZCLK und ZDAT (Nicht relevant für PD*/DH21B/DH22B/DH24A) (Wert 32); Bit 6 = Funktionsvertauschungen (CV401ff.) für SUSI F1-F12 übernehmen (Nicht relevant für PD*) (Wert 64) Wertebereich 0 – 127, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""138"" value=""0"" type=""Timer für Heranfahren"">
+    <description>(Nicht relevant für PD*) Je 100 ms, 0 = kein Heranfahren Wertebereich 0 – 250, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""139"" value=""0"" type=""Timer für Warten"">
+    <description>(Nicht relevant für PD*) Je 100 ms, 0 = kein Warten Wertebereich 0 – 250, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""140"" value=""0"" type=""Timer für Wegfahren"">
+    <description>(Nicht relevant für PD*) Je 100 ms, 0 = kein Wegfahren Wertebereich 0 – 250, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""141"" value=""12"" type=""Fahrstufe für Heranfahren"">
+    <description>(Nicht relevant für PD*) Wertebereich 0 – 127, Vorgabe 12.</description>
+  </parameter>
+  <parameter nr=""142"" value=""12"" type=""Fahrstufe für Wegfahren"">
+    <description>(Nicht relevant für PD*) Wertebereich 0 – 127, Vorgabe 12.</description>
+  </parameter>
+  <parameter nr=""143"" value=""0"" type=""Einstellungen"">
+    <description>Bit 6 = Kupplungsablauf und Timer deaktivieren (Wert 64); Bit 7 = Kupplungsablauf nur im Rangiergang (Wert 128). (Nicht relevant für PD*) Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""144"" value=""0"" type=""Einstellungen"">
+    <description>Bit 0 = Dynamische Kanalnutzung (veraltet, siehe CV29 Bit 2) (Wert 1); Bit 1 = Sofortiges Anfahren nach Stromunterbrechung (Wert 2); Bit 2 = Spezielles Bit für Beleuchtung im Analogbetrieb (Wert 4); Bit 3 = Bremsstreckenausgabe an „GPIO“ (Nur relevant für DH21A/DH21B/DH22A/DH22B/DH24A/FH22A) (Wert 8); Bit 4 = Bremsen mit „GPIO“ (1 = Fahren, 0 = Bremsen) (Nur relevant für DH21A/DH21B/DH22A/DH22B/DH24A/FH22A) (Wert 16); Bit 5 = Kurzzeitige Datenspeicherung deaktivieren (Wert 32) Wertebereich 0 – 63, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""145"" value=""0"" type=""Bedingungen für LV"">
+    <description>(Nicht relevant für PD*) Funktion Wert Grundzustand (immer an, wenn Funktionstaste an) 0 Nur bei vorwärts +1 Nur bei rückwärts +2 Nur im Stand +3 Nur bei Fahrt +6 Nur bei F0 (Licht) aus +9 Nur bei F0 (Licht) an +18 Nicht im Rangiergang +27 Nur im Rangiergang +54 Im Rangiergang Richtung ignorieren +81 Im Rangiergang Fahrt/Stand ignorieren +108 Im Rangiergang Richtung und Fahrt/Stand ignorieren +135 Es darf immer nur eine Zahl aus jedem abgrenzten Bereich aufaddiert werden! Wertebereich 0 – 161, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""146"" value=""0"" type=""Bedingungen für LR"">
+    <description>(Siehe CV145) Wertebereich 0 – 161, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""147"" value=""0"" type=""Bedingungen für AUX1"">
+    <description>(Siehe CV145) Wertebereich 0 – 161, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""148"" value=""0"" type=""Bedingungen für AUX2"">
+    <description>(Siehe CV145) Wertebereich 0 – 161, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""149"" value=""0"" type=""Bedingungen für AUX3"">
+    <description>(Siehe CV145) Wertebereich 0 – 161, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""150"" value=""0"" type=""Bedingungen für AUX4"">
+    <description>(Siehe CV145) Wertebereich 0 – 161, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""151"" value=""0"" type=""Bedingungen für AUX5"">
+    <description>(Siehe CV145) Wertebereich 0 – 161, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""152"" value=""0"" type=""Bedingungen für AUX6"">
+    <description>(Siehe CV145) Wertebereich 0 – 161, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""153"" value=""0"" type=""Initialmapping"">
+    <description>Bit 0 = LV (Wert 1); Bit 1 = LR (Wert 2); Bit 2 = AUX1 (Wert 4); Bit 3 = AUX2 (Wert 8); Bit 4 = AUX3 (Wert 16); Bit 5 = AUX4 (Wert 32); Bit 6 = AUX5 (Wert 64); Bit 7 = AUX6 (Wert 128). (Nicht relevant für PD*) Diese Funktionsausgänge sind aktiv sobald der Decoder adressiert wird (ohne aktive Funktionstaste). Dadurch kann, in Verbindung mit den Bedingungen, beispielsweise eine Schleiferumschaltung realisiert werden. Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""154"" value=""0"" type=""Bremsrampe vorwärts und rückwärts"">
+    <description>(Siehe CV27, Nicht relevant für PD05A/PD06A) CV48 = 0 für konstanten Bremsweg empfohlen; 0 = ausgeschaltet, eingestellt wird die Bremszeit aus höchster Fahrstufe in Sekunden mal 8, bei kleineren Fahrstufen errechnet der Decoder die Bremsrampe selbstständig Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""155"" value=""0"" type=""Bremsrampe rückwärts"">
+    <description>(Siehe CV154) 0 = es wird der Wert aus CV154 genutzt, ermöglicht unterschiedliche Bremszeiten für vorwärts und rückwärts Wertebereich 0 – 255, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""156"" value=""3"" type=""Dimmmaske für Abblendlicht"">
+    <description>Bit 0 = LV (Wert 1); Bit 1 = LR (Wert 2); Bit 2 = AUX1 (Wert 4); Bit 3 = AUX2 (Wert 8); Bit 4 = AUX3 (Wert 16); Bit 5 = AUX4 (Wert 32); Bit 6 = AUX5 (Wert 64); Bit 7 = AUX6 (Wert 128). (Siehe CV53) Wertebereich 0 – 255, Vorgabe 3.</description>
+  </parameter>
+  <parameter nr=""157"" value=""0"" type=""Bedingungen für Abblendlicht"">
+    <description>(Siehe CV145) Wertebereich 0 – 161, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""158"" value=""0"" type=""Bedingungen für AUX7"">
+    <description>(Siehe CV145) (Nur relevant für DH21B/DH22B/DH24A) Wertebereich 0 – 161, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""159"" value=""0"" type=""Bedingungen für AUX8"">
+    <description>(Siehe CV158) Wertebereich 0 – 161, Vorgabe 0.</description>
+  </parameter>
+  <parameter nr=""260"" value=""0"" type=""Herstellerkennung"">
+    <description>(Nur lesen) 97 = Doehler &amp; Haass</description>
+  </parameter>
+  <parameter nr=""261"" value=""0"" type=""Decoderkennzeichen"">
+    <description>(Nur lesen) DH05C=52, DH10C=102, DHSP10A=110, DH12A=120, DH14B=141, DH16A=160, DH18A=180, DH21A=200, DH21B=201, DH22A=202, DH22B=203, DH24A=204, FH05B=41, FH16A=150, FH18A=170, FH22A=192, PD05A=131, PD06A=132, PD12A=130, PD18A=134, PD21A=133 Vollständige Liste unter www.doehler-haass.de / „Häufige Fragen“</description>
+  </parameter>
+  <parameter nr=""262"" value=""0"" type=""Versionsnummer"">
+    <description>(Nur lesen)</description>
+  </parameter>
+  <parameter nr=""263"" value=""0"" type=""Datum"">
+    <description>(Nur lesen)</description>
+  </parameter>
+  <parameter nr=""264"" value=""0"" type=""Revisionsnummer"">
+    <description>(Nur lesen)</description>
+  </parameter>
+  <parameter nr=""265"" value=""0"" type=""Datum"">
+    <description>(Nur lesen)</description>
+  </parameter>
+  <parameter nr=""401"" value=""1"" type=""Funktionsvertauschung F1"">
+    <description>(Nicht relevant für PD*) 0 = deaktiviert, 1 … 28 = F1 … F28, 29 = F0 (Licht) Wertebereich 0 – 29, Vorgabe 1.</description>
+  </parameter>
+  <parameter nr=""402"" value=""2"" type=""Funktionsvertauschung F2"">
+    <description>(Wie bei CV401) Wertebereich 0 – 29, Vorgabe 2.</description>
+  </parameter>
+  <parameter nr=""403"" value=""3"" type=""Funktionsvertauschung F3"">
+    <description>(Wie bei CV401) Wertebereich 0 – 29, Vorgabe 3.</description>
+  </parameter>
+  <parameter nr=""404"" value=""4"" type=""Funktionsvertauschung F4"">
+    <description>(Wie bei CV401) Wertebereich 0 – 29, Vorgabe 4.</description>
+  </parameter>
+  <parameter nr=""405"" value=""5"" type=""Funktionsvertauschung F5"">
+    <description>(Wie bei CV401) Wertebereich 0 – 29, Vorgabe 5.</description>
+  </parameter>
+  <parameter nr=""406"" value=""6"" type=""Funktionsvertauschung F6"">
+    <description>(Wie bei CV401) Wertebereich 0 – 29, Vorgabe 6.</description>
+  </parameter>
+  <parameter nr=""407"" value=""7"" type=""Funktionsvertauschung F7"">
+    <description>(Wie bei CV401) Wertebereich 0 – 29, Vorgabe 7.</description>
+  </parameter>
+  <parameter nr=""408"" value=""8"" type=""Funktionsvertauschung F8"">
+    <description>(Wie bei CV401) Wertebereich 0 – 29, Vorgabe 8.</description>
+  </parameter>
+  <parameter nr=""409"" value=""9"" type=""Funktionsvertauschung F9"">
+    <description>(Wie bei CV401) Wertebereich 0 – 29, Vorgabe 9.</description>
+  </parameter>
+  <parameter nr=""410"" value=""10"" type=""Funktionsvertauschung F10"">
+    <description>(Wie bei CV401) Wertebereich 0 – 29, Vorgabe 10.</description>
+  </parameter>
+  <parameter nr=""411"" value=""11"" type=""Funktionsvertauschung F11"">
+    <description>(Wie bei CV401) Wertebereich 0 – 29, Vorgabe 11.</description>
+  </parameter>
+  <parameter nr=""412"" value=""12"" type=""Funktionsvertauschung F12"">
+    <description>(Wie bei CV401) Wertebereich 0 – 29, Vorgabe 12.</description>
+  </parameter>
+  <parameter nr=""461"" value=""31"" type=""Dimmung AUX3"">
+    <description>(Nicht relevant für PD*) 0 = dunkel … 31 = volle Helligkeit (Nicht jeder AUX ist bei jedem Decoder unabhängig dimmbar) Wertebereich 0 – 31, Vorgabe 31.</description>
+  </parameter>
+  <parameter nr=""463"" value=""31"" type=""Dimmung AUX4"">
+    <description>(Wie bei CV461) Wertebereich 0 – 31, Vorgabe 31.</description>
+  </parameter>
+  <parameter nr=""465"" value=""31"" type=""Dimmung AUX5"">
+    <description>(Wie bei CV461) Wertebereich 0 – 31, Vorgabe 31.</description>
+  </parameter>
+  <parameter nr=""467"" value=""31"" type=""Dimmung AUX6"">
+    <description>(Wie bei CV461) Wertebereich 0 – 31, Vorgabe 31.</description>
+  </parameter>
+</configuration>"

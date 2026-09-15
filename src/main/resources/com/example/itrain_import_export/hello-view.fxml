@@ -10,8 +10,10 @@
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns="http://javafx.com/javafx/21"
@@ -23,6 +25,7 @@
                 <Menu fx:id="fileMenu" text="Datei">
                     <MenuItem fx:id="openMenuItem" text="Öffnen..." onAction="#onOpenFile"/>
                     <MenuItem fx:id="saveMenuItem" text="Speichern unter..." onAction="#onSaveAs"/>
+                    <MenuItem fx:id="closeFileMenuItem" text="Aktuelle schließen" onAction="#onCloseFile"/>
                     <SeparatorMenuItem/>
                     <!-- Inhalt (bis zu 5 zuletzt geöffnete Dateien, oder ein
                          deaktivierter Platzhalter) wird zur Laufzeit vom
@@ -31,6 +34,8 @@
                     <Menu fx:id="recentFilesMenu" text="Zuletzt verwendet..."/>
                     <MenuItem fx:id="loadBackupMenuItem" text="Backup laden..." onAction="#onLoadBackup"/>
                     <MenuItem fx:id="exportFilesMenuItem" text="Export Dateien" onAction="#onOpenExportFiles"/>
+                    <SeparatorMenuItem/>
+                    <MenuItem fx:id="exitMenuItem" text="Programm beenden" onAction="#onExit"/>
                 </Menu>
                 <Menu fx:id="editMenu" text="Bearbeiten">
                     <MenuItem fx:id="undoMenuItem" text="Rückgängig" onAction="#onUndo"/>
@@ -39,12 +44,25 @@
                          nur die Fenster wieder einsammelt. -->
                     <SeparatorMenuItem/>
                     <MenuItem fx:id="centerWindowsMenuItem" text="Alle Fenster zentrieren" onAction="#onCenterWindows"/>
+                    <!-- Seit 2.5: dieselben Aktionen wie die pastellfarbenen
+                         Ribbon-Knöpfe, hier zusätzlich als Menüpunkt. -->
+                    <SeparatorMenuItem/>
+                    <MenuItem fx:id="editExportSelectedMenuItem" text="Export ausgewählte Kategorie" onAction="#onExportSelected"/>
+                    <MenuItem fx:id="editImportCategoryMenuItem" text="Import Kategorie" onAction="#onImportCategory"/>
                 </Menu>
+                <!-- Seit 2.5 nur noch die Voreinstellungen. "Decoder-Vorlagen"
+                     und "Decoder-Vorlagen installieren" sind ins Menü
+                     "Decoder" des Decoder-Fensters gewandert (DecoderWindow). -->
                 <Menu fx:id="settingsMenu" text="Einstellungen">
                     <MenuItem fx:id="preferencesMenuItem" text="Voreinstellungen" onAction="#onPreferences"/>
-                    <SeparatorMenuItem/>
-                    <MenuItem fx:id="decoderInstallMenuItem" text="Decoder-Vorlagen installieren" onAction="#onDecoderInstall"/>
-                    <MenuItem fx:id="decoderTemplatesMenuItem" text="Decoder-Vorlagen" onAction="#onDecoderTemplates"/>
+                </Menu>
+                <!-- Seit 2.5: führt zu den beiden anderen Programmteilen -
+                     dieselbe Öffnen-oder-nach-vorn-Wirkung wie die
+                     gleichnamigen Ribbon-Knöpfe (siehe onOpenDecoderWindow/
+                     onOpenSystemsWindow). -->
+                <Menu fx:id="functionsMenu" text="Funktionen">
+                    <MenuItem fx:id="functionsDecoderMenuItem" text="Decoder" onAction="#onOpenDecoderWindow"/>
+                    <MenuItem fx:id="functionsSystemsMenuItem" text="Systeme" onAction="#onOpenSystemsWindow"/>
                 </Menu>
                 <Menu fx:id="helpMenu" text="Hilfe">
                     <MenuItem fx:id="helpMenuItem" text="Hilfe" onAction="#onHelp"/>
@@ -67,18 +85,22 @@
                 <Separator orientation="VERTICAL"/>
                 <Button fx:id="exportSelectedToolButton" onAction="#onExportSelected"/>
                 <Button fx:id="importCategoryToolButton" onAction="#onImportCategory"/>
-                <!-- Zweiter Trennstrich: links davon der Austausch ganzer
-                     Katalog-Einträge, rechts davon alles zum Decoder (also
-                     zum configuration-Teilbaum eines Fahrzeugs). Die beiden
-                     Regionen sind nötig, weil eine ToolBar ihren Abstand
+                <!-- Zweiter Trennstrich, deutlich abgesetzt: rechts davon
+                     die beiden Knöpfe, die die Zusatzfenster "Decoder" und
+                     "Systeme" öffnen. Die drei Decoder-Knöpfe, die hier bis
+                     2.0.1 standen, liegen jetzt im Ribbon des Decoder-Fensters.
+                     Die Regionen sind nötig, weil eine ToolBar ihren Abstand
                      fest vorgibt - der Trennstrich allein stünde sonst zu
                      dicht an den Schaltflächen. -->
+                <Region minWidth="30"/>
+                <Separator orientation="VERTICAL"/>
+                <Region minWidth="10"/>
+                <Button fx:id="decoderWindowButton" onAction="#onOpenDecoderWindow"/>
+                <!-- Auch die beiden Fensterknöpfe untereinander abgesetzt. -->
                 <Region minWidth="10"/>
                 <Separator orientation="VERTICAL"/>
                 <Region minWidth="10"/>
-                <Button fx:id="decoderExportToolButton" onAction="#onDecoderExport"/>
-                <Button fx:id="decoderImportToolButton" onAction="#onDecoderImport"/>
-                <Button fx:id="decoderCaptureToolButton" onAction="#onDecoderCapture"/>
+                <Button fx:id="systemsWindowButton" onAction="#onOpenSystemsWindow"/>
             </ToolBar>
             <Label fx:id="fileNameLabel" text="Keine Datei geladen.">
                 <VBox.margin>
@@ -88,9 +110,15 @@
         </VBox>
     </top>
     <center>
-        <!-- Die Reiter je control-items-Kategorie werden zur Laufzeit vom
-             Controller erzeugt, sobald eine Datei geöffnet wurde. -->
-        <TabPane fx:id="tabPane"/>
+        <!-- Solange keine Datei geladen ist, zeigt die Mitte das Programm-
+             symbol (die Dampflok), an die Fenstergröße gebunden - siehe
+             HelloController.initStartImage(). Die Reiter je control-items-
+             Kategorie werden zur Laufzeit erzeugt, sobald eine Datei
+             geöffnet wurde; das Bild verschwindet dann. -->
+        <StackPane fx:id="centerPane">
+            <TabPane fx:id="tabPane"/>
+            <ImageView fx:id="startImage" preserveRatio="true" smooth="true" mouseTransparent="true"/>
+        </StackPane>
     </center>
     <bottom>
         <Label fx:id="statusLabel" text="" BorderPane.alignment="CENTER_LEFT">

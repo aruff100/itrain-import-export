@@ -1,0 +1,37 @@
+﻿"Kategorie";"Typ";"Name";"Beschreibung";"XML"
+"decoder-configuration";"configuration";"DCC-Funktionsdecoder";"Basic CVs only";"<configuration count=""11"">
+  <parameter nr=""1"" type=""Primary address"">
+    <description>Short address (1-127)</description>
+  </parameter>
+  <parameter nr=""7"" type=""Version ID"">
+    <description>Firmware version</description>
+  </parameter>
+  <parameter nr=""8"" type=""Manufacturer ID"">
+    <description>Manufacturer ID / reset function</description>
+  </parameter>
+  <parameter nr=""17"" type=""Extended address"">
+    <description>Long address</description>
+  </parameter>
+  <parameter nr=""18"" type=""Extended address"">
+    <description>Long address</description>
+  </parameter>
+  <parameter nr=""29"" type=""Configuration"">
+    <description>Also controls speed steps, analogue mode, address length and direction dependency of the lights here.</description>
+  </parameter>
+  <parameter nr=""33"" type=""Function mapping"">
+    <description>F0 forwards (default: front light output / LV)</description>
+  </parameter>
+  <parameter nr=""34"" type=""Function mapping"">
+    <description>F0 backwards (default: rear light output / LR)</description>
+  </parameter>
+  <parameter nr=""35"" type=""Function mapping"">
+    <description>Function F1 (default: AUX1)</description>
+  </parameter>
+  <parameter nr=""36"" type=""Function mapping"">
+    <description>Function F2 (default: AUX2)</description>
+  </parameter>
+  <parameter nr=""37"">
+    <description>Function F2 (default: AUX2)</description>
+  </parameter>
+</configuration>
+"

@@ -1,0 +1,396 @@
+﻿"Kategorie";"Typ";"Name";"Beschreibung";"XML"
+"decoder-configuration";"configuration";"D&H";"Doehler & Haass - complete CV table from doehler-haass.de (vehicle decoders, as of August 2026)";"<configuration count=""131"">
+  <parameter nr=""1"" value=""3"" type=""Address"">
+    <description>Addresses greater than 127 can only be used in MM operation (not relevant for PD*) Value range 1 – 255, default 3.</description>
+  </parameter>
+  <parameter nr=""2"" value=""0"" type=""Offset for back-EMF setpoint at speed step 1"">
+    <description>This allows a higher speed to be specified for speed step 1 Value range 0 – 15, default 0.</description>
+  </parameter>
+  <parameter nr=""3"" value=""3"" type=""Acceleration time"">
+    <description>The value corresponds to the time in seconds from standstill to maximum speed Value range 0 – 255, default 3.</description>
+  </parameter>
+  <parameter nr=""4"" value=""3"" type=""Braking time"">
+    <description>The value corresponds to the time in seconds from maximum speed to standstill Value range 0 – 255, default 3.</description>
+  </parameter>
+  <parameter nr=""5"" value=""92"" type=""Back-EMF control reference"">
+    <description>(See appendix 2) Sets the reference value for the control of the motor's back-EMF at the highest speed step („0“ corresponds to about 1.2 V, „127“ to about 10 V back-EMF); for shunting mode see CV61 Value range 0 – 127, default 92.</description>
+  </parameter>
+  <parameter nr=""7"" value=""0"" type=""Version number"">
+    <description>(Read only) 3 = 3.00.092, 3.01.023, 3.02.053, 3.02.073 or 3.03.014 (distinguishable only by par106); 15 = 3.05.015, 16 = 3.15.016, 26 = 3.06.026, 27 = 3.08.027, 48 = 3.10.048, 50 = 3.12.050, 53 = 3.13.053, 54 = 3.04.054, 66 = 3.07.066, 95 = 3.14.095, 98 = 3.11.098, 104 = 3.05.104, 114 = 3.05.114, 117 = 3.09.117</description>
+  </parameter>
+  <parameter nr=""8"" value=""0"" type=""Manufacturer ID"">
+    <description>(Nur lesen) 97 = Doehler &amp; Haass (Decoder Reset mit „8“)</description>
+  </parameter>
+  <parameter nr=""9"" value=""1"" type=""Motor frequency"">
+    <description>Bit 0 = 0 = 32 kHz, 1 = 16 kHz (value 1); Bit 1 = 0 = 16/32 kHz, 1 = low frequency (value 2); Bit 2 = Proportional component limitation (value 4); Bit 3 = Switch off short-circuit protection (value 8). (Not relevant for FH*) Value range 0 – 15, default 1.</description>
+  </parameter>
+  <parameter nr=""12"" value=""1"" type=""MM settings"">
+    <description>(Not relevant for PD*) 0 = MM operation disabled, 1 = MM operation without additional address, 2 = MM operation with one additional address, 3 = MM operation with two additional addresses, 4 = MM operation with three additional addresses, 5 = MM operation with four additional addresses, 6 = MM operation with five additional addresses, 7 = MM operation with six additional addresses. Bit 3 = decoder-internal use: direction of travel with MM1/AC analogue Value range 0 – 15, default 1.</description>
+  </parameter>
+  <parameter nr=""13"" value=""1"" type=""Analogue mode F1 – F8"">
+    <description>Bit 0 = F1 (value 1); Bit 1 = F2 (value 2); Bit 2 = F3 (value 4); Bit 3 = F4 (value 8); Bit 4 = F5 (value 16); Bit 5 = F6 (value 32); Bit 6 = F7 (value 64); Bit 7 = F8 (value 128). (Not relevant for PD05A) This setting also applies to MM1 operation Value range 0 – 255, default 1.</description>
+  </parameter>
+  <parameter nr=""14"" value=""3"" type=""Analogue mode F0, F9 – F12"">
+    <description>Bit 0 = F0(f) (value 1); Bit 1 = F0(r) (value 2); Bit 2 = F9 (value 4); Bit 3 = F10 (value 8); Bit 4 = F11 (value 16); Bit 5 = F12 (value 32). (Not relevant for PD05A) This setting also applies to MM1 operation Value range 0 – 63, default 3.</description>
+  </parameter>
+  <parameter nr=""17"" value=""195"" type=""Extended locomotive address (CV17)"">
+    <description>CV17 contains the high byte, CV18 the low byte. Only if enabled by CV29 Value range 0 – 255, default 195.</description>
+  </parameter>
+  <parameter nr=""18"" value=""232"" type=""Extended locomotive address (CV18)"">
+    <description>CV17 contains the high byte, CV18 the low byte. Only if enabled by CV29 Value range 0 – 255, default 232.</description>
+  </parameter>
+  <parameter nr=""19"" value=""0"" type=""Consist address"">
+    <description>Several locomotives in a consist under this address (1 – 127). 0, 128 = inactive; value + 128 = inverted direction of travel Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""21"" value=""0"" type=""Consist mode F1 – F8"">
+    <description>Bit 0 = F1 (value 1); Bit 1 = F2 (value 2); Bit 2 = F3 (value 4); Bit 3 = F4 (value 8); Bit 4 = F5 (value 16); Bit 5 = F6 (value 32); Bit 6 = F7 (value 64); Bit 7 = F8 (value 128) Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""22"" value=""0"" type=""Consist mode F0, F9 – F12"">
+    <description>Bit 0 = F0(f) (value 1); Bit 1 = F0(r) (value 2); Bit 2 = F9 (value 4); Bit 3 = F10 (value 8); Bit 4 = F11 (value 16); Bit 5 = F12 (value 32) Value range 0 – 63, default 0.</description>
+  </parameter>
+  <parameter nr=""27"" value=""64"" type=""Brake settings"">
+    <description>Bit 0 = Asymmetry normal (value 1); Bit 1 = Asymmetry inverted (value 2); Bit 2 = Currently without function (value 4); Bit 3 = Currently without function (value 8); Bit 4 = Negative voltage (value 16); Bit 5 = Positive voltage (value 32); Bit 6 = SX braking diode normal (value 64); Bit 7 = SX braking diode inverted (value 128) Value range 0 – 243, default 64.</description>
+  </parameter>
+  <parameter nr=""28"" value=""3"" type=""Feedback settings"">
+    <description>Bit 0 = Channel 1 (locomotive address broadcast) permitted (value 1); Bit 1 = Channel 2 (POM read-out etc.) permitted (value 2); Bit 2 = Dynamic channel use (value 4) Value range 0 – 7, default 3.</description>
+  </parameter>
+  <parameter nr=""29"" value=""0"" type=""Configuration register"">
+    <description>Bit 0 = Reverse direction (handled automatically in shuttle operation, see CV60) (value 1); Bit 1 = 14 speed steps (value 0); Bit 1 = 28/126 speed steps (value 2); Bit 2 = Analogue operation permitted (not relevant for PD05A) (value 4); Bit 3 = Feedback permitted (disabled by default on FH*) (value 8); Bit 5 = Locomotive address per CV17/18 (value 32) Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""33"" value=""1"" type=""Function assignment F0(f)"">
+    <description>(See appendix 1) Value range 0 – 255, default 1.</description>
+  </parameter>
+  <parameter nr=""34"" value=""2"" type=""Function assignment F0(r)"">
+    <description>(See appendix 1) Value range 0 – 255, default 2.</description>
+  </parameter>
+  <parameter nr=""35"" value=""4"" type=""Function assignment F1(f+r)"">
+    <description>(See appendix 1) If CV35 is set, CV47 is set to the same value Value range 0 – 255, default 4.</description>
+  </parameter>
+  <parameter nr=""36"" value=""8"" type=""Function assignment F2(f+r)"">
+    <description>(See appendix 1) If CV36 is set, CV64 is set to the same value Value range 0 – 255, default 8.</description>
+  </parameter>
+  <parameter nr=""37"" value=""16"" type=""Function assignment F3"">
+    <description>(See appendix 1) Value range 0 – 255, default 16.</description>
+  </parameter>
+  <parameter nr=""38"" value=""128"" type=""Function assignment F4"">
+    <description>(See appendix 1) Value range 0 – 255, default 128.</description>
+  </parameter>
+  <parameter nr=""39"" value=""32"" type=""Function assignment F5"">
+    <description>(See appendix 1) Value range 0 – 255, default 32.</description>
+  </parameter>
+  <parameter nr=""40"" value=""0"" type=""Function assignment F6"">
+    <description>(See appendix 1) Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""41"" value=""0"" type=""Function assignment F7"">
+    <description>(See appendix 1) Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""42"" value=""64"" type=""Function assignment F8"">
+    <description>(See appendix 1) Value range 0 – 255, default 64.</description>
+  </parameter>
+  <parameter nr=""43"" value=""0"" type=""Function assignment F9"">
+    <description>(See appendix 1) Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""44"" value=""0"" type=""Function assignment F10"">
+    <description>(See appendix 1) Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""45"" value=""0"" type=""Function assignment F11"">
+    <description>(See appendix 1) Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""46"" value=""0"" type=""Function assignment F12"">
+    <description>(See appendix 1) Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""47"" value=""4"" type=""Function assignment F1(r)"">
+    <description>(See appendix 1) If CV47 is to have a different value from CV35, CV35 must be programmed before CV47 Value range 0 – 255, default 4.</description>
+  </parameter>
+  <parameter nr=""48"" value=""5"" type=""Characteristic for back-EMF"">
+    <description>(See appendix 2) Curvature of the speed step characteristic, 0 = straight ... 7 = strongly curved Value range 0 – 7, default 5.</description>
+  </parameter>
+  <parameter nr=""49"" value=""1"" type=""Pulse width"">
+    <description>(Not relevant for FH*) 0 = 1 ms, 1 = 2 ms, 2 = 4 ms, 3 = 8 ms Value range 0 – 3, default 1.</description>
+  </parameter>
+  <parameter nr=""50"" value=""2"" type=""Control variant"">
+    <description>(Not relevant for FH*) 0 = set by CV56 ff., 1 = hard, 2 = soft, 3 = very soft Value range 0 – 3, default 2.</description>
+  </parameter>
+  <parameter nr=""51"" value=""0"" type=""Swaps"">
+    <description>Bit 0 = Motor connections (not relevant for FH*) (value 1); Bit 1 = Light connections (value 2); Bit 2 = Track connections (value 4) Value range 0 – 7, default 0.</description>
+  </parameter>
+  <parameter nr=""52"" value=""31"" type=""Dimming LV/LR"">
+    <description>0 = dark … 31 = full brightness Value range 0 – 31, default 31.</description>
+  </parameter>
+  <parameter nr=""53"" value=""15"" type=""Dimming of dipped light"">
+    <description>(See CV156) 0 = dark … 31 = full brightness Value range 0 – 31, default 15.</description>
+  </parameter>
+  <parameter nr=""54"" value=""31"" type=""Dimming AUX1"">
+    <description>0 = dark … 31 = full brightness Value range 0 – 31, default 31.</description>
+  </parameter>
+  <parameter nr=""55"" value=""31"" type=""Dimming AUX2"">
+    <description>0 = dark … 31 = full brightness Value range 0 – 31, default 31.</description>
+  </parameter>
+  <parameter nr=""56"" value=""3"" type=""Motor control proportional component"">
+    <description>(Not relevant for FH*) Only with CV50 = 0, see www.doehler-haass.de / „Frequently asked questions“ Value range 0 – 7, default 3.</description>
+  </parameter>
+  <parameter nr=""57"" value=""3"" type=""Motor control integral component"">
+    <description>(As for CV56) Value range 0 – 3, default 3.</description>
+  </parameter>
+  <parameter nr=""58"" value=""1"" type=""Motor control measuring time"">
+    <description>(As for CV56) Value range 0 – 3, default 1.</description>
+  </parameter>
+  <parameter nr=""59"" value=""3"" type=""Motor control pulse width"">
+    <description>(As for CV56) Value range 0 – 7, default 3.</description>
+  </parameter>
+  <parameter nr=""60"" value=""0"" type=""Settings"">
+    <description>Bit 0 = 0 = one-part SX braking sections, 1 = two-part SX braking sections (see CV65). Only with an SX braking diode (CV27 bits 6 and 7) (value 1); Bit 1 = Minimum speed step for the braking ramp active (see CV65) (value 2). 2:3 shuttle operation disabled 0; shuttle operation without intermediate stop (see CV63) (stop causes a direction reversal, slow running causes slow running) 4; shuttle operation with manual intermediate stop (see CV63) (stop causes a halt until released, slow running causes a direction reversal) 8; shuttle operation with automatic intermediate stop (see CV63) (stop causes a halt with automatic restart, slow running causes a direction reversal) 12. Only with suitable asymmetry braking modules (CV27 bits 0 and 1) Value range 0 – 15, default 0.</description>
+  </parameter>
+  <parameter nr=""61"" value=""63"" type=""Shunting mode back-EMF control reference"">
+    <description>(See appendix 2) Sets the reference value for the control of the motor's back-EMF at the highest speed step in shunting mode („0“ corresponds to about 1.2 V, „127“ to about 10 V back-EMF), see CV05 Value range 0 – 127, default 63.</description>
+  </parameter>
+  <parameter nr=""62"" value=""1"" type=""Shunting mode deceleration time"">
+    <description>(As for CV03) Value range 0 – 255, default 1.</description>
+  </parameter>
+  <parameter nr=""63"" value=""0"" type=""Acceleration delay / dwell time"">
+    <description>(See CV60) Depending on whether shuttle operation is active (CV60 bits 2 and 3), this sets either an additional waiting time before the decoder starts moving (in steps of 100 ms) (see CV124), or the dwell time before the decoder reverses the direction of travel (in steps of 1 s) and the dwell time before the decoder starts again (in steps of 0.5 s) Value range 0 – 250, default 0.</description>
+  </parameter>
+  <parameter nr=""64"" value=""8"" type=""Function assignment F2(r)"">
+    <description>(See appendix 1) If CV64 is to have a different value from CV36, CV36 must be programmed before CV64 Value range 0 – 255, default 8.</description>
+  </parameter>
+  <parameter nr=""65"" value=""12"" type=""Speed step in braking sections"">
+    <description>(See CV60) Depending on whether the braking ramp is active (CV60 bit 1), this sets either the maximum speed step in two-part SX braking sections (see CV27 bits 6 and 7 and CV60 bit 0), or the minimum speed step from which the braking ramp becomes active (see CV154/CV155) Value range 0 – 127, default 12.</description>
+  </parameter>
+  <parameter nr=""66"" value=""0"" type=""Forward trim"">
+    <description>0 = switched off; below 128 reduces, above 128 increases the speed Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""95"" value=""0"" type=""Reverse trim"">
+    <description>(See CV66) Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""98"" value=""10"" type=""Function assignment AUX7"">
+    <description>(Only relevant for DH21B/DH22B/DH24A) 0 = disabled, 1 … 28 = F1 … F28, 29 = F0 (light) Value range 0 – 29, default 10.</description>
+  </parameter>
+  <parameter nr=""99"" value=""11"" type=""Function assignment AUX8"">
+    <description>(As for CV98) Value range 0 – 29, default 11.</description>
+  </parameter>
+  <parameter nr=""101"" value=""12"" type=""Function assignment AUX10"">
+    <description>(As for CV98) Value range 0 – 29, default 12.</description>
+  </parameter>
+  <parameter nr=""102"" value=""13"" type=""Function assignment AUX11"">
+    <description>(As for CV98) Value range 0 – 29, default 13.</description>
+  </parameter>
+  <parameter nr=""103"" value=""14"" type=""Function assignment AUX12"">
+    <description>(As for CV98) Value range 0 – 29, default 14.</description>
+  </parameter>
+  <parameter nr=""105"" value=""0"" type=""User identifier 1"">
+    <description>Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""106"" value=""0"" type=""User identifier 2"">
+    <description>Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""112"" value=""15"" type=""Speed reduction in analogue operation"">
+    <description>(Not relevant for FH*/PD05A) 0 = slight reduction … 127 = strong reduction Value range 0 – 127, default 15.</description>
+  </parameter>
+  <parameter nr=""113"" value=""0"" type=""Switch-off function for LV"">
+    <description>Bit 0 = F1 ... bit 7 = F8 Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""114"" value=""0"" type=""Switch-off function for LR"">
+    <description>Bit 0 = F1 ... bit 7 = F8 Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""115"" value=""0"" type=""Switch-off function for AUX1"">
+    <description>Bit 0 = F1 ... bit 7 = F8 Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""116"" value=""0"" type=""Switch-off function for AUX2"">
+    <description>Bit 0 = F1 ... bit 7 = F8 Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""117"" value=""0"" type=""Timer for switching off AUX1"">
+    <description>In steps of 100 ms, 0 = switched off Value range 0 – 250, default 0.</description>
+  </parameter>
+  <parameter nr=""118"" value=""0"" type=""Timer for switching off AUX2"">
+    <description>In steps of 100 ms, 0 = switched off Value range 0 – 250, default 0.</description>
+  </parameter>
+  <parameter nr=""119"" value=""0"" type=""Timer for switching off AUX3"">
+    <description>In steps of 100 ms, 0 = switched off Value range 0 – 250, default 0.</description>
+  </parameter>
+  <parameter nr=""120"" value=""0"" type=""Timer for switching off AUX4"">
+    <description>In steps of 100 ms, 0 = switched off Value range 0 – 250, default 0.</description>
+  </parameter>
+  <parameter nr=""121"" value=""0"" type=""Function assignment LV+LR on / AUX1+AUX2 off"">
+    <description>Bit 0 = F1 … bit 7 = F8. Only with F0 (light) on Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""122"" value=""0"" type=""Function assignment AUX1+AUX2 on / LV+LR off"">
+    <description>Bit 0 = F1 … bit 7 = F8. Only with F0 (light) off Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""123"" value=""63"" type=""Slow speed"">
+    <description>(See CV27) Only with suitable asymmetry braking modules (CV27 bits 0 and 1) Value range 0 – 127, default 63.</description>
+  </parameter>
+  <parameter nr=""124"" value=""0"" type=""Function assignment acceleration delay"">
+    <description>(See CV63) Bit 0 = F1 … bit 7 = F8 Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""125"" value=""0"" type=""Switch-off function for AUX3"">
+    <description>Bit 0 = F1 ... bit 7 = F8 Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""126"" value=""0"" type=""Switch-off function for AUX4"">
+    <description>Bit 0 = F1 ... bit 7 = F8 Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""127"" value=""0"" type=""Switch-off function for AUX5"">
+    <description>Bit 0 = F1 ... bit 7 = F8 Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""128"" value=""0"" type=""Switch-off function for AUX6"">
+    <description>Bit 0 = F1 ... bit 7 = F8 Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""129"" value=""0"" type=""Timer for switching off AUX5"">
+    <description>In steps of 100 ms, 0 = switched off Value range 0 – 250, default 0.</description>
+  </parameter>
+  <parameter nr=""130"" value=""0"" type=""Timer for switching off AUX6"">
+    <description>In steps of 100 ms, 0 = switched off Value range 0 – 250, default 0.</description>
+  </parameter>
+  <parameter nr=""131"" value=""8"" type=""Function assignment dipped light"">
+    <description>(Not relevant for PD*) 0 = disabled, 1 … 28 = F1 … F28, 29 = F0 (light). Only with CV137 bit 4 = 1 Value range 0 – 29, default 8.</description>
+  </parameter>
+  <parameter nr=""132"" value=""4"" type=""Function assignment shunting mode"">
+    <description>(As for CV131) Value range 0 – 29, default 4.</description>
+  </parameter>
+  <parameter nr=""133"" value=""9"" type=""Function assignment switch off delays"">
+    <description>(As for CV131) Value range 0 – 29, default 9.</description>
+  </parameter>
+  <parameter nr=""134"" value=""6"" type=""Decision threshold for asymmetry"">
+    <description>(See CV27) The default value 6 corresponds to about 0.7 volts of asymmetry, i.e. the forward voltage of a silicon diode. Values below 3 are not sensible; values above 6 if required Value range 0 – 15, default 6.</description>
+  </parameter>
+  <parameter nr=""135"" value=""0"" type=""Multiplier for speed feedback"">
+    <description>0 = switched off Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""136"" value=""0"" type=""Divisor for speed feedback"">
+    <description>0 = /1, 1 = /2, 2 = /4, 3 = /8, 4 = /16, 5 = /32, 6 = /64 Value range 0 – 6, default 0.</description>
+  </parameter>
+  <parameter nr=""137"" value=""0"" type=""Settings"">
+    <description>Bit 0 = Unamplified function outputs instead of ZCLK and ZDAT (not relevant for PD*) (enabled by default on DH18A/FH18A) (value 1); Bit 1 = Switch off power saving mode (value 2); Bit 2 = Invert SUSI direction of travel (not relevant for PD*) (value 4); Bit 3 = Switch off SUSI acceleration delay (not relevant for PD*) (value 8); Bit 4 = Enable extended function assignments (not relevant for PD*) (value 16); Bit 5 = 0 = AUX3 and AUX4 on ZCLK and ZDAT, 1 = AUX5 and AUX6 on ZCLK and ZDAT (not relevant for PD*/DH21B/DH22B/DH24A) (value 32); Bit 6 = Apply the function swaps (CV401 ff.) to SUSI F1-F12 (not relevant for PD*) (value 64) Value range 0 – 127, default 0.</description>
+  </parameter>
+  <parameter nr=""138"" value=""0"" type=""Timer for approaching"">
+    <description>(Not relevant for PD*) In steps of 100 ms, 0 = no approach Value range 0 – 250, default 0.</description>
+  </parameter>
+  <parameter nr=""139"" value=""0"" type=""Timer for waiting"">
+    <description>(Not relevant for PD*) In steps of 100 ms, 0 = no waiting Value range 0 – 250, default 0.</description>
+  </parameter>
+  <parameter nr=""140"" value=""0"" type=""Timer for pulling away"">
+    <description>(Not relevant for PD*) In steps of 100 ms, 0 = no pull-away Value range 0 – 250, default 0.</description>
+  </parameter>
+  <parameter nr=""141"" value=""12"" type=""Speed step for approaching"">
+    <description>(Not relevant for PD*) Value range 0 – 127, default 12.</description>
+  </parameter>
+  <parameter nr=""142"" value=""12"" type=""Speed step for pulling away"">
+    <description>(Not relevant for PD*) Value range 0 – 127, default 12.</description>
+  </parameter>
+  <parameter nr=""143"" value=""0"" type=""Settings"">
+    <description>Bit 6 = Disable coupling sequence and timer (value 64); Bit 7 = Coupling sequence only in shunting mode (value 128). (Not relevant for PD*) Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""144"" value=""0"" type=""Settings"">
+    <description>Bit 0 = Dynamic channel use (obsolete, see CV29 bit 2) (value 1); Bit 1 = Immediate start after a power interruption (value 2); Bit 2 = Special bit for lighting in analogue operation (value 4); Bit 3 = Braking section output on „GPIO“ (only relevant for DH21A/DH21B/DH22A/DH22B/DH24A/FH22A) (value 8); Bit 4 = Braking via „GPIO“ (1 = run, 0 = brake) (only relevant for DH21A/DH21B/DH22A/DH22B/DH24A/FH22A) (value 16); Bit 5 = Disable short-term data storage (value 32) Value range 0 – 63, default 0.</description>
+  </parameter>
+  <parameter nr=""145"" value=""0"" type=""Conditions for LV"">
+    <description>(Not relevant for PD*) Function / value: basic state (always on when the function key is on) 0; only when forward +1; only when reverse +2; only at standstill +3; only when running +6; only with F0 (light) off +9; only with F0 (light) on +18; not in shunting mode +27; only in shunting mode +54; ignore direction in shunting mode +81; ignore running/standstill in shunting mode +108; ignore direction and running/standstill in shunting mode +135. Only one number from each delimited group may be added! Value range 0 – 161, default 0.</description>
+  </parameter>
+  <parameter nr=""146"" value=""0"" type=""Conditions for LR"">
+    <description>(See CV145) Value range 0 – 161, default 0.</description>
+  </parameter>
+  <parameter nr=""147"" value=""0"" type=""Conditions for AUX1"">
+    <description>(See CV145) Value range 0 – 161, default 0.</description>
+  </parameter>
+  <parameter nr=""148"" value=""0"" type=""Conditions for AUX2"">
+    <description>(See CV145) Value range 0 – 161, default 0.</description>
+  </parameter>
+  <parameter nr=""149"" value=""0"" type=""Conditions for AUX3"">
+    <description>(See CV145) Value range 0 – 161, default 0.</description>
+  </parameter>
+  <parameter nr=""150"" value=""0"" type=""Conditions for AUX4"">
+    <description>(See CV145) Value range 0 – 161, default 0.</description>
+  </parameter>
+  <parameter nr=""151"" value=""0"" type=""Conditions for AUX5"">
+    <description>(See CV145) Value range 0 – 161, default 0.</description>
+  </parameter>
+  <parameter nr=""152"" value=""0"" type=""Conditions for AUX6"">
+    <description>(See CV145) Value range 0 – 161, default 0.</description>
+  </parameter>
+  <parameter nr=""153"" value=""0"" type=""Initial mapping"">
+    <description>Bit 0 = LV (value 1); Bit 1 = LR (value 2); Bit 2 = AUX1 (value 4); Bit 3 = AUX2 (value 8); Bit 4 = AUX3 (value 16); Bit 5 = AUX4 (value 32); Bit 6 = AUX5 (value 64); Bit 7 = AUX6 (value 128). (Not relevant for PD*) These function outputs are active as soon as the decoder is addressed (without an active function key). In combination with the conditions this allows, for example, a pickup changeover to be implemented Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""154"" value=""0"" type=""Brake ramp forward and reverse"">
+    <description>(See CV27, not relevant for PD05A/PD06A) CV48 = 0 is recommended for a constant braking distance; 0 = switched off. The value sets the braking time from the highest speed step in seconds times 8; for lower speed steps the decoder calculates the braking ramp itself Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""155"" value=""0"" type=""Brake ramp reverse"">
+    <description>(See CV154) 0 = the value from CV154 is used; allows different braking times for forward and reverse Value range 0 – 255, default 0.</description>
+  </parameter>
+  <parameter nr=""156"" value=""3"" type=""Dimming mask for dipped light"">
+    <description>Bit 0 = LV (value 1); Bit 1 = LR (value 2); Bit 2 = AUX1 (value 4); Bit 3 = AUX2 (value 8); Bit 4 = AUX3 (value 16); Bit 5 = AUX4 (value 32); Bit 6 = AUX5 (value 64); Bit 7 = AUX6 (value 128). (See CV53) Value range 0 – 255, default 3.</description>
+  </parameter>
+  <parameter nr=""157"" value=""0"" type=""Conditions for dipped light"">
+    <description>(See CV145) Value range 0 – 161, default 0.</description>
+  </parameter>
+  <parameter nr=""158"" value=""0"" type=""Conditions for AUX7"">
+    <description>(See CV145) (Only relevant for DH21B/DH22B/DH24A) Value range 0 – 161, default 0.</description>
+  </parameter>
+  <parameter nr=""159"" value=""0"" type=""Conditions for AUX8"">
+    <description>(See CV158) Value range 0 – 161, default 0.</description>
+  </parameter>
+  <parameter nr=""260"" value=""0"" type=""Manufacturer ID"">
+    <description>(Nur lesen) 97 = Doehler &amp; Haass</description>
+  </parameter>
+  <parameter nr=""261"" value=""0"" type=""Decoder identifier"">
+    <description>(Read only) DH05C=52, DH10C=102, DHSP10A=110, DH12A=120, DH14B=141, DH16A=160, DH18A=180, DH21A=200, DH21B=201, DH22A=202, DH22B=203, DH24A=204, FH05B=41, FH16A=150, FH18A=170, FH22A=192, PD05A=131, PD06A=132, PD12A=130, PD18A=134, PD21A=133. Complete list at www.doehler-haass.de / „Frequently asked questions“</description>
+  </parameter>
+  <parameter nr=""262"" value=""0"" type=""Version number"">
+    <description>(Read only)</description>
+  </parameter>
+  <parameter nr=""263"" value=""0"" type=""Date"">
+    <description>(Read only)</description>
+  </parameter>
+  <parameter nr=""264"" value=""0"" type=""Revision number"">
+    <description>(Read only)</description>
+  </parameter>
+  <parameter nr=""265"" value=""0"" type=""Date"">
+    <description>(Read only)</description>
+  </parameter>
+  <parameter nr=""401"" value=""1"" type=""Function swap F1"">
+    <description>(Not relevant for PD*) 0 = disabled, 1 … 28 = F1 … F28, 29 = F0 (light) Value range 0 – 29, default 1.</description>
+  </parameter>
+  <parameter nr=""402"" value=""2"" type=""Function swap F2"">
+    <description>(As for CV401) Value range 0 – 29, default 2.</description>
+  </parameter>
+  <parameter nr=""403"" value=""3"" type=""Function swap F3"">
+    <description>(As for CV401) Value range 0 – 29, default 3.</description>
+  </parameter>
+  <parameter nr=""404"" value=""4"" type=""Function swap F4"">
+    <description>(As for CV401) Value range 0 – 29, default 4.</description>
+  </parameter>
+  <parameter nr=""405"" value=""5"" type=""Function swap F5"">
+    <description>(As for CV401) Value range 0 – 29, default 5.</description>
+  </parameter>
+  <parameter nr=""406"" value=""6"" type=""Function swap F6"">
+    <description>(As for CV401) Value range 0 – 29, default 6.</description>
+  </parameter>
+  <parameter nr=""407"" value=""7"" type=""Function swap F7"">
+    <description>(As for CV401) Value range 0 – 29, default 7.</description>
+  </parameter>
+  <parameter nr=""408"" value=""8"" type=""Function swap F8"">
+    <description>(As for CV401) Value range 0 – 29, default 8.</description>
+  </parameter>
+  <parameter nr=""409"" value=""9"" type=""Function swap F9"">
+    <description>(As for CV401) Value range 0 – 29, default 9.</description>
+  </parameter>
+  <parameter nr=""410"" value=""10"" type=""Function swap F10"">
+    <description>(As for CV401) Value range 0 – 29, default 10.</description>
+  </parameter>
+  <parameter nr=""411"" value=""11"" type=""Function swap F11"">
+    <description>(As for CV401) Value range 0 – 29, default 11.</description>
+  </parameter>
+  <parameter nr=""412"" value=""12"" type=""Function swap F12"">
+    <description>(As for CV401) Value range 0 – 29, default 12.</description>
+  </parameter>
+  <parameter nr=""461"" value=""31"" type=""Dimming AUX3"">
+    <description>(Not relevant for PD*) 0 = dark … 31 = full brightness (not every AUX can be dimmed independently on every decoder) Value range 0 – 31, default 31.</description>
+  </parameter>
+  <parameter nr=""463"" value=""31"" type=""Dimming AUX4"">
+    <description>(As for CV461) Value range 0 – 31, default 31.</description>
+  </parameter>
+  <parameter nr=""465"" value=""31"" type=""Dimming AUX5"">
+    <description>(As for CV461) Value range 0 – 31, default 31.</description>
+  </parameter>
+  <parameter nr=""467"" value=""31"" type=""Dimming AUX6"">
+    <description>(As for CV461) Value range 0 – 31, default 31.</description>
+  </parameter>
+</configuration>"

@@ -2,6 +2,7 @@ package com.example.itrain_import_export;
 
 import javafx.collections.ListChangeListener;
 import javafx.scene.Scene;
+import javafx.scene.paint.Color;
 import javafx.stage.Window;
 
 /**
@@ -38,7 +39,71 @@ public final class ThemeManager {
      */
     private static final String WATCHED_KEY = "iTrain.themeWatched";
 
+    /**
+     * Vorschau-Farben aus dem geoeffneten {@link CustomColorDialog}: Solange
+     * gesetzt, zeigen ALLE Fenster diese Farben, ohne dass sie schon
+     * gespeichert waeren. "Speichern" uebernimmt sie in die Einstellungen,
+     * "Zurueck" verwirft sie - beides beendet die Vorschau ({@link #endPreview}).
+     */
+    private static String previewBackground;
+    private static String previewText;
+
     private ThemeManager() {
+    }
+
+    /** Zeigt die zwei Farben sofort in allen offenen Fenstern, ohne sie zu speichern. */
+    public static void preview(String backgroundWeb, String textWeb) {
+        previewBackground = backgroundWeb;
+        previewText = textWeb;
+        applyToAllWindows(AppSettings.getInstance().getTheme());
+    }
+
+    /** Beendet die Vorschau; alle Fenster zeigen wieder die gespeicherten Farben. */
+    public static void endPreview() {
+        previewBackground = null;
+        previewText = null;
+        applyToAllWindows(AppSettings.getInstance().getTheme());
+    }
+
+    /**
+     * Die gerade wirksame Hintergrund-/Textfarbe als Web-Wert - Vorschau vor
+     * gespeicherter Farbkombination vor Hell/Dunkel-Rueckfall. Fuer Stellen,
+     * die Farben programmatisch setzen muessen (Formen, Text-Knoten), weil
+     * CSS dort nicht greift; siehe {@link #textColor()} und {@link #isDark()}.
+     */
+    private static String[] effectiveColors() {
+        if (previewBackground != null && previewText != null) {
+            return new String[]{previewBackground, previewText};
+        }
+        AppSettings settings = AppSettings.getInstance();
+        if (settings.isCustomColorActive()
+                && settings.getCustomBackgroundColor() != null && settings.getCustomTextColor() != null) {
+            return new String[]{settings.getCustomBackgroundColor(), settings.getCustomTextColor()};
+        }
+        return AppSettings.THEME_DARK.equals(settings.getTheme())
+                ? new String[]{"#2b2b2b", "#e0e0e0"}
+                : new String[]{"#ececec", "#000000"};
+    }
+
+    /** Wirksame Textfarbe des aktuellen Farbschemas. */
+    public static Color textColor() {
+        return Color.web(effectiveColors()[1]);
+    }
+
+    /** Wirksame Hintergrundfarbe des aktuellen Farbschemas. */
+    public static Color backgroundColor() {
+        return Color.web(effectiveColors()[0]);
+    }
+
+    /**
+     * Ob der wirksame Hintergrund dunkel ist - Grundlage fuer Stellen, die
+     * zwischen einer hellen und einer dunklen Farbvariante waehlen
+     * (Fuehrungsfarben im Daten-Explorer, Skizze im Hinweisfenster).
+     */
+    public static boolean isDark() {
+        Color bg = backgroundColor();
+        double luminance = 0.299 * bg.getRed() + 0.587 * bg.getGreen() + 0.114 * bg.getBlue();
+        return luminance < 0.5;
     }
 
     /**
@@ -77,6 +142,28 @@ public final class ThemeManager {
             return;
         }
         scene.getStylesheets().clear();
+        // Laufende Vorschau aus dem Farbkombination-Dialog geht vor allem anderen.
+        if (previewBackground != null && previewText != null) {
+            String previewCss = CustomColorTheme.buildStylesheet(previewBackground, previewText);
+            if (previewCss != null) {
+                scene.getStylesheets().add(previewCss);
+                return;
+            }
+        }
+        // Eine gespeicherte Farbkombination (siehe CustomColorDialog) hat
+        // Vorrang vor Hell/Dunkel und gilt unabhaengig vom uebergebenen
+        // theme-Wert. Hell/Dunkel bleibt nur noch die Rueckfallebene, solange
+        // noch nie eine Farbkombination gespeichert wurde (bzw. die
+        // Ersteinrichtung sie zurueckgesetzt hat).
+        AppSettings settings = AppSettings.getInstance();
+        if (settings.isCustomColorActive()) {
+            String customCss = CustomColorTheme.buildStylesheet(
+                    settings.getCustomBackgroundColor(), settings.getCustomTextColor());
+            if (customCss != null) {
+                scene.getStylesheets().add(customCss);
+                return;
+            }
+        }
         if (AppSettings.THEME_DARK.equals(theme)) {
             String url = HelloApplication.class.getResource(DARK_STYLESHEET) != null
                     ? HelloApplication.class.getResource(DARK_STYLESHEET).toExternalForm()

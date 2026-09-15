@@ -1,0 +1,78 @@
+﻿"Kategorie";"Typ";"Name";"Beschreibung";"XML"
+"decoder-configuration";"configuration";"Tams LD-G-30 / LD-G-31 (Ausgabe 2010)";"Tams Elektronik loco decoders, 30 series (LD-G-30 item 41-0130x, LD-G-31 item 41-0131x and others) - CV table from the instructions, edition 09/2010, pages 26-31";"<configuration count=""25"">
+  <parameter nr=""1"" value=""3"" type=""Base address"">
+    <description>Value range in DCC format: 1 ... 127</description>
+  </parameter>
+  <parameter nr=""2"" value=""5"" type=""Starting voltage"">
+    <description>= voltage applied to the motor at speed step 1. The value ""0"" corresponds to 0 volts, the value ""255"" to the maximum voltage. See also ""Optimising the running characteristics"" at the end of section 8.</description>
+  </parameter>
+  <parameter nr=""3"" value=""20"" type=""Acceleration rate"">
+    <description>= length of the waiting time that elapses each time before stepping up to the next higher speed step while the loco accelerates. The waiting time is calculated as follows: (value of CV#3) x 0.9 sec. / number of speed steps</description>
+  </parameter>
+  <parameter nr=""4"" value=""15"" type=""Braking rate"">
+    <description>= length of the waiting time that elapses each time before stepping down to the next lower speed step while the loco brakes. The waiting time is calculated as described under CV#3.</description>
+  </parameter>
+  <parameter nr=""5"" value=""0"" type=""Maximum voltage"">
+    <description>= voltage applied to the motor at the highest speed step. The value ""2"" corresponds to 0.8 %, the value ""255"" to 100 % of the maximum voltage. See also ""Optimising the running characteristics"" at the end of section 8.</description>
+  </parameter>
+  <parameter nr=""7"" type=""Version"">
+    <description>Can only be read out in DCC format!</description>
+  </parameter>
+  <parameter nr=""8"" value=""62"" type=""Manufacturer"">
+    <description>Can only be read out in DCC format!</description>
+  </parameter>
+  <parameter nr=""9"" value=""0"" type=""Motor frequency (LD-G-31, -33 and LD-G-34 only)"">
+    <description>Numeric value * / 31.5 kHz 0 / 17 kHz 1 / 480 Hz 0 / 60 Hz 1</description>
+  </parameter>
+  <parameter nr=""12"" value=""0"" type=""Analogue mode"">
+    <description>= method that triggers a change of direction in analogue operation / numeric value * / overvoltage pulse (AC layouts) 0 / change of polarity (DC layouts) 1</description>
+  </parameter>
+  <parameter nr=""13"" value=""0"" type=""Functions active in analogue operation (only for F1 to F8, not for F9 to F12)"">
+    <description>Numeric value * / F1 on 1 / F2 on 2 / F3 on 4 / F4 on 8 / F5 on 16 / F6 on 32 / F7 on 64 / F8 on 128</description>
+  </parameter>
+  <parameter nr=""17"" value=""192"" type=""Extended address"">
+    <description>For DCC format only. With most command stations it is possible to enter extended addresses directly. CVs 17, 18 and 29 are then set correctly by the command station automatically.</description>
+  </parameter>
+  <parameter nr=""18"" value=""255"">
+    <description></description>
+  </parameter>
+  <parameter nr=""19"" value=""0"" type=""Consist address"">
+    <description>= 2nd address. In DCC format only!</description>
+  </parameter>
+  <parameter nr=""27"" value=""0"" type=""Braking behaviour with DC voltage"">
+    <description>Numeric value * / no braking with DC voltage 0 / braking with positive DC voltage 16 / braking with negative DC voltage 32</description>
+  </parameter>
+  <parameter nr=""29"" value=""14"" type=""Configuration data 1"">
+    <description>Numeric value * / direction of travel ""standard"" 0 / invert direction of travel 1 / 14 speed steps 0 / 28 or 128 speed steps 2 / analogue detection off 0 / analogue detection on 4 / RailCom off 0 / RailCom on 8 / linear speed curve 0 / alternative speed curve 16 / basic addresses 0 / extended addresses 32 / numeric value * / assigned output:</description>
+  </parameter>
+  <parameter nr=""33"" value=""1"" type=""F0 forward on"">
+    <description>AUX1 1</description>
+  </parameter>
+  <parameter nr=""34"" value=""2"" type=""F0 reverse on"">
+    <description>AUX2 2</description>
+  </parameter>
+  <parameter nr=""35"" value=""0"" type=""F1"">
+    <description></description>
+  </parameter>
+  <parameter nr=""36"" value=""0"" type=""F2"">
+    <description></description>
+  </parameter>
+  <parameter nr=""37"" value=""0"" type=""F3"">
+    <description>Low tone 16</description>
+  </parameter>
+  <parameter nr=""38"" value=""0"" type=""F4"">
+    <description>High tone 32</description>
+  </parameter>
+  <parameter nr=""39"" value=""16"" type=""F5"">
+    <description></description>
+  </parameter>
+  <parameter nr=""40"" value=""32"" type=""F6"">
+    <description></description>
+  </parameter>
+  <parameter nr=""41"" value=""0"" type=""F7"">
+    <description></description>
+  </parameter>
+  <parameter nr=""46"" value=""0"" type=""F12"">
+    <description>Numeric value * / assigned output:</description>
+  </parameter>
+</configuration>"
