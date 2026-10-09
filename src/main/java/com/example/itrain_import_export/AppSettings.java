@@ -164,6 +164,24 @@ public final class AppSettings {
      * Pairing-Speicher eine neue Bestaetigung. Mit der uebernommenen ID
      * erkennt es das Programm dagegen wieder.
      */
+    /**
+     * Gemerkte Spaltenbreite einer Tabelle (Schluessel z.B.
+     * "systems.feedbacks.systems.colType"), oder -1 wenn keine gemerkt ist.
+     * Preferences begrenzt Schluessel auf 80 Zeichen - laengere werden gekuerzt.
+     */
+    public double getColumnWidth(String key) {
+        return prefs.getDouble(columnKey(key), -1);
+    }
+
+    public void setColumnWidth(String key, double width) {
+        prefs.putDouble(columnKey(key), width);
+    }
+
+    private static String columnKey(String key) {
+        String full = "colWidth." + key;
+        return full.length() <= Preferences.MAX_KEY_LENGTH ? full : full.substring(0, Preferences.MAX_KEY_LENGTH);
+    }
+
     private String inheritedBidibValue(String key) {
         migrateBidibValuesOnce();
         return prefs.get(key, null);

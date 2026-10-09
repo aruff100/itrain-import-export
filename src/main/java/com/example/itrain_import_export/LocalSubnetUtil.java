@@ -70,6 +70,34 @@ final class LocalSubnetUtil {
         return result;
     }
 
+    /**
+     * Die eigenen IPv4-Adressen (ohne Loopback/APIPA) - {@link #subnetAddresses()}
+     * laesst sie bewusst aus, fuer Dienste auf dem EIGENEN Rechner (z.B. die
+     * iTrain-BiDiB-Weiterleitung, die nur an der Netzadresse lauscht) werden
+     * sie aber gebraucht.
+     */
+    static List<InetAddress> localAddresses() {
+        List<InetAddress> result = new ArrayList<>();
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface nic = interfaces.nextElement();
+                if (!isUsable(nic)) {
+                    continue;
+                }
+                for (InterfaceAddress ifAddr : nic.getInterfaceAddresses()) {
+                    InetAddress local = ifAddr.getAddress();
+                    if (local instanceof Inet4Address && !local.isLoopbackAddress() && !local.isLinkLocalAddress()) {
+                        result.add(local);
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            // leere Liste
+        }
+        return result;
+    }
+
     private static boolean isUsable(NetworkInterface nic) {
         try {
             return nic.isUp() && !nic.isLoopback() && !nic.isPointToPoint();

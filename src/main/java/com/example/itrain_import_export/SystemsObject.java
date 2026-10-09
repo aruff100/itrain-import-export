@@ -264,6 +264,113 @@ public final class SystemsObject {
     }
 
     // ------------------------------------------------------------------
+    // Zuordnung zu einem vorhandenen Eintrag der iTrain-Datei
+    // ------------------------------------------------------------------
+
+    /**
+     * Vorhandener Eintrag in der im Systeme-Fenster geladenen iTrain-Datei,
+     * dem dieses Objekt zugeordnet ist - oder null = "Neu". Bewusst NICHT in
+     * der System-Datei gespeichert: die Zuordnung gilt nur zur jeweils
+     * geladenen .tcdz und wird beim Laden neu ermittelt.
+     */
+    private XmlNode matchedEntry;
+    /** Name des zugeordneten Eintrags fuer die Tabellenspalte, "" = Neu. */
+    private final StringProperty matchName = new SimpleStringProperty("");
+
+    public StringProperty matchNameProperty() {
+        return matchName;
+    }
+
+    public boolean isMatched() {
+        return matchedEntry != null;
+    }
+
+    public XmlNode getMatchedEntry() {
+        return matchedEntry;
+    }
+
+    /**
+     * Zuordnen (oder mit null aufheben). Bei einer Zuordnung uebernimmt das
+     * Objekt den iTrain-Namen - nur so erkennt der Import im Hauptfenster
+     * den vorhandenen Eintrag wieder ("synchronisieren") - und, falls die
+     * eigene Beschreibung leer ist, auch dessen Beschreibung.
+     */
+    public void setMatch(XmlNode entry) {
+        matchedEntry = entry;
+        matchName.set(entry == null ? "" : entry.getName());
+        if (entry != null) {
+            if (!isInterface()) {
+                name.set(entry.getName());
+            }
+            XmlNode theirDescription = entry.findChild("description");
+            if (getDescription().isEmpty() && theirDescription != null
+                    && theirDescription.getTextContent() != null) {
+                description.set(theirDescription.getTextContent());
+            }
+        }
+    }
+
+    /**
+     * Der Eintrag, der exportiert wird: ohne Zuordnung der eigene; mit
+     * Zuordnung eine Kopie des VORHANDENEN iTrain-Eintrags, in der nur die
+     * BiDiB-Verknuepfung (id, Verweis auf die Schnittstelle bzw. deren
+     * Verbindungsangaben) und die Beschreibung aktualisiert sind. So gehen
+     * in iTrain gepflegte Angaben (Typ, Seite, Laenge, Optionen, Belegung
+     * ...) beim "Synchronisieren" nicht verloren.
+     */
+    public XmlNode exportXml() {
+        if (matchedEntry == null || xml == null) {
+            return xml;
+        }
+        XmlNode merged = matchedEntry.deepCopy();
+        if ("interface".equals(xml.getTagName())) {
+            for (String connectionTag : List.of("socket", "serial")) {
+                XmlNode ours = xml.findChild(connectionTag);
+                if (ours == null) {
+                    continue;
+                }
+                XmlNode theirs = merged.findChild(connectionTag);
+                if (theirs == null) {
+                    merged.getChildren().add(ours.deepCopy());
+                } else {
+                    theirs.getAttributes().putAll(ours.getAttributes());
+                }
+            }
+        } else {
+            XmlNode ourId = xml.findChild("id");
+            if (ourId != null) {
+                XmlNode theirId = merged.findChild("id");
+                if (theirId == null) {
+                    theirId = new XmlNode("id");
+                    XmlNode desc = merged.findChild("description");
+                    merged.getChildren().add(desc == null ? 0 : merged.getChildren().indexOf(desc) + 1, theirId);
+                }
+                theirId.setTextContent(ourId.getTextContent());
+            }
+            XmlNode ourInterface = xml.findChild("interface");
+            if (ourInterface != null) {
+                XmlNode theirInterface = merged.findChild("interface");
+                if (theirInterface == null) {
+                    XmlNode id = merged.findChild("id");
+                    int at = id == null ? 0 : merged.getChildren().indexOf(id) + 1;
+                    merged.getChildren().add(at, ourInterface.deepCopy());
+                } else {
+                    theirInterface.getAttributes().putAll(ourInterface.getAttributes());
+                }
+            }
+        }
+        if (!getDescription().isEmpty()) {
+            XmlNode desc = merged.findChild("description");
+            if (desc == null) {
+                desc = new XmlNode("description");
+                merged.getChildren().add(0, desc);
+            }
+            desc.setTextContent(getDescription());
+        }
+        return merged;
+    }
+
+    // ------------------------------------------------------------------
     // Anzeigetexte und Auswahlen
     // ------------------------------------------------------------------
 

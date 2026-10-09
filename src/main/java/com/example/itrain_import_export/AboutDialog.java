@@ -50,6 +50,9 @@ public final class AboutDialog {
         licenseLabel.setWrapText(true);
         licenseLabel.setMaxWidth(320);
         licenseLabel.setStyle("-fx-font-size: 11px; -fx-opacity: 0.8;");
+        // Hinweis auf die Herkunft der Übersetzungen
+        Label translationsLabel = new Label(i18n.t("about.translationsNote"));
+        translationsLabel.setStyle("-fx-font-size: 11px; -fx-opacity: 0.8;");
 
         // Die Lizenztexte der mitgelieferten fremden Komponenten sind über
         // einen eigenen Knopf einsehbar. Die Apache-Lizenz verlangt, dass
@@ -60,7 +63,7 @@ public final class AboutDialog {
         licenseButton.setOnAction(e -> showLicenses(owner));
 
         VBox content = new VBox(6, nameLabel, authorLabel, contactLink, versionLabel,
-                licenseLabel, licenseButton);
+                licenseLabel, translationsLabel, licenseButton);
         content.setPadding(new Insets(15));
 
         Alert dialog = new Alert(Alert.AlertType.INFORMATION);

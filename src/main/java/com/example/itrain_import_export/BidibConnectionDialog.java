@@ -1,7 +1,10 @@
 package com.example.itrain_import_export;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.util.Duration;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -107,7 +110,164 @@ public final class BidibConnectionDialog {
      */
     private static Stage open;
 
+    /**
+     * Aus den Fundlisten bekannte Geraetenamen je "Adresse:Port" - fuer den
+     * Fehlerdialog "Verbindung zum Geraet ... fehlgeschlagen", der auch dann
+     * den Namen nennen soll, wenn die Adresse von Hand eingetippt wurde.
+     */
+    private static final java.util.Map<String, String> KNOWN_NAMES = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /** Schluessel in {@code Label.getProperties()}: naechster Text ist eine Erfolgsmeldung. */
+    private static final String SUCCESS_FLAG = "bidib.successFlag";
+    /** Schluessel in {@code Label.getProperties()}: Runnable, das bei einer Erfolgsmeldung zusaetzlich laeuft. */
+    private static final String ON_SUCCESS = "bidib.onSuccess";
+
+    private static final String STATUS_NORMAL_STYLE = "-fx-font-weight: bold;";
+    private static final String STATUS_SUCCESS_STYLE = "-fx-font-weight: bold; -fx-text-fill: #1e8c3a;";
+
     private BidibConnectionDialog() {
+    }
+
+    /**
+     * Erfolgsmeldung in die Statuszeile schreiben: gruen statt in der
+     * normalen Schrift, und im Verbindungsfenster beginnt "Weiter zur
+     * Bearbeitung" zu blinken (siehe {@link #ON_SUCCESS}). Jeder spaetere,
+     * gewoehnliche {@code setText} stellt die normale Farbe wieder her.
+     * Muss auf dem JavaFX-Thread laufen.
+     */
+    static void markSuccess(Label statusLabel, String text) {
+        statusLabel.getProperties().put(SUCCESS_FLAG, Boolean.TRUE);
+        // Gleicher Text wie vorher loest keine Aenderung aus - deshalb leeren.
+        statusLabel.setText("");
+        statusLabel.getProperties().put(SUCCESS_FLAG, Boolean.TRUE);
+        statusLabel.setText(text);
+    }
+
+    /**
+     * "Weiter zur Bearbeitung" nach einer Erfolgsmeldung ({@link #markSuccess})
+     * rot blinken lassen - auch vom ECoS-Verbindungsfenster genutzt.
+     * Rueckgabe: stoppt das Blinken und stellt den Knopf wieder her.
+     */
+    static Runnable installContinueBlink(Label statusLabel, Button continueButton) {
+        String baseStyle = continueButton.getStyle() == null ? "" : continueButton.getStyle();
+        boolean[] on = {false};
+        Timeline blink = new Timeline(new KeyFrame(Duration.millis(500), ev -> {
+            on[0] = !on[0];
+            continueButton.setStyle(baseStyle + (on[0]
+                    ? " -fx-text-fill: #d01010; -fx-font-weight: bold;"
+                    : " -fx-font-weight: bold;"));
+        }));
+        blink.setCycleCount(Timeline.INDEFINITE);
+        statusLabel.getProperties().put(ON_SUCCESS, (Runnable) blink::play);
+        return () -> {
+            blink.stop();
+            continueButton.setStyle(baseStyle);
+        };
+    }
+
+    /** Statuszeile so verdrahten, dass {@link #markSuccess} gruen faerbt und alles andere normal. */
+    static void installStatusStyling(Label statusLabel) {
+        statusLabel.setStyle(STATUS_NORMAL_STYLE);
+        statusLabel.textProperty().addListener((obs, old, value) -> {
+            boolean success = statusLabel.getProperties().remove(SUCCESS_FLAG) != null
+                    && value != null && !value.isEmpty();
+            statusLabel.setStyle(success ? STATUS_SUCCESS_STYLE : STATUS_NORMAL_STYLE);
+            if (success && statusLabel.getProperties().get(ON_SUCCESS) instanceof Runnable action) {
+                action.run();
+            }
+        });
+    }
+
+    /**
+     * Die Statuszeile in einen vertieften 3D-Rahmen setzen (oben/links
+     * dunkel, unten/rechts hell). Halbtransparente Farben, damit es in
+     * heller wie dunkler Ansicht wirkt.
+     */
+    static javafx.scene.layout.StackPane sunkenBox(Label statusLabel) {
+        statusLabel.setMaxWidth(Double.MAX_VALUE);
+        javafx.scene.layout.StackPane box = new javafx.scene.layout.StackPane(statusLabel);
+        box.setAlignment(Pos.CENTER_LEFT);
+        box.setMinHeight(34);
+        box.setPadding(new Insets(6, 10, 6, 10));
+        box.setStyle("-fx-border-color: rgba(0,0,0,0.55) rgba(255,255,255,0.85) rgba(255,255,255,0.85) rgba(0,0,0,0.55);"
+                + " -fx-border-width: 2; -fx-background-color: rgba(127,127,127,0.10);");
+        return box;
+    }
+
+    /**
+     * Deutlich sichtbare 3D-Trennlinie zwischen den Bereichen des Fensters
+     * (eingekerbte Rille: oben dunkel, unten hell) - kraeftiger als ein
+     * gewoehnlicher {@link Separator}.
+     */
+    private static javafx.scene.layout.Region groove() {
+        javafx.scene.layout.Region line = new javafx.scene.layout.Region();
+        line.setMinHeight(6);
+        line.setPrefHeight(6);
+        line.setMaxHeight(6);
+        line.setMaxWidth(Double.MAX_VALUE);
+        line.setStyle("-fx-border-color: rgba(0,0,0,0.60) transparent rgba(255,255,255,0.90) transparent;"
+                + " -fx-border-width: 3 0 3 0;");
+        VBox.setMargin(line, new Insets(6, 0, 6, 0));
+        return line;
+    }
+
+    /**
+     * Fehlerdialog bei gescheitertem Verbindungsaufbau - statt nur einer
+     * Zeile in der Statusleiste, die leicht uebersehen wird.
+     *
+     * @param refused true, wenn die Gegenseite die TCP-Verbindung abgelehnt
+     *                hat (dann besteht sehr wahrscheinlich schon eine
+     *                Verbindung mit einem anderen Programm)
+     */
+    static void showConnectFailed(javafx.stage.Window owner, I18n i18n, String deviceName, String address,
+            boolean refused, String detail) {
+        String name = deviceName == null || deviceName.isBlank() ? i18n.t("bidib.unknownDevice") : deviceName;
+        StringBuilder text = new StringBuilder(i18n.t("bidib.connectFailedText", name, address));
+        text.append("\n\n").append(refused ? i18n.t("bidib.connectFailedBusy") : i18n.t("bidib.connectFailedOther"));
+        if (detail != null && !detail.isBlank()) {
+            text.append("\n\n").append(i18n.t("bidib.connectFailedDetail", detail));
+        }
+        Alert alert = new Alert(Alert.AlertType.ERROR, text.toString());
+        if (owner != null) {
+            alert.initOwner(owner);
+        }
+        alert.setTitle(i18n.t("bidib.dialogTitle"));
+        alert.setHeaderText(i18n.t("bidib.connectFailedHeader"));
+        alert.getDialogPane().setMinWidth(520);
+        alert.getDialogPane().setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+        alert.show();
+    }
+
+    /** Bekannter Geraetename zu "Adresse:Port" aus den Fundlisten, sonst null. */
+    static String knownName(String hostPort) {
+        return hostPort == null ? null : KNOWN_NAMES.get(hostPort);
+    }
+
+    /**
+     * Lehnt die Gegenstelle die TCP-Verbindung ab ("Connection refused")?
+     * Kurze eigene Probe, weil jbidibc die urspruengliche Ursache nicht
+     * immer in der Exception weiterreicht (Meldung ist dann nur die Adresse).
+     */
+    private static boolean isRefused(String hostPort, Throwable ex) {
+        for (Throwable t = ex; t != null; t = t.getCause()) {
+            String m = t.getMessage() == null ? "" : t.getMessage().toLowerCase(java.util.Locale.ROOT);
+            if (t instanceof java.net.ConnectException || m.contains("connection refused")) {
+                return true;
+            }
+        }
+        int colon = hostPort.lastIndexOf(':');
+        if (colon <= 0) {
+            return false;
+        }
+        try (java.net.Socket socket = new java.net.Socket()) {
+            socket.connect(new java.net.InetSocketAddress(hostPort.substring(0, colon),
+                    Integer.parseInt(hostPort.substring(colon + 1))), 1500);
+            return false;
+        } catch (java.net.ConnectException refused) {
+            return true;
+        } catch (Exception other) {
+            return false;
+        }
     }
 
     public static void show(Stage owner) {
@@ -122,7 +282,7 @@ public final class BidibConnectionDialog {
 
         Label statusLabel = new Label(i18n.t("bidib.statusIdle"));
         statusLabel.setWrapText(true);
-        statusLabel.setStyle("-fx-font-weight: bold;");
+        installStatusStyling(statusLabel);
 
         // ==== 1. Netz: gefundene netBiDiB-Geraete ============================
         Label hintLabel = new Label(i18n.t("bidib.hint"));
@@ -208,6 +368,31 @@ public final class BidibConnectionDialog {
         Button mc2RescanButton = new Button(i18n.t("bidib.rescanButton"));
         HBox mc2Row = new HBox(8, mc2Label, mc2RescanButton);
         mc2Row.setAlignment(Pos.CENTER_LEFT);
+
+        // ==== 2c. iTrain-BiDiB-Weiterleitung ("BiDiB seriell ueber TCP") ====
+        // iTrain kann den BiDiB-Verkehr an andere Programme weiterreichen
+        // (einstellbarer Port, Vorgabe 62800). Das ist KEIN netBiDiB, sondern
+        // serielles BiDiB ueber TCP (siehe TcpSerialBidibConnector) - deshalb
+        // ein eigener Ankreuzkasten fuer die manuelle Adresse und eine eigene
+        // Fundliste (BidibForwardDiscovery).
+        CheckBox tcpSerialBox = new CheckBox(i18n.t("bidib.tcpSerialCheck"));
+        tcpSerialBox.setWrapText(true);
+        Label fwdLabel = new Label(i18n.t("bidib.forwardFoundLabel"));
+        TableView<BidibForwardDiscovery.Found> fwdList = new TableView<>();
+        fwdList.setPlaceholder(new Label(i18n.t("bidib.noForwardFound")));
+        fwdList.setFixedCellSize(24);
+        fwdList.setPrefHeight(24 * 2 + 30);
+        fwdList.setMinHeight(24 * 2 + 30);
+        fwdList.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        TableColumn<BidibForwardDiscovery.Found, String> fwdColumn = new TableColumn<>(i18n.t("bidib.deviceColumn"));
+        fwdColumn.setCellValueFactory(cell -> new ReadOnlyStringWrapper(
+                i18n.t("bidib.forwardDevice") + "  (" + cell.getValue().hostPort() + ")"
+                        + (cell.getValue().confirmed() ? "  ✔" : "  - " + i18n.t("bidib.forwardUnconfirmed"))));
+        fwdColumn.setReorderable(false);
+        fwdList.getColumns().setAll(fwdColumn);
+        Button fwdRescanButton = new Button(i18n.t("bidib.rescanButton"));
+        HBox fwdRow = new HBox(8, fwdLabel, fwdRescanButton);
+        fwdRow.setAlignment(Pos.CENTER_LEFT);
 
         // ==== 3. USB: COM-Ports mit Pruefroutine =============================
         // Interfaces am virtuellen COM-Port (FTDI-USB, z.B. IF2/GBMboost -
@@ -346,6 +531,8 @@ public final class BidibConnectionDialog {
             if (selected != null) {
                 usbList.getSelectionModel().clearSelection();
                 mc2List.getSelectionModel().clearSelection();
+                fwdList.getSelectionModel().clearSelection();
+                tcpSerialBox.setSelected(false);
                 fillingFields[0] = true;
                 ipField.setText(selected.getAddress() != null ? selected.getAddress().getHostAddress() : "");
                 portField.setText(String.valueOf(selected.getPort()));
@@ -356,6 +543,21 @@ public final class BidibConnectionDialog {
             if (selected != null) {
                 deviceList.getSelectionModel().clearSelection();
                 mc2List.getSelectionModel().clearSelection();
+                fwdList.getSelectionModel().clearSelection();
+            }
+        });
+        // Weiterleitungs-Fund: Adresse/Port uebernehmen und "seriell ueber
+        // TCP" ankreuzen - verbunden wird dann ueber TcpSerialBidib.
+        fwdList.getSelectionModel().selectedItemProperty().addListener((obs, old, selected) -> {
+            if (selected != null) {
+                deviceList.getSelectionModel().clearSelection();
+                usbList.getSelectionModel().clearSelection();
+                mc2List.getSelectionModel().clearSelection();
+                tcpSerialBox.setSelected(true);
+                fillingFields[0] = true;
+                ipField.setText(selected.host());
+                portField.setText(String.valueOf(selected.port()));
+                fillingFields[0] = false;
             }
         });
         // mc2-per-FTP-Fund: nur die Adresse ins Manuell-Feld uebernehmen (fester
@@ -365,6 +567,8 @@ public final class BidibConnectionDialog {
             if (selected != null) {
                 deviceList.getSelectionModel().clearSelection();
                 usbList.getSelectionModel().clearSelection();
+                fwdList.getSelectionModel().clearSelection();
+                tcpSerialBox.setSelected(false);
                 fillingFields[0] = true;
                 ipField.setText(selected.getHost());
                 portField.setText(DEFAULT_PORT);
@@ -376,6 +580,7 @@ public final class BidibConnectionDialog {
                 deviceList.getSelectionModel().clearSelection();
                 usbList.getSelectionModel().clearSelection();
                 mc2List.getSelectionModel().clearSelection();
+                fwdList.getSelectionModel().clearSelection();
             }
         };
         ipField.textProperty().addListener(manualEdit);
@@ -397,6 +602,9 @@ public final class BidibConnectionDialog {
 
         BidibDiscovery discovery = new BidibDiscovery(devices -> Platform.runLater(() -> {
             BidibDiscoveredDevice selected = deviceList.getSelectionModel().getSelectedItem();
+            for (BidibDiscoveredDevice device : devices.values()) {
+                KNOWN_NAMES.put(hostPortOf(device), device.getDeviceName());
+            }
             deviceList.getItems().setAll(devices.values());
             // Der Pairing-Speicher kann sich zwischenzeitlich geaendert haben
             // (erstes Pairing, Eintrag geloescht) - Spalte neu berechnen lassen.
@@ -426,6 +634,28 @@ public final class BidibConnectionDialog {
                     return;
                 }
                 BidibSerialSupport.connect(usb.systemName, i18n, statusLabel, connectButton, manager);
+                return;
+            }
+            // iTrain-Weiterleitung bzw. "seriell ueber TCP" angekreuzt:
+            // kein netBiDiB, sondern TcpSerialBidib (kein Pairing).
+            BidibForwardDiscovery.Found fwd = fwdList.getSelectionModel().getSelectedItem();
+            if (fwd != null || (tcpSerialBox.isSelected() && deviceList.getSelectionModel().getSelectedItem() == null)) {
+                String host = fwd != null ? fwd.host() : (ipField.getText() == null ? "" : ipField.getText().trim());
+                if (host.isEmpty()) {
+                    statusLabel.setText(i18n.t("bidib.enterAddress"));
+                    return;
+                }
+                String port = fwd != null ? String.valueOf(fwd.port())
+                        : (portField.getText() == null || portField.getText().isBlank()
+                                ? String.valueOf(BidibForwardDiscovery.DEFAULT_PORT) : portField.getText().trim());
+                String target = host + ":" + port;
+                if (manager.findByHostPort(target) != null) {
+                    statusLabel.setText(i18n.t("bidib.alreadyConnected", target));
+                    return;
+                }
+                settings.setBidibLastIp(host);
+                settings.setBidibLastPort(port);
+                BidibSerialSupport.connectTcp(target, i18n, statusLabel, connectButton, manager);
                 return;
             }
             BidibDiscoveredDevice chosen = deviceList.getSelectionModel().getSelectedItem();
@@ -464,6 +694,7 @@ public final class BidibConnectionDialog {
         Runnable connectManual = () -> {
             deviceList.getSelectionModel().clearSelection();
             usbList.getSelectionModel().clearSelection();
+            fwdList.getSelectionModel().clearSelection();
             connectButton.fire();
         };
         manualConnectButton.setOnAction(e -> connectManual.run());
@@ -524,13 +755,43 @@ public final class BidibConnectionDialog {
         // ist). "Erneut suchen" bricht einen laufenden Lauf ab und beginnt
         // neu - derselbe Ablauf wie beim mDNS-"rescanButton" oben.
         Mc2Discovery mc2Discovery = new Mc2Discovery(
-                device -> Platform.runLater(() -> mc2List.getItems().add(device)),
+                device -> Platform.runLater(() -> {
+                    KNOWN_NAMES.putIfAbsent(device.getHost() + ":" + DEFAULT_PORT, "mc2");
+                    mc2List.getItems().add(device);
+                }),
                 () -> { });
         mc2Discovery.start();
         mc2RescanButton.setOnAction(e -> {
             mc2Discovery.stop();
             mc2List.getItems().clear();
             mc2Discovery.start();
+        });
+
+        // Suche nach der iTrain-BiDiB-Weiterleitung (eigener Rechner + /24-Netz).
+        fwdList.setRowFactory(tv -> {
+            javafx.scene.control.TableRow<BidibForwardDiscovery.Found> row = new javafx.scene.control.TableRow<>();
+            row.setOnMouseClicked(ev -> {
+                if (ev.getClickCount() == 2 && !row.isEmpty()) {
+                    fwdList.getSelectionModel().select(row.getItem());
+                    connectButton.fire();
+                }
+            });
+            return row;
+        });
+        BidibForwardDiscovery fwdDiscovery = new BidibForwardDiscovery(BidibForwardDiscovery.DEFAULT_PORT,
+                found -> Platform.runLater(() -> {
+                    KNOWN_NAMES.putIfAbsent(found.hostPort(), i18n.t("bidib.forwardDevice"));
+                    // Derselbe Rechner kann ueber 127.0.0.1 UND seine
+                    // Netzadresse antworten - beide zeigen, das ist ehrlicher
+                    // als zu raten, welche iTrain tatsaechlich bedient.
+                    fwdList.getItems().add(found);
+                }),
+                () -> { });
+        fwdDiscovery.start();
+        fwdRescanButton.setOnAction(e -> {
+            fwdDiscovery.stop();
+            fwdList.getItems().clear();
+            fwdDiscovery.start();
         });
 
         // "Alles trennen": saemtliche Verbindungen (netBiDiB und USB) beenden,
@@ -556,20 +817,46 @@ public final class BidibConnectionDialog {
                 pairingStoreButton, localUidButton, buttonSpacer, continueButton);
         buttonRow.setAlignment(Pos.CENTER_LEFT);
 
+        // "Weiter zur Bearbeitung" blinkt nach einer erfolgreichen Verbindung
+        // rot (Schrift), als Hinweis, dass es dort weitergeht. Endet beim
+        // Klick auf den Knopf oder beim Schliessen des Fensters.
+        String continueBaseStyle = continueButton.getStyle() == null ? "" : continueButton.getStyle();
+        boolean[] blinkOn = {false};
+        Timeline blink = new Timeline(new KeyFrame(Duration.millis(500), ev -> {
+            blinkOn[0] = !blinkOn[0];
+            continueButton.setStyle(continueBaseStyle + (blinkOn[0]
+                    ? " -fx-text-fill: #d01010; -fx-font-weight: bold;"
+                    : " -fx-font-weight: bold;"));
+        }));
+        blink.setCycleCount(Timeline.INDEFINITE);
+        Runnable stopBlink = () -> {
+            blink.stop();
+            continueButton.setStyle(continueBaseStyle);
+        };
+        statusLabel.getProperties().put(ON_SUCCESS, (Runnable) blink::play);
+
+        javafx.scene.layout.StackPane statusBox = sunkenBox(statusLabel);
+
         VBox content = new VBox(10,
                 hintLabel, discoveryRow, deviceList,
-                new Separator(),
-                manualLabel, manualHint, addressRow, manualConnectRow,
+                groove(),
+                manualLabel, manualHint, addressRow, tcpSerialBox, manualConnectRow,
                 mc2Row, mc2List,
-                new Separator(),
+                fwdRow, fwdList,
+                groove(),
                 usbRow, usbHint, usbList,
-                new Separator(),
+                groove(),
                 openLabel, connectionList,
-                statusLabel, buttonRow);
+                statusBox, buttonRow);
         content.setPadding(new Insets(12));
 
         BorderPane root = new BorderPane();
-        root.setCenter(content);
+        // Mit der iTrain-Weiterleitung ist das Fenster hoeher geworden - auf
+        // kleinen Bildschirmen laesst es sich so rollen statt abzuschneiden.
+        javafx.scene.control.ScrollPane scroller = new javafx.scene.control.ScrollPane(content);
+        scroller.setFitToWidth(true);
+        scroller.setStyle("-fx-background-color: transparent; -fx-background: transparent;");
+        root.setCenter(scroller);
 
         stage.initOwner(owner);
         // Bewusst kein modales Fenster: die Suche soll im Hintergrund weiterlaufen
@@ -577,13 +864,18 @@ public final class BidibConnectionDialog {
         stage.initModality(Modality.NONE);
         stage.setTitle(i18n.t("bidib.dialogTitle"));
         stage.getIcons().addAll(loadAppIcons());
-        continueButton.setOnAction(e -> stage.close());
+        continueButton.setOnAction(e -> {
+            stopBlink.run();
+            stage.close();
+        });
         // VOR WindowState.apply (das haengt seinen eigenen OnHidden-Handler
         // an diesen an). Nur die Geraetesuche beenden - die offenen
         // VERBINDUNGEN bleiben bestehen; den Listener am Manager abmelden.
         stage.setOnHidden(e -> {
             discovery.stop();
             mc2Discovery.stop();
+            fwdDiscovery.stop();
+            stopBlink.run();
             manager.getConnections().removeListener(refreshOnChange);
             if (open == stage) {
                 open = null;
@@ -974,6 +1266,12 @@ public final class BidibConnectionDialog {
                         // Erst jetzt darf der Name abgefragt werden - vorher
                         // weist die Gegenseite Anfragen zurück.
                         connection.resolveNameInBackground();
+                        // Erst hier steht die Verbindung wirklich (Logon
+                        // erhalten) - gruene Erfolgsmeldung, "Weiter" blinkt.
+                        String shown = knownName(hostPort) != null ? knownName(hostPort) : connection.getName();
+                        Platform.runLater(() -> markSuccess(statusLabel,
+                                i18n.t("bidib.statusConnectedOk",
+                                        shown == null || shown.isBlank() ? "BiDiB" : shown, hostPort)));
                     }
                     return;
                 }
@@ -1135,26 +1433,18 @@ public final class BidibConnectionDialog {
                 connectButton.setDisable(false);
             });
         } catch (Exception ex) {
+            // Noch im Hintergrund: ob die Gegenseite ablehnt, braucht ggf.
+            // eine kurze eigene TCP-Probe (siehe isRefused).
+            boolean refused = isRefused(hostPort, ex);
+            String detail = ex.getMessage() == null || ex.getMessage().isBlank()
+                    ? ex.getClass().getSimpleName() : ex.getMessage();
             Platform.runLater(() -> {
-                statusLabel.setText(describeConnectError(ex, i18n));
+                statusLabel.setText(refused ? i18n.t("bidib.statusRefused") : i18n.t("bidib.statusError", detail));
                 connectButton.setDisable(false);
+                showConnectFailed(owner, i18n, knownName(hostPort), hostPort, refused,
+                        refused ? null : detail);
             });
         }
-    }
-
-    /**
-     * Fehlertext beim Verbindungsaufbau. "Connection refused" bekommt einen
-     * eigenen Hinweis: Der Rechner ist erreichbar und lehnt ab - bei netBiDiB
-     * fast immer, weil bereits ein anderes Programm mit dem Geraet verbunden
-     * ist (es laesst nur eine Verbindung zu) oder der Server dort aus ist.
-     */
-    private static String describeConnectError(Exception ex, I18n i18n) {
-        String message = ex.getMessage() == null ? "" : ex.getMessage();
-        if (ex instanceof java.net.ConnectException
-                || message.toLowerCase(java.util.Locale.ROOT).contains("connection refused")) {
-            return i18n.t("bidib.statusRefused");
-        }
-        return i18n.t("bidib.statusError", message);
     }
 
     /**

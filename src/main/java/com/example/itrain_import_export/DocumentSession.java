@@ -214,6 +214,92 @@ public final class DocumentSession {
         for (DocumentSession secondary : new ArrayList<>(secondaries)) {
             secondary.syncFromPrimary();
         }
+        for (Runnable listener : new ArrayList<>(documentListeners)) {
+            listener.run();
+        }
+    }
+
+    /**
+     * Beobachter fuer Programmteile ohne eigene Sitzung (Systeme-Fenster):
+     * laufen nach Oeffnen, Schliessen, Rueckgaengig/Wiederholen und nach
+     * {@link #applyExternalChange()} - dann, wenn das EINE geladene
+     * iTrain-Dokument ausgetauscht oder von aussen veraendert wurde.
+     */
+    private final List<Runnable> documentListeners = new ArrayList<>();
+
+    public void addDocumentListener(Runnable listener) {
+        if (primary != null) {
+            primary.addDocumentListener(listener);
+            return;
+        }
+        documentListeners.add(listener);
+    }
+
+    public void removeDocumentListener(Runnable listener) {
+        if (primary != null) {
+            primary.removeDocumentListener(listener);
+            return;
+        }
+        documentListeners.remove(listener);
+    }
+
+    /**
+     * Ein anderer Programmteil (Systeme-Fenster) hat das Dokument direkt
+     * veraendert: als geaendert markieren, Reiter aller Fenster neu aufbauen,
+     * Beobachter benachrichtigen. Der Rueckgaengig-Schritt wird vorher mit
+     * {@link #recordExternalUndo()} gesichert.
+     */
+    public void applyExternalChange() {
+        if (primary != null) {
+            primary.applyExternalChange();
+            return;
+        }
+        if (document == null) {
+            return;
+        }
+        document.markDirty();
+        rebuildTabs();
+        updateUndoRedoState();
+        notifySecondaries();
+    }
+
+    /** Rueckgaengig-Schnappschuss VOR einer Aenderung durch einen anderen Programmteil. */
+    public void recordExternalUndo() {
+        if (primary != null) {
+            primary.recordExternalUndo();
+            return;
+        }
+        if (document != null) {
+            recordUndoSnapshot();
+        }
+    }
+
+    /**
+     * "In iTrain-Datei schreiben": das geladene Dokument in SEINE Datei
+     * speichern (ohne Dateidialog) - vorher eine Sicherung im
+     * Sicherungsordner. Rueckgabe true bei Erfolg; Fehler werden angezeigt.
+     */
+    public boolean saveToCurrentFile() {
+        if (primary != null) {
+            return primary.saveToCurrentFile();
+        }
+        if (document == null || document.getFile() == null) {
+            new Alert(Alert.AlertType.INFORMATION, i18n.t("error.pleaseOpenFirst")).showAndWait();
+            return false;
+        }
+        File target = document.getFile();
+        try {
+            createBackup(target);
+            document.save(target);
+            host.showStatus(i18n.t("status.fileSaved", target.getName()));
+            for (DocumentSession secondary : secondaries) {
+                secondary.host.showStatus(i18n.t("status.fileSaved", target.getName()));
+            }
+            return true;
+        } catch (Exception ex) {
+            showError(i18n.t("error.saveTitle"), ex);
+            return false;
+        }
     }
 
     // ------------------------------------------------------------------
@@ -475,7 +561,9 @@ public final class DocumentSession {
      * Schlägt die Sicherung fehl, wird nur gewarnt; das eigentliche Öffnen
      * der Datei wird dadurch nicht blockiert.
      */
-    private File createBackup(File file) {
+    /** Paketsichtbar und statisch: auch das Systeme-Fenster sichert vor dem direkten Schreiben. */
+    static File createBackup(File file) {
+        I18n i18n = I18n.getInstance();
         String backupDir = AppSettings.getInstance().getBackupDirectory();
         if (backupDir == null || backupDir.isBlank()) {
             return null;
@@ -719,6 +807,14 @@ public final class DocumentSession {
 
         if (!tabPane.getTabs().isEmpty()) {
             tabPane.getSelectionModel().select(0);
+            if (categoryFilter != null) {
+                // Decoder-Fenster: erstes Fahrzeug markieren, damit dessen
+                // configuration-Knoten gleich hervorgehoben im Fokus steht
+                CategoryEditor first = editorsByTab.get(tabPane.getTabs().get(0));
+                if (first != null) {
+                    first.selectFirstEntry();
+                }
+            }
         }
         updateStatusForSelectedTab();
         host.selectionChanged();
@@ -727,6 +823,8 @@ public final class DocumentSession {
     private void addCategoryTab(XmlNode controlItems, String categoryName) {
         CategoryEditor editor = new CategoryEditor(categoryName, controlItems, getDocument()::markDirty,
                 this::rebuildTabs, this::recordUndoSnapshot, this::nextImportSuffix);
+        // Decoder-Fenster: Fahrzeug auswaehlen springt auf "configuration"
+        editor.setFocusConfiguration(categoryFilter != null);
         Tab tab = editor.createTab();
         editorsByTab.put(tab, editor);
         editor.entryCountProperty().addListener((obs, oldV, newV) -> {

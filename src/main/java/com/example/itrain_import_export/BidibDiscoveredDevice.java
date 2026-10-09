@@ -74,6 +74,18 @@ public final class BidibDiscoveredDevice {
         return host + ":" + port;
     }
 
+    /**
+     * Gerätename ohne Adresse, z.B. "IFnet (BiDiB-IFnet)" - Benutzername und,
+     * falls abweichend, Produktname. Für Meldungen wie "Verbindung zum Gerät
+     * ... fehlgeschlagen" (siehe {@link BidibConnectionDialog}).
+     */
+    public String getDeviceName() {
+        if (notBlank(userName) && notBlank(productName) && !userName.equalsIgnoreCase(productName)) {
+            return userName + " (" + productName + ")";
+        }
+        return notBlank(userName) ? userName : (notBlank(productName) ? productName : serviceName);
+    }
+
     /** Anzeige-Text für die Geräteliste im Verbindungsdialog. */
     public String getDisplayText() {
         String label = notBlank(userName) ? userName : (notBlank(productName) ? productName : serviceName);

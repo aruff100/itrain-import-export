@@ -52,6 +52,8 @@ public final class DecoderWindow implements DocumentSession.Host {
     private final I18n i18n = I18n.getInstance();
     private final Stage stage = new Stage();
     private final TabPane tabPane = new TabPane();
+    /** Startbild ohne geladene Datei (siehe documentChanged), oder null. */
+    private javafx.scene.image.ImageView startImage;
     private final Label fileNameLabel = new Label();
     private final Label statusLabel = new Label();
     private final DocumentSession session;
@@ -92,6 +94,10 @@ public final class DecoderWindow implements DocumentSession.Host {
     private final Button decoderExportToolButton = new Button();
     private final Button decoderImportToolButton = new Button();
     private final Button decoderCaptureToolButton = new Button();
+    private final Button loadItrainButton = new Button();
+    private final Button writeItrainButton = new Button();
+    private final MenuItem loadItrainMenuItem = new MenuItem();
+    private final MenuItem writeItrainMenuItem = new MenuItem();
 
     /** Öffnet das Fenster oder holt das bereits offene nach vorn. */
     public static void show(Stage mainStage, DocumentSession mainSession) {
@@ -179,10 +185,26 @@ public final class DecoderWindow implements DocumentSession.Host {
         gapLeft.setMinWidth(10);
         Region gapRight = new Region();
         gapRight.setMinWidth(10);
+        // "iTrain-Datei laden" / "In iTrain-Datei schreiben" wie im
+        // Systeme-Fenster: es gibt EINE geladene iTrain-Datei fuer alle
+        // Programmteile (die des Hauptfensters) - laden hier laedt sie
+        // ueberall, schreiben speichert sie (mit Sicherung) in ihre Datei.
+        loadItrainButton.setStyle("-fx-background-color: #fff3b0; -fx-text-fill: #2b2b2b;");
+        loadItrainButton.setOnAction(e -> session.openFileDialog());
+        writeItrainButton.setStyle("-fx-background-color: #fff3b0; -fx-text-fill: #2b2b2b;");
+        writeItrainButton.setOnAction(e -> onWriteItrain());
+        writeItrainButton.disableProperty().bind(javafx.beans.binding.Bindings.createBooleanBinding(
+                () -> !session.hasDocument(), fileNameLabel.textProperty()));
+        loadItrainMenuItem.setOnAction(e -> session.openFileDialog());
+        writeItrainMenuItem.setOnAction(e -> onWriteItrain());
+        fileMenu.getItems().addAll(new SeparatorMenuItem(), loadItrainMenuItem, writeItrainMenuItem);
+        Region gapItrain = new Region();
+        gapItrain.setMinWidth(10);
         ToolBar ribbon = new ToolBar(
                 openToolButton, saveToolButton, undoToolButton, redoToolButton,
                 gapLeft, new Separator(javafx.geometry.Orientation.VERTICAL), gapRight,
-                decoderExportToolButton, decoderImportToolButton, decoderCaptureToolButton);
+                decoderExportToolButton, decoderImportToolButton, decoderCaptureToolButton,
+                gapItrain, loadItrainButton, writeItrainButton);
 
         VBox.setMargin(fileNameLabel, new Insets(6, 10, 6, 10));
         VBox top = new VBox(menuBar, ribbon, fileNameLabel);
@@ -191,7 +213,15 @@ public final class DecoderWindow implements DocumentSession.Host {
 
         BorderPane root = new BorderPane();
         root.setTop(top);
-        root.setCenter(tabPane);
+        // Startbild (Decoder-Platine) wie die Dampflok im Hauptfenster:
+        // mittig, mitwachsend, nur solange keine Datei geladen ist.
+        javafx.scene.layout.StackPane center = new javafx.scene.layout.StackPane(tabPane);
+        startImage = HelloController.createStartImage("decoder-image.png", center);
+        if (startImage != null) {
+            center.getChildren().add(startImage);
+            startImage.setVisible(!session.hasDocument());
+        }
+        root.setCenter(center);
         root.setBottom(statusLabel);
 
         // --- Fenster ---------------------------------------------------
@@ -264,6 +294,12 @@ public final class DecoderWindow implements DocumentSession.Host {
         decoderExportToolButton.setText(i18n.t("editor.decoderExport"));
         decoderImportToolButton.setText(i18n.t("editor.decoderImport"));
         decoderCaptureToolButton.setText(i18n.t("menu.decoderCapture"));
+        loadItrainButton.setText(i18n.t("systems.loadItrain"));
+        loadItrainButton.setTooltip(new Tooltip(i18n.t("decoder.loadItrainTooltip")));
+        writeItrainButton.setText(i18n.t("systems.writeItrain"));
+        writeItrainButton.setTooltip(new Tooltip(i18n.t("decoder.writeItrainTooltip")));
+        loadItrainMenuItem.setText(i18n.t("systems.loadItrain"));
+        writeItrainMenuItem.setText(i18n.t("systems.writeItrain"));
 
         if (!session.hasDocument()) {
             fileNameLabel.setText(i18n.t("status.noFileLoaded"));
@@ -323,6 +359,30 @@ public final class DecoderWindow implements DocumentSession.Host {
      * Dokument nutzbar - hier wird eine Vorlagen-Datei erstellt, keine
      * iTrain-Datei verändert.
      */
+    /**
+     * "In iTrain-Datei schreiben": die (in allen Programmteilen gemeinsame)
+     * geladene iTrain-Datei nach Rueckfrage in ihre Datei speichern - vorher
+     * wird eine Sicherung angelegt (siehe DocumentSession.saveToCurrentFile).
+     */
+    private void onWriteItrain() {
+        TcdDocument doc = session.getDocument();
+        if (doc == null || doc.getFile() == null) {
+            return;
+        }
+        javafx.scene.control.ButtonType write = new javafx.scene.control.ButtonType(
+                i18n.t("systems.writeItrain"), javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
+        javafx.scene.control.ButtonType abort = new javafx.scene.control.ButtonType(
+                i18n.t("bidib.abortButton"), javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE);
+        javafx.scene.control.Alert ask = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION,
+                i18n.t("decoder.writeItrainConfirm", doc.getFile().getName()), write, abort);
+        ask.initOwner(stage);
+        ask.setHeaderText(null);
+        ThemeManager.apply(ask.getDialogPane().getScene(), AppSettings.getInstance().getTheme());
+        if (ask.showAndWait().orElse(abort) == write) {
+            session.saveToCurrentFile();
+        }
+    }
+
     private void onDecoderCapture() {
         // Auch hier der Hinweistext, solange er nicht abgeschaltet wurde -
         // "Decoder erfassen" ist für viele der erste Kontakt mit der Funktion.
@@ -371,7 +431,9 @@ public final class DecoderWindow implements DocumentSession.Host {
 
     @Override
     public void documentChanged(boolean loaded) {
-        // Kein Startbild in diesem Fenster.
+        if (startImage != null) {
+            startImage.setVisible(!loaded);
+        }
     }
 
     private static Image[] loadAppIcons() {

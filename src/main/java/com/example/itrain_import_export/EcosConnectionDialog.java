@@ -83,6 +83,8 @@ public final class EcosConnectionDialog {
 
         Label statusLabel = new Label();
         statusLabel.setWrapText(true);
+        // Wie im BiDiB-Fenster: Statuszeile im vertieften Rahmen, Erfolg gruen.
+        BidibConnectionDialog.installStatusStyling(statusLabel);
 
         // Auswahl in der Fundliste fuellt das IP-Feld (wie im BiDiB-Dialog);
         // wer die Adresse von Hand aendert, hebt die Auswahl wieder auf,
@@ -151,7 +153,12 @@ public final class EcosConnectionDialog {
         });
         Button closeButton = new Button(i18n.t("bidib.continueButton"));
         closeButton.setCancelButton(true);
-        closeButton.setOnAction(e -> stage.close());
+        // Nach erfolgreicher Verbindung blinkt "Weiter zur Bearbeitung" rot.
+        Runnable stopBlink = BidibConnectionDialog.installContinueBlink(statusLabel, closeButton);
+        closeButton.setOnAction(e -> {
+            stopBlink.run();
+            stage.close();
+        });
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         HBox bottom = new HBox(8, disconnectButton, spacer, closeButton);
@@ -173,14 +180,20 @@ public final class EcosConnectionDialog {
                 try {
                     EcosConnection connection = EcosConnection.open(host);
                     Platform.runLater(() -> {
-                        statusLabel.setText(i18n.t("ecos.statusConnected", connection.getVersion(),
-                                connection.getHardware()));
+                        BidibConnectionDialog.markSuccess(statusLabel, i18n.t("ecos.statusConnected",
+                                connection.getVersion(), connection.getHardware()));
                         connectButton.setDisable(false);
                     });
                 } catch (IOException ex) {
+                    String detail = String.valueOf(ex.getMessage());
+                    boolean refused = ex instanceof java.net.ConnectException
+                            || detail.toLowerCase(java.util.Locale.ROOT).contains("refused");
                     Platform.runLater(() -> {
-                        statusLabel.setText(i18n.t("bidib.statusError", String.valueOf(ex.getMessage())));
+                        statusLabel.setText(i18n.t("bidib.statusError", detail));
                         connectButton.setDisable(false);
+                        // Wie bei BiDiB: deutlicher Fehlerdialog statt nur einer Zeile.
+                        BidibConnectionDialog.showConnectFailed(stage, i18n, "ECoS",
+                                host + ":" + EcosClient.PORT, refused, detail);
                     });
                 }
             }, "ecos-connect");
@@ -188,8 +201,8 @@ public final class EcosConnectionDialog {
             worker.start();
         });
 
-        VBox content = new VBox(10, hint, discoveryRow, deviceList, ipRow, statusLabel,
-                existingLabel, list, bottom);
+        VBox content = new VBox(10, hint, discoveryRow, deviceList, ipRow,
+                BidibConnectionDialog.sunkenBox(statusLabel), existingLabel, list, bottom);
         content.setPadding(new Insets(14));
         VBox.setVgrow(list, Priority.ALWAYS);
         Scene scene = new Scene(new BorderPane(content));
@@ -200,6 +213,7 @@ public final class EcosConnectionDialog {
         // Abtastung beenden, sobald das Fenster schliesst - offene
         // ECoS-VERBINDUNGEN bleiben davon unberuehrt (siehe EcosConnection).
         stage.setOnHidden(e -> {
+            stopBlink.run();
             if (discoveryHolder[0] != null) {
                 discoveryHolder[0].stop();
             }

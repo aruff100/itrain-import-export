@@ -86,14 +86,36 @@ public final class BidibSerialSupport {
      */
     public static void connect(String portName, I18n i18n, Label statusLabel, Button button,
             BidibConnectionManager manager) {
+        connectWith(portName, false, i18n, statusLabel, button, manager);
+    }
+
+    /**
+     * Wie {@link #connect}, aber "BiDiB seriell ueber TCP" (siehe
+     * {@link TcpSerialBidib}) - z.B. die BiDiB-Weiterleitung von iTrain.
+     *
+     * @param hostPort "Adresse:Port", z.B. "192.168.0.171:62800"
+     */
+    public static void connectTcp(String hostPort, I18n i18n, Label statusLabel, Button button,
+            BidibConnectionManager manager) {
+        connectWith(hostPort, true, i18n, statusLabel, button, manager);
+    }
+
+    private static void connectWith(String portName, boolean tcp, I18n i18n, Label statusLabel, Button button,
+            BidibConnectionManager manager) {
         if (button != null) {
             button.setDisable(true);
         }
         statusLabel.setText(i18n.t("bidib.statusConnecting"));
+        String deviceLabel = tcp
+                ? (BidibConnectionDialog.knownName(portName) != null
+                        ? BidibConnectionDialog.knownName(portName) : i18n.t("bidib.tcpSerialDevice"))
+                : "BiDiB-USB";
 
         Thread worker = new Thread(() -> {
             Context context = new DefaultContext();
-            BidibInterface bidib = JSerialCommSerialBidib.createInstance(context);
+            BidibInterface bidib = tcp
+                    ? TcpSerialBidib.createInstance(context)
+                    : JSerialCommSerialBidib.createInstance(context);
             BidibNodeModel nodeModel = new BidibNodeModel();
             BidibConnection connection = new BidibConnection(portName, bidib, nodeModel);
 
@@ -139,9 +161,10 @@ public final class BidibSerialSupport {
                 connection.resolveNameInBackground();
                 Platform.runLater(() -> {
                     manager.add(connection);
-                    // Keine Erfolgsmeldung - die neue Zeile in "Bestehende
-                    // Verbindungen" sagt es bereits.
-                    statusLabel.setText("");
+                    // Gruene Erfolgsmeldung (im Verbindungsfenster blinkt
+                    // danach "Weiter zur Bearbeitung").
+                    BidibConnectionDialog.markSuccess(statusLabel,
+                            i18n.t("bidib.statusConnectedOk", deviceLabel, portName));
                     if (button != null) {
                         button.setDisable(false);
                     }
@@ -153,16 +176,35 @@ public final class BidibSerialSupport {
                     // Port war ohnehin nicht offen.
                 }
                 String message = ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage();
+                // COM-Port: ein Fehler heisst fast immer "belegt". TCP: nur bei
+                // abgelehnter Verbindung; sonst antwortet dort kein BiDiB.
+                boolean busy = !tcp || hasRefusedCause(ex);
                 Platform.runLater(() -> {
                     statusLabel.setText(i18n.t("bidib.statusSerialFailed", portName, message));
                     if (button != null) {
                         button.setDisable(false);
                     }
+                    // Wie bei netBiDiB: deutlicher Fehlerdialog. Ein belegter
+                    // COM-Port heisst praktisch immer: ein anderes Programm
+                    // (iTrain, BiDiB-Wizard) hat ihn offen.
+                    BidibConnectionDialog.showConnectFailed(
+                            statusLabel.getScene() != null ? statusLabel.getScene().getWindow() : null,
+                            i18n, deviceLabel, portName, busy, message);
                 });
             }
-        }, "bidib-serial-connect");
+        }, tcp ? "bidib-tcp-serial-connect" : "bidib-serial-connect");
         worker.setDaemon(true);
         worker.start();
+    }
+
+    private static boolean hasRefusedCause(Throwable ex) {
+        for (Throwable t = ex; t != null; t = t.getCause()) {
+            String m = t.getMessage() == null ? "" : t.getMessage().toLowerCase(java.util.Locale.ROOT);
+            if (t instanceof java.net.ConnectException || m.contains("refused")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static ConnectionListener silentListener() {

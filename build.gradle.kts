@@ -17,7 +17,7 @@ plugins {
 }
 
 group = "com.example"
-version = "3.0beta"
+version = "3.1"
 
 repositories {
     mavenCentral()
@@ -83,12 +83,12 @@ dependencies {
     // Werte stehen nur in einer nicht oeffentlichen Kopfdatei (bidib_messages.h,
     // nur ueber die Implementierer-Mailgroup erhaeltlich).
     //
-    // ACHTUNG Lizenz: jbidibc-netbidib steht unter der GPL 3.0 (Copyleft). Vor
-    // einer OEFFENTLICHEN Weitergabe dieser Abzweigung (Installer, Release wie
-    // bei der 2.0) sollte geprueft werden, ob/wie sich das mit der eigenen
-    // Lizenzierung vertraegt - z.B. durch Offenlegung des Quellcodes dieser
-    // Abzweigung. Fuer das Experimentieren im privaten Repository ist das
-    // unkritisch.
+    // Lizenz: jbidibc steht unter der GPL 3.0 (Copyleft). Deshalb steht seit
+    // 3.1 das ganze Programm unter der GPL 3.0 (LICENSE im Projektstamm,
+    // Quellcode oeffentlich auf GitHub). Die Lizenzen ALLER mitgelieferten
+    // Bibliotheken stehen in src/main/resources/.../third-party-licenses.txt
+    // (Hilfe -> Ueber -> Lizenzhinweise) - bei neuen oder geaenderten
+    // Abhaengigkeiten dort nachziehen.
     implementation("org.bidib.jbidib:jbidibc-netbidib:2.0.44") {
         // jbidibc-core zieht zwei widerspruechliche JAXB-Implementierungen mit
         // (altes javax.xml.bind + neues jakarta.xml.bind) - beide melden sich
@@ -281,7 +281,7 @@ jlink {
         // waeren ein Fehler) - "version" oben darf das "beta" tragen (zeigt
         // im Ueber-Dialog und beim Update-Check als Text an), appVersion
         // hier bleibt rein numerisch.
-        appVersion = "3.0"
+        appVersion = "3.1"
         vendor = "Andre Ruff"
 
         // Wird von jpackage als "--java-options" in das installierte

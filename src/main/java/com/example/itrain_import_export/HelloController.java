@@ -326,6 +326,31 @@ public class HelloController implements DocumentSession.Host {
         startImage.setVisible(!session.hasDocument());
     }
 
+    /**
+     * Startbild fuer die Zusatzfenster (Decoder: decoder-image.png, Systeme:
+     * occupancy-image.png) - gleicher Stil und gleiches Groessenverhalten wie
+     * die Dampflok im Hauptfenster ({@value #START_IMAGE_SHARE} der kleineren
+     * Kante von {@code pane}). Mausdurchlaessig, damit es nichts verdeckt.
+     * Rueckgabe null, wenn die Grafik fehlt.
+     */
+    static ImageView createStartImage(String resourcePath, javafx.scene.layout.Region pane) {
+        try (InputStream in = HelloController.class.getResourceAsStream(resourcePath)) {
+            if (in == null) {
+                return null;
+            }
+            ImageView view = new ImageView(new Image(in));
+            view.setPreserveRatio(true);
+            view.setSmooth(true);
+            view.setMouseTransparent(true);
+            view.fitWidthProperty().bind(
+                    Bindings.min(pane.widthProperty(), pane.heightProperty()).multiply(START_IMAGE_SHARE));
+            view.fitHeightProperty().bind(view.fitWidthProperty());
+            return view;
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
     static ImageView loadIcon(String resourcePath, int size) {
         try (InputStream in = HelloController.class.getResourceAsStream(resourcePath)) {
             if (in == null) {

@@ -98,7 +98,8 @@ public final class SystemsWindow {
     private static final String STYLE_MC2 =
             "-fx-background-color: #e0d6f5; -fx-text-fill: #2b2b2b;";
 
-    private static final double ROW_HEIGHT = 26;
+    /** Zeilenhoehe der Tabellen - so hoch, dass die Auswahlbox "Zuordnung in iTrain" lesbar hineinpasst. */
+    private static final double ROW_HEIGHT = 32;
 
     private static SystemsWindow open;
 
@@ -126,6 +127,29 @@ public final class SystemsWindow {
     private final Button exportButton = new Button();
     private final Button exportAllButton = new Button();
     private final Button clearTablesButton = new Button();
+    /** "iTrain-Datei laden": .tcd/.tcdz zum Abgleichen (Spalte "Zuordnung in iTrain"). */
+    private final Button loadItrainButton = new Button();
+    private final MenuItem loadItrainMenuItem = new MenuItem();
+    /** "In iTrain-Datei schreiben": markierte Zeilen direkt in die geladene .tcdz (ohne Exportdateien). */
+    private final Button writeItrainButton = new Button();
+    private final MenuItem writeItrainMenuItem = new MenuItem();
+    private static final String STYLE_ITRAIN =
+            "-fx-background-color: #fff3b0; -fx-text-fill: #2b2b2b;";
+
+    /**
+     * Die gemeinsame iTrain-Datei aller Programmteile (Dokument der Sitzung
+     * des Hauptfensters), oder null - siehe onMainDocumentChanged().
+     */
+    private TcdDocument matchDocument = mainDocument();
+    /** Beobachter an der Hauptsitzung (beim Schliessen wieder abgemeldet). */
+    private final Runnable mainDocumentListener = this::onMainDocumentChanged;
+    /** Statuszeile Mitte: welche iTrain-Datei zum Abgleich geladen ist. */
+    private final Label itrainFileLabel = new Label();
+    /**
+     * Auswahl der Spalte "Zuordnung in iTrain" je Kategorie: "Neu" plus die
+     * Namen der vorhandenen Eintraege dieser Kategorie in der geladenen Datei.
+     */
+    private final Map<String, ObservableList<String>> matchChoices = new LinkedHashMap<>();
 
     /** Alle vorbereiteten iTrain-Objekte; die Abschnitte filtern daraus je Kategorie. */
     private final ObservableList<SystemsObject> objects = FXCollections.observableArrayList();
@@ -153,9 +177,13 @@ public final class SystemsWindow {
             table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
             table.setPlaceholder(new Label(""));
             table.setFixedCellSize(ROW_HEIGHT);
-            table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+            // Frei veraenderbare Spalten (Anwenderwunsch): kein "constrained"
+            // Verhalten mehr, das gezogene Breiten wieder umverteilt; jede
+            // Breite wird je Abschnitt gemerkt (rememberColumnWidths).
+            table.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
             table.setStyle("-fx-border-color: derive(-fx-background, -25%); -fx-border-width: 1;");
             table.getColumns().setAll(buildColumns(category));
+            rememberColumnWidths(category, table);
             // Hoehe passend zur Zeilenzahl - die Abschnitte liegen gemeinsam
             // in einer Bildlaufflaeche, jede Tabelle zeigt alle Zeilen.
             table.prefHeightProperty().bind(Bindings.size(rows).multiply(ROW_HEIGHT).add(ROW_HEIGHT + 6));
@@ -309,11 +337,13 @@ public final class SystemsWindow {
             open.currentFile = source;
         }
         int added = 0;
+        List<SystemsObject> addedObjects = new ArrayList<>();
         for (SystemsObject object : newObjects) {
             if (object.isInterface()) {
                 open.objects.removeIf(existing -> existing.isInterface()
                         && existing.getName().equals(object.getName()));
                 open.objects.add(0, object);
+                addedObjects.add(object);
                 added++;
                 continue;
             }
@@ -321,11 +351,18 @@ public final class SystemsWindow {
                 continue;
             }
             open.objects.add(object);
+            addedObjects.add(object);
             added++;
         }
+        // Ist schon eine iTrain-Datei zum Abgleich geladen (z.B. VOR dem
+        // Auslesen), die neuen Zeilen gleich zuordnen - vorher standen sie
+        // alle auf "Neu" und es sah aus, als waere die Datei wieder weg.
+        int matched = open.matchDocument != null ? open.autoMatch(addedObjects) : 0;
+        open.refreshTables();
         open.updateFileLabel();
         open.updateState();
-        open.fileLabel.setText(open.i18n.t("systems.objectsAccepted", added));
+        open.fileLabel.setText(open.i18n.t("systems.objectsAccepted", added)
+                + (open.matchDocument != null ? "  " + open.i18n.t("systems.objectsMatched", matched) : ""));
     }
 
     /** Vom Knotenbaum nach dem Speichern: Öffnen-Knopf ggf. freigeben. */
@@ -363,7 +400,10 @@ public final class SystemsWindow {
         openMenuItem.setOnAction(e -> onOpenSystemFile());
         saveMenuItem.setOnAction(e -> onSaveSystemFile());
         closeFileMenuItem.setOnAction(e -> onCloseSystemFile());
-        fileMenu.getItems().addAll(openMenuItem, saveMenuItem, closeFileMenuItem);
+        loadItrainMenuItem.setOnAction(e -> onLoadItrainFile());
+        writeItrainMenuItem.setOnAction(e -> onWriteToItrain());
+        fileMenu.getItems().addAll(openMenuItem, saveMenuItem, closeFileMenuItem,
+                new SeparatorMenuItem(), loadItrainMenuItem, writeItrainMenuItem);
 
         bidibConnectMenuItem.setOnAction(e -> BidibConnectionDialog.show(stage));
         bidibReadMenuItem.setOnAction(e -> openNodeTree());
@@ -452,6 +492,10 @@ public final class SystemsWindow {
                 openNodeTree();
             }
         });
+        loadItrainButton.setStyle(STYLE_ITRAIN);
+        loadItrainButton.setOnAction(e -> onLoadItrainFile());
+        writeItrainButton.setStyle(STYLE_ITRAIN);
+        writeItrainButton.setOnAction(e -> onWriteToItrain());
         exportButton.setOnAction(e -> onExportSelected());
         exportAllButton.setOnAction(e -> onExportAll());
         clearTablesButton.setOnAction(e -> clearTables());
@@ -465,7 +509,8 @@ public final class SystemsWindow {
         ToolBar ribbon = new ToolBar(
                 openToolButton, saveToolButton, undoToolButton, redoToolButton,
                 gapLeft, new Separator(Orientation.VERTICAL), gapRight,
-                connectButton, readButton, systemBox, rawLogButton, mc2LocoButton, exportButton, exportAllButton,
+                connectButton, readButton, systemBox, rawLogButton, mc2LocoButton, loadItrainButton, writeItrainButton,
+                exportButton, exportAllButton,
                 gapClear, clearTablesButton);
 
         // --- Abschnitte ------------------------------------------------
@@ -495,10 +540,24 @@ public final class SystemsWindow {
         BorderPane statusBar = new BorderPane();
         statusBar.setLeft(fileLabel);
         statusBar.setRight(bidibStatusBox);
+        // Mitte: geladene iTrain-Datei zum Abgleich - bleibt sichtbar, auch
+        // wenn links Meldungen wie "n Objekte uebernommen" erscheinen.
+        itrainFileLabel.setStyle("-fx-font-weight: bold;");
+        itrainFileLabel.setPadding(new Insets(4, 10, 4, 10));
+        statusBar.setCenter(itrainFileLabel);
+        updateItrainFileLabel();
 
         BorderPane root = new BorderPane();
         root.setTop(new VBox(menuBar, ribbon));
-        root.setCenter(scroll);
+        // Startbild (Besetztmelder) wie die Dampflok im Hauptfenster: mittig,
+        // mitwachsend, nur solange die Tabellen leer sind.
+        javafx.scene.layout.StackPane center = new javafx.scene.layout.StackPane(scroll);
+        javafx.scene.image.ImageView startImage = HelloController.createStartImage("occupancy-image.png", center);
+        if (startImage != null) {
+            startImage.visibleProperty().bind(Bindings.isEmpty(objects));
+            center.getChildren().add(startImage);
+        }
+        root.setCenter(center);
         root.setBottom(statusBar);
 
         // --- Fenster ---------------------------------------------------
@@ -511,8 +570,17 @@ public final class SystemsWindow {
 
         Runnable languageListener = this::applyLanguage;
         i18n.addLanguageChangeListener(languageListener);
+        // Die gemeinsame iTrain-Datei beobachten (laden/schliessen/rueckgaengig
+        // in irgendeinem Programmteil) - siehe onMainDocumentChanged().
+        DocumentSession mainSession = HelloController.getMainSession();
+        if (mainSession != null) {
+            mainSession.addDocumentListener(mainDocumentListener);
+        }
         stage.setOnHidden(event -> {
             i18n.removeLanguageChangeListener(languageListener);
+            if (mainSession != null) {
+                mainSession.removeDocumentListener(mainDocumentListener);
+            }
             if (open == this) {
                 open = null;
             }
@@ -566,11 +634,72 @@ public final class SystemsWindow {
         selectedColumn.setUserData("systems.colSelected");
         columns.add(selectedColumn);
 
-        columns.add(textColumn("systems.colNameItrain", SystemsObject::nameProperty, 220));
+        columns.add(textColumn("systems.colNameItrain", SystemsObject::nameProperty, 200));
+        // Beschreibung: landet beim Import im gleichnamigen iTrain-Feld
+        // (<description>, siehe SystemsObject.applyDescription). Bekommt den
+        // freien Platz der Tabelle (siehe unten: Typ/Schnittstelle schmal).
+        columns.add(textColumn("systems.colDescription", SystemsObject::descriptionProperty, 220));
+
+        // Zuordnung zu einem vorhandenen Eintrag der geladenen iTrain-Datei
+        // ("iTrain-Datei laden") - "Neu" oder ein vorhandener Name. Die
+        // einzige direkt in der Tabelle bearbeitbare Spalte neben "Ausgewaehlt".
+        TableColumn<SystemsObject, String> matchColumn = new TableColumn<>();
+        matchColumn.setCellValueFactory(cell -> {
+            String name = cell.getValue().matchNameProperty().get();
+            return new ReadOnlyStringWrapper(name == null || name.isEmpty() ? i18n.t("systems.matchNew") : name);
+        });
+        matchColumn.setCellFactory(col -> new javafx.scene.control.TableCell<>() {
+            private final javafx.scene.control.ComboBox<String> box = new javafx.scene.control.ComboBox<>();
+            {
+                box.setMaxWidth(Double.MAX_VALUE);
+                // Kompakt, aber mit voller Schrifthoehe: vorher schnitt die
+                // feste Zeilenhoehe den Text der Box unten ab.
+                box.setPrefHeight(ROW_HEIGHT - 4);
+                box.setMinHeight(ROW_HEIGHT - 4);
+                box.setMaxHeight(ROW_HEIGHT - 4);
+                box.setStyle("-fx-padding: 0 2 0 2;");
+                setStyle("-fx-padding: 1 2 1 2;");
+                box.setOnAction(e -> {
+                    SystemsObject object = getTableRow() == null ? null : getTableRow().getItem();
+                    if (object != null && box.getValue() != null) {
+                        applyMatch(object, box.getValue());
+                    }
+                });
+            }
+
+            @Override
+            protected void updateItem(String value, boolean empty) {
+                super.updateItem(value, empty);
+                SystemsObject object = getTableRow() == null ? null : getTableRow().getItem();
+                if (empty || object == null) {
+                    setGraphic(null);
+                    setText(null);
+                    return;
+                }
+                if (matchDocument == null) {
+                    // Ohne geladene iTrain-Datei gibt es nichts zuzuordnen.
+                    setGraphic(null);
+                    setText(i18n.t("systems.matchNew"));
+                    return;
+                }
+                box.setItems(matchChoices.getOrDefault(object.getCategory(), FXCollections.observableArrayList()));
+                box.setValue(value);
+                setText(null);
+                setGraphic(box);
+            }
+        });
+        matchColumn.setPrefWidth(190);
+        matchColumn.setReorderable(false);
+        matchColumn.setSortable(false);
+        matchColumn.setUserData("systems.colMatch");
+        columns.add(matchColumn);
 
         TableColumn<SystemsObject, String> typeColumn = new TableColumn<>();
         typeColumn.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().typeLabel(i18n)));
-        typeColumn.setPrefWidth(170);
+        // Typ und Schnittstelle so schmal wie sinnvoll (Wunsch: "auf den
+        // niedrigsten Platz begrenzen") - per Maus weiterhin verbreiterbar.
+        typeColumn.setPrefWidth(110);
+        typeColumn.setMaxWidth(150);
         typeColumn.setEditable(false);
         typeColumn.setReorderable(false);
         typeColumn.setUserData("systems.colType");
@@ -583,8 +712,32 @@ public final class SystemsWindow {
             columns.add(lengthColumn);
         }
 
-        columns.add(textColumn("systems.colInterface", SystemsObject::interfaceNameProperty, 170));
+        TableColumn<SystemsObject, String> interfaceColumn =
+                textColumn("systems.colInterface", SystemsObject::interfaceNameProperty, 110);
+        interfaceColumn.setMaxWidth(150);
+        columns.add(interfaceColumn);
         return columns;
+    }
+
+    /**
+     * Spalten frei in der Breite veraenderbar machen, gemerkte Breiten
+     * wiederherstellen und jede Aenderung (kurz verzoegert, damit beim
+     * Ziehen nicht staendig geschrieben wird) dauerhaft speichern - je
+     * Abschnitt und Spalte, siehe {@link AppSettings#getColumnWidth}.
+     */
+    private void rememberColumnWidths(String category, TableView<SystemsObject> table) {
+        for (TableColumn<SystemsObject, ?> column : table.getColumns()) {
+            column.setResizable(true);
+            column.setMaxWidth(5000);
+            String key = "systems." + category + "." + column.getUserData();
+            double saved = settings.getColumnWidth(key);
+            if (saved > 20) {
+                column.setPrefWidth(saved);
+            }
+            javafx.animation.PauseTransition delay = new javafx.animation.PauseTransition(javafx.util.Duration.millis(400));
+            delay.setOnFinished(e -> settings.setColumnWidth(key, column.getWidth()));
+            column.widthProperty().addListener((obs, old, width) -> delay.playFromStart());
+        }
     }
 
     private TableColumn<SystemsObject, String> textColumn(String key,
@@ -651,6 +804,15 @@ public final class SystemsWindow {
         exportButton.setTooltip(new Tooltip(i18n.t("systems.exportTooltip")));
         exportAllButton.setText(i18n.t("systems.exportAll"));
         clearTablesButton.setText(i18n.t("systems.clearTables"));
+        loadItrainButton.setText(i18n.t("systems.loadItrain"));
+        loadItrainButton.setTooltip(new Tooltip(i18n.t("systems.loadItrainTooltip")));
+        loadItrainMenuItem.setText(i18n.t("systems.loadItrain"));
+        writeItrainButton.setText(i18n.t("systems.writeItrain"));
+        writeItrainButton.setTooltip(new Tooltip(i18n.t("systems.writeItrainTooltip")));
+        writeItrainMenuItem.setText(i18n.t("systems.writeItrain"));
+        if (matchDocument != null) {
+            rebuildMatchChoices(); // "Neu" in der neuen Sprache
+        }
         emptyLabel.setText(i18n.t("systems.noObjects"));
         for (Section section : sections) {
             section.header.setText(i18n.t(sectionKey(section.category)));
@@ -735,6 +897,9 @@ public final class SystemsWindow {
         editExportAllMenuItem.setDisable(!anyObjects);
         clearTablesButton.setDisable(!anyObjects);
         editClearTablesMenuItem.setDisable(!anyObjects);
+        // Direkt schreiben nur mit geladener iTrain-Datei.
+        writeItrainButton.setDisable(!(anyObjects && matchDocument != null));
+        writeItrainMenuItem.setDisable(!(anyObjects && matchDocument != null));
     }
 
     private void updateFileLabel() {
@@ -959,37 +1124,82 @@ public final class SystemsWindow {
         if (byCategory.isEmpty()) {
             return;
         }
-        String interfaceName = currentFile != null ? currentFile.getInterfaceName() : "BiDiB";
-        String base = interfaceName.replaceAll("[\\\\/:*?\"<>|]", "_").trim();
-        List<String> written = new ArrayList<>();
+        // Zusammengehoerigkeit sichtbar machen (Anwenderwunsch): alle Dateien
+        // EINES Exports bekommen denselben "Exportsatz"-Namen (Schnittstelle +
+        // Zeitstempel) und eine laufende Nummer "1von3", "2von3" ... - in
+        // der Reihenfolge, in der sie importiert werden sollten (Schnittstelle
+        // zuerst, weil die anderen auf sie verweisen). Ein einziger
+        // Ordner-Dialog statt eines Datei-Dialogs je Kategorie.
+        List<Map.Entry<String, List<SystemsObject>>> parts = new ArrayList<>();
+        for (String category : SystemsObject.CATEGORY_ORDER) {
+            if (byCategory.containsKey(category)) {
+                parts.add(Map.entry(category, byCategory.get(category)));
+            }
+        }
         for (Map.Entry<String, List<SystemsObject>> entry : byCategory.entrySet()) {
-            FileChooser chooser = new FileChooser();
-            chooser.setTitle(i18n.t("editor.exportSelected") + " - " + i18n.t(sectionKey(entry.getKey())));
-            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ZIP", "*.zip"));
-            String exportDir = settings.getExportDirectory();
-            if (exportDir != null && new File(exportDir).isDirectory()) {
-                chooser.setInitialDirectory(new File(exportDir));
+            if (!SystemsObject.CATEGORY_ORDER.contains(entry.getKey())) {
+                parts.add(entry);
             }
-            chooser.setInitialFileName(base + "_" + entry.getKey() + ".zip");
-            File target = chooser.showSaveDialog(stage);
-            if (target == null) {
-                continue;
+        }
+        // Speichern-Dialog MIT vorgeschlagenem Namen (Anwenderwunsch - der
+        // reine Ordner-Dialog schlug keinen vor). Der eingegebene Name ist der
+        // gemeinsame Namensanfang des Exportsatzes; die Teile bekommen
+        // "_1von3_<kategorie>.zip" usw. angehaengt.
+        String interfaceName = currentFile != null ? currentFile.getInterfaceName() : "BiDiB";
+        String base = (interfaceName == null || interfaceName.isBlank() ? "BiDiB" : interfaceName)
+                .replaceAll("[\\\\/:*?\"<>|]", "_").trim();
+        String proposed = base + "_" + java.time.LocalDateTime.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"));
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle(i18n.t("systems.exportChooseFolder"));
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ZIP", "*.zip"));
+        String exportDir = settings.getExportDirectory();
+        if (exportDir != null && new File(exportDir).isDirectory()) {
+            chooser.setInitialDirectory(new File(exportDir));
+        }
+        chooser.setInitialFileName(proposed + ".zip");
+        File picked = chooser.showSaveDialog(stage);
+        if (picked == null) {
+            return;
+        }
+        File folder = picked.getParentFile();
+        String setName = picked.getName().toLowerCase().endsWith(".zip")
+                ? picked.getName().substring(0, picked.getName().length() - 4) : picked.getName();
+        if (setName.isBlank()) {
+            setName = proposed;
+        }
+        List<File> targets = new ArrayList<>();
+        for (int i = 0; i < parts.size(); i++) {
+            String part = i18n.t("systems.exportPart", i + 1, parts.size());
+            targets.add(new File(folder, setName + "_" + part + "_" + parts.get(i).getKey() + ".zip"));
+        }
+        if (targets.stream().anyMatch(File::exists)) {
+            ButtonType overwrite = new ButtonType(i18n.t("systems.overwrite"), ButtonBar.ButtonData.OK_DONE);
+            ButtonType abort = new ButtonType(i18n.t("bidib.abortButton"), ButtonBar.ButtonData.CANCEL_CLOSE);
+            Alert ask = new Alert(Alert.AlertType.CONFIRMATION, i18n.t("systems.exportExists"), overwrite, abort);
+            ask.initOwner(stage);
+            ask.setHeaderText(null);
+            if (ask.showAndWait().orElse(abort) != overwrite) {
+                return;
             }
-            if (!target.getName().toLowerCase().endsWith(".zip")) {
-                target = new File(target.getParentFile(), target.getName() + ".zip");
-            }
+        }
+        List<String> written = new ArrayList<>();
+        for (int i = 0; i < parts.size(); i++) {
             try {
-                writeCategoryZip(target, entry.getKey(), entry.getValue());
-                written.add(target.getAbsolutePath());
+                writeCategoryZip(targets.get(i), parts.get(i).getKey(), parts.get(i).getValue());
+                written.add(targets.get(i).getName());
             } catch (Exception ex) {
                 error(i18n.t("systems.fileError", String.valueOf(ex.getMessage())));
                 return;
             }
         }
         if (!written.isEmpty()) {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION, String.join("\n", written));
+            Alert alert = new Alert(Alert.AlertType.INFORMATION,
+                    i18n.t("systems.exportSetText", setName, folder.getAbsolutePath()) + "\n\n"
+                            + String.join("\n", written));
             alert.initOwner(stage);
             alert.setHeaderText(i18n.t("bidib.generateSaveSuccess", written.size()));
+            alert.getDialogPane().setMinWidth(560);
             alert.showAndWait();
         }
     }
@@ -1000,12 +1210,315 @@ public final class SystemsWindow {
                 i18n.t("editor.columnDescription"), "XML");
         List<List<String>> rows = new ArrayList<>();
         for (SystemsObject object : items) {
-            XmlNode item = object.getXml();
-            rows.add(List.of(category, item.getTagName(), object.getName(), object.getDescription(),
+            // Bei einer Zuordnung zur geladenen iTrain-Datei: der vorhandene
+            // Eintrag mit aktualisierter BiDiB-Verknuepfung (siehe exportXml).
+            XmlNode item = object.exportXml();
+            rows.add(List.of(category, item.getTagName(), item.getName(), object.getDescription(),
                     TcdDocument.nodeToXmlString(item)));
         }
         String entryName = target.getName().substring(0, target.getName().length() - 4) + ".csv";
         CsvUtil.writeZipped(target, entryName, header, rows);
+    }
+
+    // ------------------------------------------------------------------
+    // iTrain-Datei laden und zuordnen
+    // ------------------------------------------------------------------
+
+    /**
+     * "iTrain-Datei laden": laedt die .tcd/.tcdz als DIE geladene iTrain-Datei
+     * des ganzen Programms (sie gehoert der Sitzung des Hauptfensters und gilt
+     * damit gleichzeitig im Hauptfenster, im Decoder- und im Systeme-Fenster,
+     * bis eine andere geladen oder das Programm beendet wird). Die
+     * Tabellenzeilen werden danach automatisch zugeordnet - siehe
+     * {@link #onMainDocumentChanged()}.
+     */
+    private void onLoadItrainFile() {
+        DocumentSession main = HelloController.getMainSession();
+        if (main != null) {
+            main.openFileDialog();
+        }
+    }
+
+    /** Das in allen Programmteilen gemeinsame iTrain-Dokument (Hauptfenster), oder null. */
+    private static TcdDocument mainDocument() {
+        DocumentSession main = HelloController.getMainSession();
+        return main == null ? null : main.getDocument();
+    }
+
+    /**
+     * Die gemeinsame iTrain-Datei wurde geladen, geschlossen, per
+     * Rueckgaengig veraendert oder von hier aus beschrieben: Zuordnungen neu
+     * aufbauen (alte verweisen auf nicht mehr gueltige Eintraege).
+     */
+    private void onMainDocumentChanged() {
+        matchDocument = mainDocument();
+        for (SystemsObject object : objects) {
+            object.setMatch(null);
+        }
+        rebuildMatchChoices();
+        int matched = autoMatch();
+        refreshTables();
+        updateState();
+        updateItrainFileLabel();
+        if (matchDocument != null && matchDocument.getFile() != null && !objects.isEmpty()) {
+            fileLabel.setText(i18n.t("systems.itrainLoaded", matchDocument.getFile().getName(), matched));
+        }
+    }
+
+    /** Statuszeile: "iTrain-Datei: <Name>" solange eine iTrain-Datei geladen ist. */
+    private void updateItrainFileLabel() {
+        boolean loaded = matchDocument != null && matchDocument.getFile() != null;
+        itrainFileLabel.setText(loaded ? i18n.t("systems.itrainFileLabel", matchDocument.getFile().getName()) : "");
+        itrainFileLabel.setVisible(loaded);
+    }
+
+    /**
+     * "In iTrain-Datei schreiben": die markierten Zeilen (Haken
+     * "Ausgewaehlt", die Schnittstelle immer) OHNE Umweg ueber Exportdateien
+     * in die geladene iTrain-Datei uebernehmen und diese speichern.
+     * Zugeordnete Zeilen ersetzen ihren vorhandenen Eintrag an derselben
+     * Stelle (Verweise bleiben gueltig), neue werden angehaengt - bei
+     * Namensgleichheit mit freiem Namen "Name (2)". Die Aenderung laeuft
+     * ueber die Sitzung des Hauptfensters (Rueckgaengig-Schritt, Reiter aller
+     * Fenster aktualisiert); gespeichert wird mit vorheriger Sicherung
+     * (DocumentSession.saveToCurrentFile).
+     */
+    private void onWriteToItrain() {
+        DocumentSession main = HelloController.getMainSession();
+        matchDocument = mainDocument();
+        if (main == null || matchDocument == null || matchDocument.getFile() == null) {
+            return;
+        }
+        List<SystemsObject> chosen = new ArrayList<>();
+        for (String category : SystemsObject.CATEGORY_ORDER) {
+            for (SystemsObject object : objects) {
+                if (category.equals(object.getCategory()) && object.getXml() != null
+                        && (object.isSelected() || object.isInterface())) {
+                    chosen.add(object);
+                }
+            }
+        }
+        if (chosen.isEmpty()) {
+            return;
+        }
+        String fileName = matchDocument.getFile().getName();
+        ButtonType write = new ButtonType(i18n.t("systems.writeItrain"), ButtonBar.ButtonData.OK_DONE);
+        ButtonType abort = new ButtonType(i18n.t("bidib.abortButton"), ButtonBar.ButtonData.CANCEL_CLOSE);
+        Alert ask = new Alert(Alert.AlertType.CONFIRMATION,
+                i18n.t("systems.writeItrainConfirm", chosen.size(), fileName), write, abort);
+        ask.initOwner(stage);
+        ask.setHeaderText(null);
+        ask.getDialogPane().setMinWidth(520);
+        ThemeManager.apply(ask.getDialogPane().getScene(), settings.getTheme());
+        if (ask.showAndWait().orElse(abort) != write) {
+            return;
+        }
+
+        main.recordExternalUndo();
+        XmlNode root = matchDocument.getRoot();
+        XmlNode controlItems = root.findChild("control-items");
+        if (controlItems == null) {
+            controlItems = new XmlNode("control-items");
+            root.getChildren().add(controlItems);
+        }
+        int updated = 0;
+        int added = 0;
+        List<String> renamed = new ArrayList<>();
+        for (SystemsObject object : chosen) {
+            XmlNode node = object.exportXml().deepCopy();
+            XmlNode category = controlItems.findChild(object.getCategory());
+            if (category == null) {
+                category = new XmlNode(object.getCategory());
+                controlItems.getChildren().add(category);
+            }
+            int index = object.isMatched() ? indexOfIdentity(category, object.getMatchedEntry()) : -1;
+            if (index >= 0) {
+                category.getChildren().set(index, node);
+                updated++;
+            } else {
+                String base = node.getName();
+                if (!base.isBlank() && hasEntry(category, node.getTagName(), base)) {
+                    int n = 2;
+                    while (hasEntry(category, node.getTagName(), base + " (" + n + ")")) {
+                        n++;
+                    }
+                    node.setAttribute("name", base + " (" + n + ")");
+                    renamed.add(base + " -> " + node.getName());
+                }
+                category.getChildren().add(node);
+                added++;
+            }
+        }
+        // Reiter aller Fenster nachziehen; die Zuordnungen hier baut der
+        // Beobachter (onMainDocumentChanged) neu auf - die geschriebenen
+        // Eintraege tragen jetzt die BiDiB-Kennung und werden wiedererkannt.
+        main.applyExternalChange();
+        if (!main.saveToCurrentFile()) {
+            return;
+        }
+        StringBuilder text = new StringBuilder(i18n.t("systems.writeItrainDone", updated, added, fileName));
+        if (!renamed.isEmpty()) {
+            text.append("\n\n").append(i18n.t("systems.writeItrainRenamed")).append("\n").append(String.join("\n", renamed));
+        }
+        Alert done = new Alert(Alert.AlertType.INFORMATION, text.toString());
+        done.initOwner(stage);
+        done.setHeaderText(null);
+        done.getDialogPane().setMinWidth(520);
+        done.showAndWait();
+    }
+
+    private static int indexOfIdentity(XmlNode category, XmlNode entry) {
+        List<XmlNode> children = category.getChildren();
+        for (int i = 0; i < children.size(); i++) {
+            if (children.get(i) == entry) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private static boolean hasEntry(XmlNode category, String tag, String name) {
+        for (XmlNode child : category.getChildren()) {
+            if (child.getTagName().equals(tag) && name.equals(child.getAttribute("name"))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** "Neu" plus die Namen der vorhandenen Eintraege je Kategorie. */
+    private void rebuildMatchChoices() {
+        matchChoices.clear();
+        if (matchDocument == null) {
+            return;
+        }
+        for (String category : SystemsObject.CATEGORY_ORDER) {
+            ObservableList<String> choices = FXCollections.observableArrayList();
+            choices.add(i18n.t("systems.matchNew"));
+            for (XmlNode entry : entriesOf(category)) {
+                if (!entry.getName().isBlank() && !choices.contains(entry.getName())) {
+                    choices.add(entry.getName());
+                }
+            }
+            matchChoices.put(category, choices);
+        }
+    }
+
+    private List<XmlNode> entriesOf(String category) {
+        if (matchDocument == null || matchDocument.getRoot() == null) {
+            return List.of();
+        }
+        XmlNode controlItems = matchDocument.getRoot().findChild("control-items");
+        XmlNode categoryNode = controlItems == null ? null : controlItems.findChild(category);
+        return categoryNode == null ? List.of() : categoryNode.getChildren();
+    }
+
+    /** Eindeutige Zuordnungen setzen; Rueckgabe: Anzahl zugeordneter Zeilen. */
+    private int autoMatch() {
+        return autoMatch(objects);
+    }
+
+    /** Wie {@link #autoMatch()}, aber nur fuer die uebergebenen Zeilen (z.B. frisch ausgelesene). */
+    private int autoMatch(List<SystemsObject> candidates) {
+        if (matchDocument == null) {
+            return 0;
+        }
+        int matched = 0;
+        // Schnittstelle zuerst - ihr Name wird ggf. an die anderen Zeilen weitergegeben.
+        List<SystemsObject> ordered = new ArrayList<>(candidates);
+        ordered.sort((a, b) -> Boolean.compare(!a.isInterface(), !b.isInterface()));
+        for (SystemsObject object : ordered) {
+            XmlNode ours = object.getXml();
+            if (ours == null) {
+                continue;
+            }
+            XmlNode found = null;
+            if (object.isInterface()) {
+                String host = object.childAttribute("socket", "host");
+                for (XmlNode entry : entriesOf(object.getCategory())) {
+                    XmlNode socket = entry.findChild("socket");
+                    boolean sameHost = !host.isBlank() && socket != null && host.equals(socket.getAttribute("host"));
+                    if (entry.getName().equals(object.getName()) || sameHost) {
+                        found = entry;
+                        break;
+                    }
+                }
+            } else {
+                XmlNode idNode = ours.findChild("id");
+                String id = idNode == null || idNode.getTextContent() == null ? "" : idNode.getTextContent().trim();
+                if (!id.isEmpty()) {
+                    for (XmlNode entry : entriesOf(object.getCategory())) {
+                        XmlNode theirId = entry.findChild("id");
+                        if (theirId != null && theirId.getTextContent() != null
+                                && id.equalsIgnoreCase(theirId.getTextContent().trim())) {
+                            found = entry;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (found != null) {
+                matchTo(object, found);
+                matched++;
+            }
+        }
+        return matched;
+    }
+
+    /** Auswahl in der Spalte "Zuordnung in iTrain": "Neu" oder ein vorhandener Name. */
+    private void applyMatch(SystemsObject object, String choice) {
+        if (choice.equals(i18n.t("systems.matchNew"))) {
+            if (object.isMatched()) {
+                object.setMatch(null);
+                refreshTables();
+            }
+            return;
+        }
+        if (object.isMatched() && choice.equals(object.getMatchedEntry().getName())) {
+            return;
+        }
+        XmlNode entry = null;
+        for (XmlNode candidate : entriesOf(object.getCategory())) {
+            if (choice.equals(candidate.getName())) {
+                // Bei Zubehoer gleiche Elementart (turnout/signal ...) bevorzugen.
+                if (entry == null || (object.getXml() != null
+                        && candidate.getTagName().equals(object.getXml().getTagName()))) {
+                    entry = candidate;
+                }
+            }
+        }
+        if (entry != null) {
+            matchTo(object, entry);
+            refreshTables();
+        }
+    }
+
+    /**
+     * Zuordnen; bei der Schnittstelle zusaetzlich deren iTrain-Namen in
+     * alle Zeilen uebernehmen, die auf den bisherigen Namen verweisen.
+     */
+    private void matchTo(SystemsObject object, XmlNode entry) {
+        if (object.isInterface()) {
+            String oldName = object.getName();
+            String newName = entry.getName();
+            object.setMatch(entry);
+            if (!newName.equals(oldName)) {
+                object.setInterfaceName(newName);
+                for (SystemsObject other : objects) {
+                    if (other != object && oldName.equals(other.getInterfaceName())) {
+                        other.setInterfaceName(newName);
+                    }
+                }
+            }
+            return;
+        }
+        object.setMatch(entry);
+    }
+
+    private void refreshTables() {
+        for (Section section : sections) {
+            section.table.refresh();
+        }
     }
 
     // ------------------------------------------------------------------

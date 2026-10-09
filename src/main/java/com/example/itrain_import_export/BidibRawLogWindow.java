@@ -87,7 +87,17 @@ public final class BidibRawLogWindow {
             textArea.positionCaret(textArea.getLength());
             countLabel.setText(i18n.t("bidib.rawLogCount", entries.size()));
         };
-        hexButton.setOnAction(e -> refill.run());
+        // Beschriftung zeigt die AKTUELLE Ansicht ("Ansicht: Lesbar" /
+        // "Ansicht: Hex") - ein Klick schaltet um. Vorher stand dort immer
+        // nur "Hex", man sah nicht, in welcher Ansicht man ist.
+        Runnable relabel = () -> hexButton.setText(
+                i18n.t(hexButton.isSelected() ? "bidib.rawLogViewHex" : "bidib.rawLogViewReadable"));
+        relabel.run();
+        hexButton.setTooltip(new javafx.scene.control.Tooltip(i18n.t("bidib.rawLogViewTooltip")));
+        hexButton.setOnAction(e -> {
+            relabel.run();
+            refill.run();
+        });
 
         ToggleButton pauseButton = new ToggleButton(i18n.t("bidib.rawLogPause"));
         pauseButton.selectedProperty().addListener((obs, old, paused) -> {

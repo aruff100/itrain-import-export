@@ -52,18 +52,11 @@ import java.util.Optional;
  * bearbeitet wird.
  * <p>
  * "Decoder-Typ" ist dagegen bewusst eine GESCHLOSSENE Auswahl mit einem
- * ersten Eintrag "unveraendert": anders als beim Typ-Feld wuerde ein
- * geaenderter Decoder-Typ nicht nur ein Attribut, sondern Protokoll,
- * Fahrstufenzahl UND die komplette Fahrstufentabelle neu schreiben (siehe
- * {@link #applyDecoderProtocol}, nachgebildet nach
- * {@link SystemsObject#applyLocomotiveProtocol}) - das darf nur auf
- * ausdruecklichen Wunsch passieren, nie als Nebenwirkung eines bloss
- * angezeigten Feldes. Erkennt das Fenster die aktuellen Decoder-Werte als
- * eine der vier unterstuetzten Kombinationen (DCC 128/28/14, Selectrix 31 -
- * siehe {@link LocomotiveXmlFactory#parseLocoType}), ist diese vorgewaehlt;
- * sonst bleibt "unveraendert" stehen (Motorola, FMZ, SX2, "multi", "analog"
- * und aehnliche in echten Dateien beobachtete Protokolle werden NIE
- * automatisch auf DCC umgeschrieben).
+ * ersten Eintrag "unveraendert" und denselben Typen wie in iTrain (siehe
+ * {@link #DECODER_VARIANTS}); ein Wechsel schreibt die Decoder-Attribute
+ * neu (siehe {@link #applyDecoderProtocol}) und darf deshalb nur auf
+ * ausdruecklichen Wunsch passieren. Unbekannte Kombinationen bleiben bei
+ * "unveraendert" und werden nie angetastet.
  * <p>
  * Das Attribut {@code uid} am {@code <decoder>}-Element (Feld "UID") ist in
  * keiner der geprueften echten iTrain-Dateien belegt - vermutlich schreibt
@@ -79,8 +72,23 @@ import java.util.Optional;
  */
 public final class VehicleFieldsDialog {
 
-    /** Lokomotiven-Typen, an echten Dateien abgelesen (siehe Klassenkommentar). */
-    private static final List<String> LOCOMOTIVE_TYPES = List.of("steam", "diesel");
+    /**
+     * Ein Loktyp wie in iTrain: XML-Wert des Attributs {@code type} ("" =
+     * Attribut fehlt = "Sonstiges"), Uebersetzungsschluessel, Kennbuchstabe
+     * und Farbe des Symbols (wie in der Auswahl von iTrain).
+     * Alle Werte an von iTrain gespeicherten Dateien abgelesen
+     * (electric/hydrogen/battery aus Neue_N_Anlage.tcdz).
+     */
+    private record LocoType(String xml, String key, String letter, String color) {
+    }
+
+    private static final List<LocoType> LOCO_TYPES = List.of(
+            new LocoType("", "vehicle.locoType.other", "-", "#808080"),
+            new LocoType("steam", "vehicle.locoType.steam", "S", "-fx-text-background-color"),
+            new LocoType("diesel", "vehicle.locoType.diesel", "D", "#c62828"),
+            new LocoType("electric", "vehicle.locoType.electric", "E", "#2e7d32"),
+            new LocoType("hydrogen", "vehicle.locoType.hydrogen", "H", "#1565c0"),
+            new LocoType("battery", "vehicle.locoType.battery", "B", "#6a1b9a"));
 
     /**
      * Wagen-Typen: {@code coach} (Personenwagen) sowie die deutschen
@@ -88,12 +96,61 @@ public final class VehicleFieldsDialog {
      */
     private static final List<String> WAGON_TYPES = List.of("coach", "e", "g", "i", "t", "u", "z");
 
-    /** Wie {@link SystemsObjectDialog#LOCOMOTIVE_PROTOCOLS} - bewusst dieselben vier Codes. */
-    private static final List<SystemsObject.Choice> DECODER_PROTOCOLS = List.of(
-            new SystemsObject.Choice("DCC128", "DCC (128)"),
-            new SystemsObject.Choice("DCC28", "DCC (28)"),
-            new SystemsObject.Choice("DCC14", "DCC (14)"),
-            new SystemsObject.Choice("SX32", "Selectrix (31)"));
+    /**
+     * Ein Decoder-Typ wie in der Auswahl von iTrain: Anzeigename und die
+     * genauen Attribute des {@code <decoder>}-Elements. Alle Werte an einer
+     * von iTrain gespeicherten Datei abgelesen, in der je eine Lok mit jedem
+     * Typ angelegt war (N-Anlage5.tcdz), "Motorola 27a (C90X)" aus
+     * Neue_N_Anlage.tcdz.
+     */
+    private record DecoderVariant(String label, String protocol, int steps, String... flags) {
+        boolean matches(XmlNode decoder) {
+            if (!protocol.equals(nz(decoder.getAttribute("protocol")).toLowerCase(Locale.ROOT))
+                    || steps != parseIntOrDefault(decoder.getAttribute("steps"), -1)) {
+                return false;
+            }
+            for (String flag : FLAG_NAMES) {
+                String expected = null;
+                for (int i = 0; i < flags.length; i += 2) {
+                    if (flags[i].equals(flag)) {
+                        expected = flags[i + 1];
+                    }
+                }
+                String actual = decoder.getAttribute(flag);
+                if (expected == null ? actual != null && !"false".equals(actual) : !expected.equals(actual)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
+    /** Attribute, die die Varianten unterscheiden. */
+    private static final List<String> FLAG_NAMES = List.of("extended", "old", "type", "susi", "dynamic");
+
+    private static final List<DecoderVariant> DECODER_VARIANTS = List.of(
+            new DecoderVariant("DCC 14", "dcc", 14, "old", "true"),
+            new DecoderVariant("DCC 27", "dcc", 27, "old", "true"),
+            new DecoderVariant("DCC 28", "dcc", 28),
+            new DecoderVariant("DCC 126", "dcc", 126),
+            new DecoderVariant("DCC 126 Extended", "dcc", 126, "extended", "true"),
+            new DecoderVariant("Motorola I (old)", "mot", 14, "old", "true"),
+            new DecoderVariant("Motorola II (Delta/C80)", "mot", 14, "type", "c80"),
+            new DecoderVariant("Motorola 14 (C90)", "mot", 14),
+            new DecoderVariant("Motorola 27a (C90X)", "mot", 27, "old", "true"),
+            new DecoderVariant("Motorola 27b", "mot", 27),
+            new DecoderVariant("Motorola 28", "mot", 28),
+            new DecoderVariant("MFX", "mfx", 126),
+            new DecoderVariant("SX1", "sx1", 31),
+            new DecoderVariant("Selectrix (SUSI)", "sx1", 31, "susi", "true"),
+            new DecoderVariant("Selectrix AD", "sx1", 31, "dynamic", "true"),
+            new DecoderVariant("Selectrix AD (SUSI)", "sx1", 31, "susi", "true", "dynamic", "true"),
+            new DecoderVariant("SX2", "sx2", 127),
+            new DecoderVariant("Selectrix 2 (31)", "sx2", 31),
+            new DecoderVariant("FMZ", "fmz", 15),
+            new DecoderVariant("CTC", "ctc", 1023),
+            new DecoderVariant("Multi", "multi", 126),
+            new DecoderVariant("Analog", "analog", 63, "kickstart", "0"));
 
     private VehicleFieldsDialog() {
     }
@@ -152,16 +209,32 @@ public final class VehicleFieldsDialog {
         addRow(grid, row, i18n.t("systems.fieldName"), nameField);
         addRow(grid, row, i18n.t("systems.fieldDescription"), descriptionField);
 
-        // Typ (Lok- bzw. Wagentyp) - editierbare Auswahl, siehe Klassenkommentar.
-        List<String> typeChoices = isWagon ? WAGON_TYPES : LOCOMOTIVE_TYPES;
-        ComboBox<String> typeBox = new ComboBox<>(FXCollections.observableArrayList(typeChoices));
-        typeBox.setEditable(true);
-        typeBox.setMaxWidth(Double.MAX_VALUE);
-        typeBox.setValue(nz(vehicle.getAttribute("type")));
+        // Wagen: Typ als editierbare Auswahl (Gattungsbuchstaben).
+        // Lokomotiven: "Loktyp" als feste Auswahl wie in iTrain, mit
+        // farbigem Kennbuchstaben; ein unbekannter vorhandener Wert wird als
+        // eigener Eintrag angezeigt und unveraendert zurueckgeschrieben.
+        ComboBox<String> typeBox;
+        String currentType = nz(vehicle.getAttribute("type"));
         if (isWagon) {
+            typeBox = new ComboBox<>(FXCollections.observableArrayList(WAGON_TYPES));
+            typeBox.setEditable(true);
+            typeBox.setValue(currentType);
             typeBox.setTooltip(new Tooltip(i18n.t("vehicle.wagonTypeHint")));
+        } else {
+            List<String> values = new java.util.ArrayList<>();
+            for (LocoType type : LOCO_TYPES) {
+                values.add(type.xml());
+            }
+            if (!values.contains(currentType)) {
+                values.add(currentType);
+            }
+            typeBox = new ComboBox<>(FXCollections.observableArrayList(values));
+            typeBox.setCellFactory(list -> new LocoTypeCell(i18n));
+            typeBox.setButtonCell(new LocoTypeCell(i18n));
+            typeBox.setValue(currentType);
         }
-        addRow(grid, row, i18n.t("systems.fieldType"), typeBox);
+        typeBox.setMaxWidth(Double.MAX_VALUE);
+        addRow(grid, row, i18n.t(isWagon ? "systems.fieldType" : "vehicle.fieldLocoType"), typeBox);
 
         // Laenge - reiner Textwert plus die vorhandene (oder neue) Einheit,
         // wie beim Rueckmelder-Laengenfeld im Systeme-Fenster.
@@ -177,16 +250,49 @@ public final class VehicleFieldsDialog {
 
         addSeparator(grid, row);
 
-        // Decoder-Typ: siehe Klassenkommentar - "unveraendert" plus die vier
-        // bekannten Kombinationen; vorgewaehlt ist die erkannte aktuelle
-        // Kombination, sonst "unveraendert".
+        // Decoder-Typ: "unveraendert" plus alle Typen wie in iTrain;
+        // vorgewaehlt ist der erkannte aktuelle Typ, sonst "unveraendert".
         XmlNode currentDecoder = vehicle.findChild("decoder");
         String detectedCode = detectProtocolCode(currentDecoder);
         java.util.List<SystemsObject.Choice> decoderChoices = new java.util.ArrayList<>();
         decoderChoices.add(new SystemsObject.Choice("", i18n.t("vehicle.decoderKeep")));
-        decoderChoices.addAll(DECODER_PROTOCOLS);
+        for (DecoderVariant variant : DECODER_VARIANTS) {
+            decoderChoices.add(new SystemsObject.Choice(variant.label(), variant.label()));
+        }
         ComboBox<SystemsObject.Choice> decoderBox = choiceBox(decoderChoices, detectedCode != null ? detectedCode : "");
         addRow(grid, row, i18n.t("vehicle.fieldDecoderType"), decoderBox);
+
+        // Decoder-Vorlage: "unveraendert" oder eine der Vorlagen aus dem
+        // eingestellten Ordner - beim Uebernehmen wird ihre Konfiguration
+        // (CV-Liste) eingesetzt, siehe DecoderTemplateSupport.apply. Darunter
+        // steht, welche Vorlage das Fahrzeug derzeit vermutlich hat.
+        List<DecoderTemplate> templates = new java.util.ArrayList<>();
+        for (DecoderTemplateSupport.Known known : DecoderTemplateSupport.known()) {
+            templates.add(known.template());
+        }
+        ComboBox<Object> templateBox = new ComboBox<>();
+        String keepLabel = i18n.t("vehicle.decoderKeep");
+        templateBox.getItems().add(keepLabel);
+        templateBox.getItems().addAll(templates);
+        templateBox.setValue(keepLabel);
+        templateBox.setMaxWidth(Double.MAX_VALUE);
+        templateBox.setConverter(new javafx.util.StringConverter<>() {
+            @Override
+            public String toString(Object value) {
+                return value instanceof DecoderTemplate t ? t.getName() : String.valueOf(value);
+            }
+
+            @Override
+            public Object fromString(String text) {
+                return text;
+            }
+        });
+        addRow(grid, row, i18n.t("vehicle.fieldTemplate"), templateBox);
+        String currentTemplateText = DecoderTemplateSupport.templateColumnText(vehicle, i18n);
+        Label currentTemplate = new Label(currentTemplateText.isEmpty()
+                ? i18n.t("vehicle.templateNone") : i18n.t("vehicle.templateCurrent", currentTemplateText));
+        currentTemplate.setStyle("-fx-opacity: 0.75;");
+        addRow(grid, row, "", currentTemplate);
 
         TextField uidField = new TextField(currentDecoder != null ? nz(currentDecoder.getAttribute("uid")) : "");
         uidField.setPrefColumnCount(12);
@@ -233,6 +339,26 @@ public final class VehicleFieldsDialog {
             String chosenProtocol = decoderBox.getValue() == null ? "" : decoderBox.getValue().value();
             if (!chosenProtocol.isEmpty()) {
                 applyDecoderProtocol(vehicle, chosenProtocol);
+            }
+            if (templateBox.getValue() instanceof DecoderTemplate chosenTemplate) {
+                DecoderTemplateSupport.Result result = DecoderTemplateSupport.apply(vehicle, chosenTemplate, "dcc");
+                Alert info;
+                if (result == DecoderTemplateSupport.Result.APPLIED) {
+                    XmlNode configuration = vehicle.findChild(DecoderTemplate.CONFIGURATION_TAG);
+                    int count = configuration == null ? 0 : configuration.getChildren().size();
+                    info = new Alert(Alert.AlertType.WARNING,
+                            i18n.t("editor.decoderImportSuccess", count, vehicle.getName())
+                                    + "\n\n" + i18n.t("editor.decoderAddressWarning"));
+                } else if (result == DecoderTemplateSupport.Result.PROTOCOL_BLOCKED) {
+                    info = new Alert(Alert.AlertType.ERROR, i18n.t("editor.decoderProtocolBlocked",
+                            vehicle.getName(), DecoderProtocol.displayName(DecoderProtocol.read(vehicle))));
+                } else {
+                    info = new Alert(Alert.AlertType.ERROR, i18n.t("editor.importErrorTitle"));
+                }
+                info.initOwner(stage);
+                info.setHeaderText(null);
+                info.setTitle(i18n.t("vehicle.fieldTemplate"));
+                info.showAndWait();
             }
             applyUid(vehicle, uidField.getText() == null ? "" : uidField.getText().trim());
             applyInterface(vehicle,
@@ -343,18 +469,29 @@ public final class VehicleFieldsDialog {
     }
 
     /**
-     * Schreibt {@code <decoder>} und {@code <speed-control>} komplett neu -
-     * nachgebildet nach {@link SystemsObject#applyLocomotiveProtocol}, hier
-     * direkt auf dem rohen {@code XmlNode} statt ueber die Systeme-Huelle,
-     * damit dieselbe Logik auch fuer beliebige, bereits in einer iTrain-Datei
-     * vorhandene Fahrzeuge greift. Alles andere (Name, Interface, UID,
-     * Funktionen) bleibt erhalten - die UID wird nach diesem Aufruf separat
-     * neu gesetzt (siehe {@link #applyUid}), weil hier alle Decoder-Attribute
-     * geloescht werden.
+     * Setzt den gewaehlten Decoder-Typ: die Attribute von {@code <decoder>}
+     * werden genau so geschrieben, wie iTrain sie fuer diesen Typ speichert
+     * (siehe {@link #DECODER_VARIANTS}); die UID wird danach separat gesetzt
+     * ({@link #applyUid}). Aendert sich die Fahrstufenzahl, wird eine
+     * vorhandene Fahrstufentabelle ({@code <speed-control>}) entfernt - sie
+     * passt dann nicht mehr; iTrain legt ohne sie selbst eine an (in von
+     * iTrain gespeicherten Dateien fehlt sie oft).
      */
-    private static void applyDecoderProtocol(XmlNode vehicle, String protocolCode) {
-        LocomotiveXmlFactory.LocoInfo info = LocomotiveXmlFactory.parseLocoType(protocolCode);
+    private static void applyDecoderProtocol(XmlNode vehicle, String label) {
+        DecoderVariant variant = null;
+        for (DecoderVariant candidate : DECODER_VARIANTS) {
+            if (candidate.label().equals(label)) {
+                variant = candidate;
+            }
+        }
+        if (variant == null) {
+            return;
+        }
         XmlNode decoder = vehicle.findChild("decoder");
+        if (decoder != null && variant.matches(decoder)) {
+            return;
+        }
+        int oldSteps = decoder == null ? -1 : parseIntOrDefault(decoder.getAttribute("steps"), -1);
         if (decoder == null) {
             decoder = new XmlNode("decoder");
             XmlNode description = vehicle.findChild("description");
@@ -365,55 +502,70 @@ public final class VehicleFieldsDialog {
             vehicle.getChildren().add(idx, decoder);
         }
         decoder.getAttributes().clear();
-        decoder.setAttribute("protocol", info.decoderProtocol());
-        decoder.setAttribute("steps", String.valueOf(info.steps()));
-        if (info.extended()) {
-            decoder.setAttribute("extended", "true");
+        decoder.setAttribute("protocol", variant.protocol());
+        decoder.setAttribute("steps", String.valueOf(variant.steps()));
+        for (int i = 0; i < variant.flags().length; i += 2) {
+            decoder.setAttribute(variant.flags()[i], variant.flags()[i + 1]);
         }
-        XmlNode speedControl = vehicle.findChild("speed-control");
-        if (speedControl == null) {
-            speedControl = new XmlNode("speed-control");
-            vehicle.getChildren().add(speedControl);
-        }
-        speedControl.getChildren().clear();
-        int count = info.steps() + 1;
-        speedControl.setAttribute("count", String.valueOf(count));
-        speedControl.setAttribute("unit", "km_h");
-        for (int step = 1; step <= info.steps(); step++) {
-            XmlNode speed = new XmlNode("speed");
-            speed.setAttribute("step", String.valueOf(step));
-            speed.setAttribute("value", SystemsObject.formatNumber(100.0 * step / info.steps()));
-            speedControl.getChildren().add(speed);
+        if (oldSteps != variant.steps()) {
+            XmlNode speedControl = vehicle.findChild("speed-control");
+            if (speedControl != null) {
+                vehicle.getChildren().remove(speedControl);
+            }
         }
     }
 
-    /**
-     * Erkennt, ob ein vorhandener {@code <decoder>}-Knoten genau einer der
-     * vier unterstuetzten Kombinationen entspricht (siehe
-     * {@link LocomotiveXmlFactory#parseLocoType}) - liefert {@code null} bei
-     * jedem anderen oder fehlenden Decoder, damit dieser NIE ungefragt
-     * ueberschrieben wird.
-     */
+    /** Liefert den Anzeigenamen des Decoder-Typs, oder null bei unbekannter Kombination. */
     private static String detectProtocolCode(XmlNode decoder) {
         if (decoder == null) {
             return null;
         }
-        String protocol = nz(decoder.getAttribute("protocol")).toLowerCase(Locale.ROOT);
-        int steps = parseIntOrDefault(decoder.getAttribute("steps"), -1);
-        boolean extended = "true".equals(decoder.getAttribute("extended"));
-        if ("dcc".equals(protocol) && steps == 126 && extended) {
-            return "DCC128";
-        }
-        if ("dcc".equals(protocol) && steps == 28) {
-            return "DCC28";
-        }
-        if ("dcc".equals(protocol) && steps == 14) {
-            return "DCC14";
-        }
-        if (("selectrix".equals(protocol) || "sx".equals(protocol)) && steps == 31) {
-            return "SX32";
+        for (DecoderVariant variant : DECODER_VARIANTS) {
+            if (variant.matches(decoder)) {
+                return variant.label();
+            }
         }
         return null;
+    }
+
+    /** Name des Decoder-Typs wie in iTrain, oder null - auch fuer die Tabellenspalte "Decoder". */
+    static String decoderTypeLabel(XmlNode decoder) {
+        return detectProtocolCode(decoder);
+    }
+
+    /** Zelle der Loktyp-Auswahl: farbiger Kennbuchstabe plus uebersetzter Name. */
+    private static final class LocoTypeCell extends javafx.scene.control.ListCell<String> {
+        private final I18n i18n;
+
+        LocoTypeCell(I18n i18n) {
+            this.i18n = i18n;
+        }
+
+        @Override
+        protected void updateItem(String value, boolean empty) {
+            super.updateItem(value, empty);
+            if (empty || value == null) {
+                setText(null);
+                setGraphic(null);
+                return;
+            }
+            LocoType type = null;
+            for (LocoType candidate : LOCO_TYPES) {
+                if (candidate.xml().equals(value)) {
+                    type = candidate;
+                }
+            }
+            if (type == null) {
+                setText(value);
+                setGraphic(null);
+                return;
+            }
+            Label letter = new Label(type.letter());
+            letter.setMinWidth(14);
+            letter.setStyle("-fx-font-weight: bold; -fx-text-fill: " + type.color() + ";");
+            setGraphic(letter);
+            setText(i18n.t(type.key()));
+        }
     }
 
     private static int parseIntOrDefault(String text, int fallback) {

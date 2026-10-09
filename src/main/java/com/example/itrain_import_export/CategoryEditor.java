@@ -178,6 +178,12 @@ public class CategoryEditor {
     private XmlNode categoryNode;
     private XmlNode selectedTreeNode;
     private int lastClickedIndex = -1;
+    /**
+     * Decoder-Fenster: beim Auswaehlen eines Fahrzeugs springt der
+     * Daten-Explorer gleich auf dessen {@code configuration}-Knoten (farblich
+     * hervorgehoben, mit Fokus) - siehe {@link #setFocusConfiguration}.
+     */
+    private boolean focusConfiguration;
 
     public CategoryEditor(String categoryName, XmlNode controlItemsNode, Runnable onModified,
                            Runnable onStructuralChange, Runnable beforeChange, IntSupplier nextImportSuffix) {
@@ -477,6 +483,21 @@ public class CategoryEditor {
         entryTable.getColumns().add(typeColumn);
         entryTable.getColumns().add(nameColumn);
         entryTable.getColumns().add(descColumn);
+        // Lokomotiven/Wagen: zusaetzlich "Decoder" (Protokoll) und
+        // "Decoder-Vorlage" (erkannte Vorlage bzw. Anzahl eigener CVs, siehe
+        // DecoderTemplateSupport). Zugewiesen wird im Bearbeitungsfenster.
+        if ("locomotives".equals(categoryName) || "wagons".equals(categoryName)) {
+            TableColumn<XmlNode, String> decoderColumn = new TableColumn<>(i18n.t("vehicle.columnDecoder"));
+            decoderColumn.setCellValueFactory(data ->
+                    new ReadOnlyStringWrapper(DecoderTemplateSupport.decoderColumnText(data.getValue())));
+            decoderColumn.setPrefWidth(90);
+            TableColumn<XmlNode, String> templateColumn = new TableColumn<>(i18n.t("vehicle.columnTemplate"));
+            templateColumn.setCellValueFactory(data ->
+                    new ReadOnlyStringWrapper(DecoderTemplateSupport.templateColumnText(data.getValue(), i18n)));
+            templateColumn.setPrefWidth(200);
+            entryTable.getColumns().add(entryTable.getColumns().indexOf(descColumn), decoderColumn);
+            entryTable.getColumns().add(entryTable.getColumns().indexOf(descColumn), templateColumn);
+        }
         // Ohne Resize-Policy behalten die Spalten ihre feste Breite, und rechts
         // neben der letzten Spalte bleibt ein leerer Rest der Tabelle stehen
         // (sieht aus wie eine dritte, namenlose Spalte). Mit dieser Policy
@@ -486,7 +507,12 @@ public class CategoryEditor {
         bindEntryItems(categoryNode != null ? categoryNode.getChildren() : FXCollections.observableArrayList());
         entryTable.setPlaceholder(new Label(i18n.t("editor.noEntries")));
 
-        entryTable.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> showDetail(newV));
+        entryTable.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> {
+            showDetail(newV);
+            if (focusConfiguration) {
+                focusConfigurationNode(newV);
+            }
+        });
 
         ContextMenu rowContextMenu = new ContextMenu();
         MenuItem exportItem = new MenuItem(i18n.t("editor.export"));
@@ -677,6 +703,12 @@ public class CategoryEditor {
                 cancelButton, continueButton);
         confirm.setTitle(i18n.t("editor.exportConfirmTitle"));
         confirm.setHeaderText(null);
+        // Ohne feste Breite/Hoehe schneidet JavaFX den dreizeiligen Text ab
+        // bzw. bricht die dritte Zeile zusaetzlich um (vierte Zeile) - siehe
+        // Meldung des Anwenders mit Screenshot. 640px reicht auch fuer die
+        // laengste Uebersetzung der dritten Zeile (Portugiesisch, ~81 Zeichen).
+        confirm.getDialogPane().setPrefWidth(640);
+        confirm.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
         Optional<ButtonType> confirmResult = confirm.showAndWait();
         if (confirmResult.isEmpty() || confirmResult.get() != continueButton) {
             return;
@@ -1701,6 +1733,41 @@ public class CategoryEditor {
         BorderPane pane = new BorderPane(detailSplit);
         pane.setPadding(new Insets(0, 0, 0, 8));
         return pane;
+    }
+
+    /** Schaltet das Springen auf den configuration-Knoten ein (Decoder-Fenster). */
+    public void setFocusConfiguration(boolean focusConfiguration) {
+        this.focusConfiguration = focusConfiguration && supportsDecoderConfiguration();
+    }
+
+    /**
+     * Waehlt das erste Fahrzeug aus, falls noch keines markiert ist - nach
+     * dem Laden einer Datei im Decoder-Fenster; ueber den Auswahl-Beobachter
+     * landet der Fokus dann auf dessen configuration-Knoten.
+     */
+    public void selectFirstEntry() {
+        if (entryTable.getSelectionModel().getSelectedItem() == null && !entryTable.getItems().isEmpty()) {
+            entryTable.getSelectionModel().select(0);
+        }
+    }
+
+    /** Markiert im Daten-Explorer den configuration-Knoten des Fahrzeugs und gibt dem Baum den Fokus. */
+    private void focusConfigurationNode(XmlNode entry) {
+        if (entry == null) {
+            return;
+        }
+        XmlNode configuration = entry.findChild(DecoderTemplate.CONFIGURATION_TAG);
+        if (configuration == null) {
+            return;
+        }
+        selectInTree(configuration);
+        int index = detailTree.getSelectionModel().getSelectedIndex();
+        javafx.application.Platform.runLater(() -> {
+            if (index >= 0) {
+                detailTree.scrollTo(index);
+            }
+            detailTree.requestFocus();
+        });
     }
 
     private void showDetail(XmlNode entry) {

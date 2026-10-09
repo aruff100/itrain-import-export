@@ -78,6 +78,13 @@ public final class SystemsObjectDialog {
         TextField nameField = new TextField(object.getName());
         TextField descriptionField = new TextField(object.getDescription());
         addRow(grid, row, i18n.t("systems.fieldName"), nameField);
+        if (object.isMatched() && !object.isInterface()) {
+            // Einem vorhandenen iTrain-Eintrag zugeordnet: der Name muss der
+            // iTrain-Name bleiben, sonst erkennt der Import ihn nicht wieder
+            // (und Verweise anderer Eintraege, z.B. Bloecke, liefen ins Leere).
+            nameField.setDisable(true);
+            nameField.setTooltip(new javafx.scene.control.Tooltip(i18n.t("systems.nameLockedMatched")));
+        }
         addRow(grid, row, i18n.t("systems.fieldDescription"), descriptionField);
 
         Runnable apply;

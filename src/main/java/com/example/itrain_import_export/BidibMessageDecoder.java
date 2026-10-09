@@ -40,16 +40,98 @@ public final class BidibMessageDecoder {
         if (data == null || data.length == 0) {
             return "";
         }
+        // Serielles BiDiB (USB, iTrain-Weiterleitung "seriell ueber TCP"):
+        // Rahmen mit 0xFE begrenzt, 0xFD als Escape, CRC als letztes Byte.
+        // Erst auspacken, dann wie netBiDiB lesen.
+        // (Endet ein Paket nur auf 0xFE, kann das auch ein Datenbyte sein -
+        // dann erst unten, wenn die netBiDiB-Lesart nicht aufgeht.)
+        if ((data[0] & 0xFF) == 0xFE) {
+            return decodeSerial(data);
+        }
+        String plain = decodeMessages(data);
+        if (plain != null) {
+            return plain;
+        }
+        // Empfangsseite seriell: bereits ohne 0xFE, aber mit CRC am Ende.
+        if (data.length > 1) {
+            String withoutCrc = decodeMessages(java.util.Arrays.copyOf(data, data.length - 1));
+            if (withoutCrc != null) {
+                return withoutCrc + crcNote(java.util.Arrays.copyOf(data, data.length - 1), data[data.length - 1]);
+            }
+        }
+        if ((data[data.length - 1] & 0xFF) == 0xFE) {
+            return decodeSerial(data);
+        }
+        return toHex(data);
+    }
+
+    /** Ein oder mehrere 0xFE-Rahmen: je Rahmen auspacken, CRC pruefen, Nachrichten lesen. */
+    private static String decodeSerial(byte[] data) {
+        List<String> frames = new ArrayList<>();
+        java.io.ByteArrayOutputStream frame = new java.io.ByteArrayOutputStream();
+        boolean escape = false;
+        for (byte b : data) {
+            int v = b & 0xFF;
+            if (v == 0xFE) {
+                if (frame.size() > 0) {
+                    frames.add(decodeFrame(frame.toByteArray()));
+                    frame.reset();
+                }
+                escape = false;
+                continue;
+            }
+            if (v == 0xFD) {
+                escape = true;
+                continue;
+            }
+            frame.write(escape ? (v ^ 0x20) : v);
+            escape = false;
+        }
+        if (frame.size() > 0) {
+            frames.add(decodeFrame(frame.toByteArray()));
+        }
+        if (frames.isEmpty()) {
+            return "MAGIC (Rahmenstart 0xFE)";
+        }
+        return String.join("  ||  ", frames);
+    }
+
+    private static String decodeFrame(byte[] frame) {
+        if (frame.length < 2) {
+            return toHex(frame);
+        }
+        byte[] body = java.util.Arrays.copyOf(frame, frame.length - 1);
+        String messages = decodeMessages(body);
+        return (messages != null ? messages : toHex(body)) + crcNote(body, frame[frame.length - 1]);
+    }
+
+    /** "(CRC ok)" bzw. "(CRC falsch: xx)" - BiDiB-CRC8, Polynom 0x8C (Dallas/Maxim), siehe bidib.org. */
+    private static String crcNote(byte[] body, byte crc) {
+        int c = 0;
+        for (byte b : body) {
+            c ^= b & 0xFF;
+            for (int i = 0; i < 8; i++) {
+                c = (c & 1) != 0 ? (c >>> 1) ^ 0x8C : c >>> 1;
+            }
+        }
+        return c == (crc & 0xFF) ? "  (CRC ok)" : String.format("  (CRC %02X, erwartet %02X)", crc & 0xFF, c);
+    }
+
+    /** Nachrichtenfolge ohne Rahmung; null, wenn die Laengen nicht aufgehen. */
+    private static String decodeMessages(byte[] data) {
+        if (data.length == 0) {
+            return null;
+        }
         List<String> parts = new ArrayList<>();
         int offset = 0;
         while (offset < data.length) {
             int len = data[offset] & 0xFF;
             if (len < 3 || offset + 1 + len > data.length) {
-                return toHex(data);
+                return null;
             }
             String part = decodeMessage(data, offset + 1, len);
             if (part == null) {
-                return toHex(data);
+                return null;
             }
             parts.add(part);
             offset += 1 + len;
