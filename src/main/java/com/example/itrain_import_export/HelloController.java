@@ -109,6 +109,10 @@ public class HelloController implements DocumentSession.Host {
     @FXML
     private MenuItem functionsSystemsMenuItem;
 
+    /** Seit 13.10.2026: verwaiste und "~"-Einträge aufräumen, siehe {@link OrphanCleanup}. */
+    @FXML
+    private MenuItem functionsCleanupMenuItem;
+
     @FXML
     private Menu helpMenu;
 
@@ -156,6 +160,10 @@ public class HelloController implements DocumentSession.Host {
     @FXML
     private Button importCategoryToolButton;
 
+    /** Gegenstück zu {@link #functionsCleanupMenuItem} im Ribbon. */
+    @FXML
+    private Button cleanupToolButton;
+
     /**
      * Die beiden Knöpfe rechts im Ribbon, abgesetzt durch einen breiten
      * Trennstrich: Sie öffnen die Zusatzfenster "Decoder" und "Systeme"
@@ -199,6 +207,9 @@ public class HelloController implements DocumentSession.Host {
     /** Blassgelb für "Decoder erfassen" - hebt sich von den vier übrigen ab. */
     static final String STYLE_DECODER_CAPTURE =
             "-fx-background-color: #faeec2; -fx-text-fill: #2b2b2b;";
+    /** Blassorange für "Verwaiste Einträge" (seit 13.10.2026). */
+    static final String STYLE_CLEANUP =
+            "-fx-background-color: #ffe0b2; -fx-text-fill: #2b2b2b;";
     // Die beiden Fensterknöpfe "Decoder" und "Systeme" bekommen bewusst KEINE
     // Pastellfarbe: Sie führen keine Funktion aus, sondern öffnen ein
     // Zusatzfenster, und sollen deshalb wie gewöhnliche Knöpfe aussehen.
@@ -288,6 +299,7 @@ public class HelloController implements DocumentSession.Host {
 
         exportSelectedToolButton.setStyle(STYLE_EXPORT_SELECTED);
         importCategoryToolButton.setStyle(STYLE_IMPORT_CATEGORY);
+        cleanupToolButton.setStyle(STYLE_CLEANUP);
 
         initStartImage();
 
@@ -387,6 +399,7 @@ public class HelloController implements DocumentSession.Host {
         functionsMenu.setText(i18n.t("menu.functions"));
         functionsDecoderMenuItem.setText(i18n.t("menu.programPart", i18n.t("window.decoder")));
         functionsSystemsMenuItem.setText(i18n.t("menu.programPart", i18n.t("window.systems")));
+        functionsCleanupMenuItem.setText(i18n.t("cleanup.title"));
         helpMenu.setText(i18n.t("menu.help"));
         helpMenuItem.setText(i18n.t("menu.helpItem"));
         manualMenuItem.setText(i18n.t("menu.manual"));
@@ -403,6 +416,8 @@ public class HelloController implements DocumentSession.Host {
         // Symbol), damit ohne Erklärung klar ist, was sie tun.
         exportSelectedToolButton.setText(i18n.t("editor.exportSelected"));
         importCategoryToolButton.setText(i18n.t("editor.import"));
+        cleanupToolButton.setText(i18n.t("cleanup.button"));
+        cleanupToolButton.setTooltip(new Tooltip(i18n.t("cleanup.tooltip")));
         decoderWindowButton.setText(i18n.t("window.decoder"));
         decoderWindowButton.setTooltip(new Tooltip(i18n.t("window.decoderTooltip")));
         systemsWindowButton.setText(i18n.t("window.systems"));
@@ -596,6 +611,13 @@ public class HelloController implements DocumentSession.Host {
         importCategoryToolButton.setDisable(!hasCategory);
         editExportSelectedMenuItem.setDisable(!hasCategory);
         editImportCategoryMenuItem.setDisable(!hasCategory);
+        cleanupToolButton.setDisable(!session.hasDocument());
+        functionsCleanupMenuItem.setDisable(!session.hasDocument());
+    }
+
+    @FXML
+    private void onCleanupOrphans() {
+        session.cleanupOrphans();
     }
 
     @FXML

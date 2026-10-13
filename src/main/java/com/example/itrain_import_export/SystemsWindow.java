@@ -101,7 +101,44 @@ public final class SystemsWindow {
     /** Zeilenhoehe der Tabellen - so hoch, dass die Auswahlbox "Zuordnung in iTrain" lesbar hineinpasst. */
     private static final double ROW_HEIGHT = 32;
 
+    /**
+     * Seit 13.10.2026 mehrere Fenster: das Hauptfenster "Systeme" nimmt die
+     * erste Verbindung auf, jede weitere Verbindung bekommt ein eigenes
+     * Fenster mit eigenen Tabellen und eigener Statusleiste (Andre). Bedient
+     * werden kann alles aus jedem Fenster.
+     */
     private static SystemsWindow open;
+    private static final List<SystemsWindow> WINDOWS = new ArrayList<>();
+    /** Fenster, das zuletzt einen Knotenbaum geoeffnet hat - dorthin gehen die uebernommenen Objekte. */
+    private static SystemsWindow treeTarget;
+    private static boolean globalListenersInstalled;
+
+    /**
+     * Eine Verbindung, die einem Fenster gehoert: BiDiB (netBiDiB/USB), ECoS
+     * oder mc2 ueber CGI (nur der Host). Dieselbe mc2 ueber netBiDiB und
+     * ueber CGI landet im selben Fenster (gleicher Host).
+     */
+    private record Link(BidibConnection bidib, EcosConnection ecos, String cgiHost) {
+        String host() {
+            return bidib != null ? bidib.getHost() : ecos != null ? ecos.getHost() : cgiHost;
+        }
+
+        String name() {
+            if (bidib != null) {
+                return bidib.getName();
+            }
+            if (ecos != null) {
+                return ecos.getName();
+            }
+            return I18n.getInstance().t("mc2.cgiStatus", cgiHost);
+        }
+    }
+
+    /** Diesem Fenster zugeordnete Verbindungen (leer = keine). */
+    private final List<Link> links = new ArrayList<>();
+    /** Letzte Uebertragung in eine Zentrale (fuer Bearbeiten -> Rueckgaengig), oder null. */
+    private CentralUndo lastTransfer;
+    private final boolean isMain;
 
     private final I18n i18n = I18n.getInstance();
     private final AppSettings settings = AppSettings.getInstance();
@@ -115,15 +152,27 @@ public final class SystemsWindow {
     private final Button readButton = new Button();
     /**
      * Auswahl des Digitalsystems fuer "Verbindung" und "Auslesen"
-     * (Klappliste mit Dreieck): erst BiDiB oder ECoS waehlen, dann den Knopf
+     * (Klappliste mit Dreieck): erst BiDiB, ECoS oder Tams mc2 waehlen, dann den Knopf
      * druecken.
      */
     private final javafx.scene.control.ComboBox<String> systemBox = new javafx.scene.control.ComboBox<>();
     private static final String SYSTEM_BIDIB = "BiDiB";
     private static final String SYSTEM_ECOS = "ESU ECoS";
+    /** Seit 13.10.2026: Verbindung ueber CGI (wie Menue Systeme / mc2), Auslesen = Lokomotiven der mc2. */
+    private static final String SYSTEM_MC2 = "Tams mc2";
     private final Button rawLogButton = new Button();
     /** Nur sichtbar, solange mindestens eine verbundene mc2 per FTP lesbar ist (siehe BidibConnection#isMc2LocoAvailable). */
     private final Button mc2LocoButton = new Button();
+    /**
+     * "Lokomotiven zur mc2 uebertragen" (seit 13.10.2026): wie
+     * {@link #mc2LocoButton} nur bei lesbarer mc2, zusaetzlich nur bei
+     * geladener iTrain-Datei - siehe {@link #writeMc2Locos()}.
+     */
+    private final Button mc2WriteButton = new Button();
+    /** "ECoS Lokomotiven auslesen" (seit 13.10.2026): nur sichtbar bei bestehender ECoS-Verbindung. */
+    private final Button ecosLocoButton = new Button();
+    /** "Lokomotiven zur ECoS uebertragen" (seit 13.10.2026): ECoS-Verbindung und geladene iTrain-Datei. */
+    private final Button ecosWriteButton = new Button();
     private final Button exportButton = new Button();
     private final Button exportAllButton = new Button();
     private final Button clearTablesButton = new Button();
@@ -285,6 +334,10 @@ public final class SystemsWindow {
     private final MenuItem bidibReadMenuItem = new MenuItem();
     private final MenuItem bidibLoadFileMenuItem = new MenuItem();
     private final Menu bidibRawLogMenu = new Menu();
+    /** Seit 13.10.2026: mc2 ueber cgi (unabhaengig von netBiDiB), siehe {@link Mc2CgiConnection}. */
+    private final Menu mc2Menu = new Menu();
+    private final MenuItem mc2CgiConnectMenuItem = new MenuItem();
+    private final MenuItem mc2CgiDisconnectMenuItem = new MenuItem();
     private final Menu esuMenu = new Menu();
     private final MenuItem esuConnectMenuItem = new MenuItem();
     private final MenuItem esuReadMenuItem = new MenuItem();
@@ -304,21 +357,100 @@ public final class SystemsWindow {
     private final Menu helpMenu = new Menu();
     private final MenuItem helpMenuItem = new MenuItem();
 
+    /** Oeffnet das Hauptfenster "Systeme" oder holt es nach vorn. */
     public static void show(Stage mainStage) {
+        installGlobalListeners();
         if (open != null && open.stage.isShowing()) {
             open.stage.toFront();
             open.stage.requestFocus();
             return;
         }
-        open = new SystemsWindow();
+        open = new SystemsWindow(true);
+        WINDOWS.add(open);
         open.stage.show();
+        assignConnections();
     }
 
-    /** Beim Beenden des Programms: ohne Rückfrage schließen (siehe HelloApplication). */
+    /** Beim Beenden des Programms: alle Systeme-Fenster ohne Rückfrage schließen (siehe HelloApplication). */
     public static void closeIfOpen() {
-        if (open != null && open.stage.isShowing()) {
-            open.stage.setOnCloseRequest(null);
-            open.stage.close();
+        for (SystemsWindow window : new ArrayList<>(WINDOWS)) {
+            if (window.stage.isShowing()) {
+                window.stage.setOnCloseRequest(null);
+                window.stage.close();
+            }
+        }
+    }
+
+    /** Einmalig: auf neue/geschlossene Verbindungen aller Systeme hoeren. */
+    private static void installGlobalListeners() {
+        if (globalListenersInstalled) {
+            return;
+        }
+        globalListenersInstalled = true;
+        BidibConnectionManager.getInstance().getConnections().addListener(
+                (javafx.collections.ListChangeListener<BidibConnection>) change -> assignConnections());
+        EcosConnection.getConnections().addListener(
+                (javafx.collections.ListChangeListener<EcosConnection>) change -> assignConnections());
+        Mc2CgiConnection.getInstance().hostProperty().addListener((obs, old, value) -> assignConnections());
+    }
+
+    /** Alle derzeit offenen Verbindungen als Links. */
+    private static List<Link> currentLinks() {
+        List<Link> result = new ArrayList<>();
+        for (BidibConnection connection : BidibConnectionManager.getInstance().getConnections()) {
+            result.add(new Link(connection, null, null));
+        }
+        for (EcosConnection connection : EcosConnection.getConnections()) {
+            result.add(new Link(null, connection, null));
+        }
+        Mc2CgiConnection cgi = Mc2CgiConnection.getInstance();
+        if (cgi.isConnected()) {
+            result.add(new Link(null, null, cgi.getHost()));
+        }
+        return result;
+    }
+
+    /**
+     * Verbindungen auf die Fenster verteilen (Andre, 13.10.2026): die erste
+     * ins Hauptfenster, jede weitere in ein eigenes Fenster - ausser sie
+     * gehoert zu einer Zentrale, die schon ein Fenster hat (mc2 ueber
+     * netBiDiB und CGI). Geschlossene Verbindungen verschwinden aus ihrem
+     * Fenster; das Fenster bleibt mit seinen Tabellen offen.
+     */
+    private static void assignConnections() {
+        WINDOWS.removeIf(window -> !window.stage.isShowing());
+        if (WINDOWS.isEmpty()) {
+            return;
+        }
+        List<Link> current = currentLinks();
+        for (SystemsWindow window : WINDOWS) {
+            window.links.removeIf(link -> !current.contains(link));
+        }
+        for (Link link : current) {
+            if (WINDOWS.stream().anyMatch(w -> w.links.contains(link))) {
+                continue;
+            }
+            SystemsWindow target = null;
+            for (SystemsWindow window : WINDOWS) {
+                if (link.host() != null && window.links.stream().anyMatch(l -> link.host().equals(l.host()))) {
+                    target = window;
+                    break;
+                }
+            }
+            if (target == null && open != null && open.stage.isShowing() && open.links.isEmpty()) {
+                target = open;
+            }
+            if (target == null) {
+                target = new SystemsWindow(false);
+                WINDOWS.add(target);
+                target.links.add(link);
+                target.stage.show();
+                continue;
+            }
+            target.links.add(link);
+        }
+        for (SystemsWindow window : WINDOWS) {
+            window.rebuildBidibUi();
         }
     }
 
@@ -329,9 +461,18 @@ public final class SystemsWindow {
      * ersetzt, alles andere angehängt (doppelte iTrain-Kennungen übersprungen).
      */
     static void acceptObjects(BidibSystemFile source, List<SystemsObject> newObjects) {
+        if (treeTarget != null && treeTarget.stage.isShowing()) {
+            treeTarget.acceptObjectsHere(source, newObjects);
+            return;
+        }
         if (open == null || !open.stage.isShowing()) {
             show(HelloController.getMainStage());
         }
+        open.acceptObjectsHere(source, newObjects);
+    }
+
+    private void acceptObjectsHere(BidibSystemFile source, List<SystemsObject> newObjects) {
+        SystemsWindow open = this;
         open.stage.toFront();
         if (open.currentFile == null) {
             open.currentFile = source;
@@ -367,8 +508,8 @@ public final class SystemsWindow {
 
     /** Vom Knotenbaum nach dem Speichern: Öffnen-Knopf ggf. freigeben. */
     static void systemFilesChanged() {
-        if (open != null) {
-            open.updateState();
+        for (SystemsWindow window : WINDOWS) {
+            window.updateState();
         }
     }
 
@@ -393,7 +534,8 @@ public final class SystemsWindow {
         return id != null ? id.getTextContent() : null;
     }
 
-    private SystemsWindow() {
+    private SystemsWindow(boolean isMain) {
+        this.isMain = isMain;
         // --- Menüzeile -------------------------------------------------
         openMenuItem.setGraphic(HelloController.loadIcon("icons/open-icon.png", 16));
         saveMenuItem.setGraphic(HelloController.loadIcon("icons/save-icon.png", 16));
@@ -421,8 +563,6 @@ public final class SystemsWindow {
         esuConnectMenuItem.setOnAction(e -> EcosConnectionDialog.show(stage));
         esuReadMenuItem.setOnAction(e -> readEcos());
         esuMenu.getItems().addAll(esuConnectMenuItem, esuReadMenuItem);
-        EcosConnection.getConnections().addListener(
-                (javafx.collections.ListChangeListener<EcosConnection>) change -> rebuildBidibUi());
         for (Menu menu : placeholderSystemMenus) {
             MenuItem connect = new MenuItem();
             MenuItem read = new MenuItem();
@@ -431,11 +571,16 @@ public final class SystemsWindow {
             menu.getItems().addAll(connect, read);
             menu.setDisable(true);
         }
-        systemsMenu.getItems().addAll(bidibMenu, esuMenu, maerklinMenu, z21Menu, lokstoreMenu, zimoMenu);
+        mc2CgiConnectMenuItem.setOnAction(e -> Mc2CgiConnection.showConnectDialog(stage));
+        mc2CgiDisconnectMenuItem.setOnAction(e -> Mc2CgiConnection.getInstance().disconnect());
+        mc2Menu.getItems().addAll(mc2CgiConnectMenuItem, mc2CgiDisconnectMenuItem);
+        systemsMenu.getItems().addAll(bidibMenu, mc2Menu, esuMenu, maerklinMenu, z21Menu, lokstoreMenu, zimoMenu);
         helpMenu.getItems().add(helpMenuItem);
         helpMenuItem.setOnAction(e -> HelpDialog.showSystems(stage));
 
-        editUndoMenuItem.setDisable(true);
+        // Rueckgaengig: die letzte Uebertragung in eine Zentrale (mc2/ECoS)
+        // aus der Sicherung auf dem PC zuruecknehmen.
+        editUndoMenuItem.setOnAction(e -> undoTransfer());
         editRedoMenuItem.setDisable(true);
         editRowMenuItem.setOnAction(e -> editSelected(null));
         editExportMenuItem.setOnAction(e -> onExportSelected());
@@ -460,7 +605,7 @@ public final class SystemsWindow {
         redoToolButton.setGraphic(HelloController.loadIcon("icons/redo-icon.png", 22));
         openToolButton.setOnAction(e -> onOpenSystemFile());
         saveToolButton.setOnAction(e -> onSaveSystemFile());
-        undoToolButton.setDisable(true);
+        undoToolButton.setOnAction(e -> undoTransfer());
         redoToolButton.setDisable(true);
 
         connectButton.setStyle(STYLE_CONNECT);
@@ -472,22 +617,43 @@ public final class SystemsWindow {
         mc2LocoButton.setOnAction(e -> readMc2Locos());
         mc2LocoButton.setVisible(false);
         mc2LocoButton.setManaged(false);
+        mc2WriteButton.setStyle(STYLE_MC2);
+        mc2WriteButton.setOnAction(e -> writeMc2Locos());
+        mc2WriteButton.setVisible(false);
+        mc2WriteButton.setManaged(false);
+        ecosLocoButton.setStyle(STYLE_MC2);
+        ecosLocoButton.setOnAction(e -> readEcosLocos());
+        ecosLocoButton.setVisible(false);
+        ecosLocoButton.setManaged(false);
+        ecosWriteButton.setStyle(STYLE_MC2);
+        ecosWriteButton.setOnAction(e -> writeEcosLocos());
+        ecosWriteButton.setVisible(false);
+        ecosWriteButton.setManaged(false);
         exportButton.setStyle(STYLE_EXPORT);
         exportAllButton.setStyle(STYLE_EXPORT_ALL);
         clearTablesButton.setStyle(STYLE_CLEAR);
-        systemBox.getItems().setAll(SYSTEM_BIDIB, SYSTEM_ECOS);
+        systemBox.getItems().setAll(SYSTEM_BIDIB, SYSTEM_ECOS, SYSTEM_MC2);
         systemBox.setValue(SYSTEM_BIDIB);
         systemBox.valueProperty().addListener((obs, old, value) -> updateState());
         connectButton.setOnAction(e -> {
             if (SYSTEM_ECOS.equals(systemBox.getValue())) {
                 EcosConnectionDialog.show(stage);
+            } else if (SYSTEM_MC2.equals(systemBox.getValue())) {
+                Mc2CgiConnection.showConnectDialog(stage);
             } else {
                 BidibConnectionDialog.show(stage);
             }
         });
+        // Auslesen (zweite Reihe): richtet sich nach der Verbindung DIESES
+        // Fensters - BiDiB: Knotenbaum, ECoS: Bestand, mc2 nur ueber CGI:
+        // Lokomotiven; ohne Verbindung der Knotenbaum der System-Datei.
         readButton.setOnAction(e -> {
-            if (SYSTEM_ECOS.equals(systemBox.getValue())) {
+            if (hasBidibLink()) {
+                openNodeTree();
+            } else if (!ecosLinks().isEmpty()) {
                 readEcos();
+            } else if (cgiHost() != null) {
+                readMc2Locos(new Mc2Target(i18n.t("mc2.cgiStatus", cgiHost()), cgiHost(), "mc2"));
             } else {
                 openNodeTree();
             }
@@ -500,17 +666,27 @@ public final class SystemsWindow {
         exportAllButton.setOnAction(e -> onExportAll());
         clearTablesButton.setOnAction(e -> clearTables());
 
+        // Zwei Reihen (Andre, 13.10.2026): oben nur Datei/Rueckgaengig,
+        // Verbindung und iTrain-Datei; darunter Auslesen, die Knoepfe der
+        // verbundenen Zentrale, Export und Tabellen leeren.
         Region gapLeft = new Region();
         gapLeft.setMinWidth(30);
         Region gapRight = new Region();
         gapRight.setMinWidth(10);
-        Region gapClear = new Region();
-        gapClear.setMinWidth(20);
+        Region gapItrain = new Region();
+        gapItrain.setMinWidth(20);
         ToolBar ribbon = new ToolBar(
                 openToolButton, saveToolButton, undoToolButton, redoToolButton,
                 gapLeft, new Separator(Orientation.VERTICAL), gapRight,
-                connectButton, readButton, systemBox, rawLogButton, mc2LocoButton, loadItrainButton, writeItrainButton,
-                exportButton, exportAllButton,
+                systemBox, connectButton,
+                gapItrain, new Separator(Orientation.VERTICAL), loadItrainButton, writeItrainButton);
+        Region gapExport = new Region();
+        gapExport.setMinWidth(20);
+        Region gapClear = new Region();
+        gapClear.setMinWidth(20);
+        ToolBar ribbon2 = new ToolBar(
+                readButton, rawLogButton, mc2LocoButton, mc2WriteButton, ecosLocoButton, ecosWriteButton,
+                gapExport, new Separator(Orientation.VERTICAL), exportButton, exportAllButton,
                 gapClear, clearTablesButton);
 
         // --- Abschnitte ------------------------------------------------
@@ -534,8 +710,6 @@ public final class SystemsWindow {
         fileLabel.setPadding(new Insets(4, 10, 4, 10));
         bidibStatusBox.setAlignment(Pos.CENTER_RIGHT);
         bidibStatusBox.setPadding(new Insets(4, 10, 4, 10));
-        BidibConnectionManager.getInstance().getConnections().addListener(
-                (javafx.collections.ListChangeListener<BidibConnection>) change -> rebuildBidibUi());
 
         BorderPane statusBar = new BorderPane();
         statusBar.setLeft(fileLabel);
@@ -548,7 +722,7 @@ public final class SystemsWindow {
         updateItrainFileLabel();
 
         BorderPane root = new BorderPane();
-        root.setTop(new VBox(menuBar, ribbon));
+        root.setTop(new VBox(menuBar, ribbon, ribbon2));
         // Startbild (Besetztmelder) wie die Dampflok im Hauptfenster: mittig,
         // mitwachsend, nur solange die Tabellen leer sind.
         javafx.scene.layout.StackPane center = new javafx.scene.layout.StackPane(scroll);
@@ -581,18 +755,34 @@ public final class SystemsWindow {
             if (mainSession != null) {
                 mainSession.removeDocumentListener(mainDocumentListener);
             }
+            WINDOWS.remove(this);
             if (open == this) {
                 open = null;
             }
+            if (treeTarget == this) {
+                treeTarget = null;
+            }
         });
         // Offene Verbindungen (netBiDiB und USB) halten Faeden der
-        // Bibliothek am Leben - beim Schliessen nachfragen und ALLE trennen.
+        // Bibliothek am Leben - beim Schliessen nachfragen und die
+        // Verbindungen DIESES Fensters trennen.
         stage.setOnCloseRequest(event -> {
             if (!confirmDisconnect()) {
                 event.consume();
             }
         });
-        WindowState.apply(stage, "systems", 1000, 520);
+        if (isMain) {
+            WindowState.apply(stage, "systems", 1000, 520);
+        } else {
+            WindowState.apply(stage, "systemsConnection", 1000, 520);
+            // Leicht versetzt zum Hauptfenster, damit man sieht, dass es zwei sind.
+            if (open != null && open.stage.isShowing()
+                    && Math.abs(stage.getX() - open.stage.getX()) < 20
+                    && Math.abs(stage.getY() - open.stage.getY()) < 20) {
+                stage.setX(open.stage.getX() + 40);
+                stage.setY(open.stage.getY() + 40);
+            }
+        }
         applyLanguage();
         rebuildBidibUi();
         updateState();
@@ -705,6 +895,23 @@ public final class SystemsWindow {
         typeColumn.setUserData("systems.colType");
         columns.add(typeColumn);
 
+        if (SystemsObject.CATEGORY_LOCOMOTIVES.equals(category)) {
+            // Seit 13.10.2026: Adresse, UID (nur Anzeige, mc2/DCC-A) und
+            // Laenge in mm (wie in iTrain).
+            TableColumn<SystemsObject, String> addressColumn =
+                    textColumn("systems.fieldAddress", SystemsObject::addressProperty, 70);
+            addressColumn.setMaxWidth(90);
+            columns.add(addressColumn);
+            TableColumn<SystemsObject, String> uidColumn =
+                    textColumn("vehicle.fieldUid", SystemsObject::uidProperty, 90);
+            uidColumn.setMaxWidth(110);
+            columns.add(uidColumn);
+            TableColumn<SystemsObject, String> locoLengthColumn =
+                    textColumn("systems.colLength", SystemsObject::lengthProperty, 80);
+            locoLengthColumn.setMaxWidth(100);
+            columns.add(locoLengthColumn);
+        }
+
         if (SystemsObject.CATEGORY_FEEDBACKS.equals(category)) {
             TableColumn<SystemsObject, String> lengthColumn =
                     textColumn("systems.colLength", SystemsObject::lengthProperty, 80);
@@ -752,7 +959,7 @@ public final class SystemsWindow {
     }
 
     private void applyLanguage() {
-        stage.setTitle(i18n.t("window.systemsTitle"));
+        updateTitle();
         fileMenu.setText(i18n.t("menu.file"));
         openMenuItem.setText(i18n.t("menu.open"));
         saveMenuItem.setText(i18n.t("systems.saveFile"));
@@ -772,6 +979,9 @@ public final class SystemsWindow {
         }
         systemsMenu.setText(i18n.t("window.systems"));
         bidibMenu.setText(i18n.t("menu.bidib"));
+        mc2Menu.setText(i18n.t("menu.mc2"));
+        mc2CgiConnectMenuItem.setText(i18n.t("mc2.cgiConnect"));
+        mc2CgiDisconnectMenuItem.setText(i18n.t("mc2.cgiDisconnect"));
         bidibConnectMenuItem.setText(i18n.t("systems.connect"));
         bidibReadMenuItem.setText(i18n.t("systems.read"));
         esuMenu.setText(i18n.t("systems.esu"));
@@ -782,6 +992,10 @@ public final class SystemsWindow {
         rawLogButton.setText(i18n.t("systems.rawLogButton"));
         rawLogButton.setTooltip(new Tooltip(i18n.t("systems.showRawLog")));
         mc2LocoButton.setText(i18n.t("mc2.readLocosButton"));
+        mc2WriteButton.setText(i18n.t("mc2.writeLocosButton"));
+        mc2WriteButton.setTooltip(new Tooltip(i18n.t("mc2.writeLocosTooltip")));
+        ecosLocoButton.setText(i18n.t("ecos.readLocosButton"));
+        ecosWriteButton.setText(i18n.t("central.writeTitle", "ECoS"));
         for (int i = 0; i < placeholderSystemMenus.length; i++) {
             Menu menu = placeholderSystemMenus[i];
             menu.setText(i18n.t(placeholderSystemKeys[i]));
@@ -858,9 +1072,9 @@ public final class SystemsWindow {
      * Zeile bearbeiten nur mit markierter Zeile.
      */
     private void updateState() {
-        boolean anyBidib = BidibConnectionManager.getInstance().hasConnections();
-        boolean anyEcos = !EcosConnection.getConnections().isEmpty();
-        boolean anyConnection = anyBidib || anyEcos;
+        // Nur die Verbindungen DIESES Fensters zaehlen (seit 13.10.2026).
+        boolean anyBidib = hasBidibLink();
+        boolean anyEcos = !ecosLinks().isEmpty();
         boolean hasFile = currentFile != null;
         boolean fileHasNodes = hasFile && !currentFile.getNodes().isEmpty();
         boolean anyObjects = !objects.isEmpty();
@@ -876,19 +1090,33 @@ public final class SystemsWindow {
         closeFileMenuItem.setDisable(!(hasFile || anyObjects));
         // Auslesen: mit Verbindung vom Geraet, sonst aus der geoeffneten
         // System-Datei (Knotenbaum ohne angeschlossene Anlage).
-        boolean ecosChosen = SYSTEM_ECOS.equals(systemBox.getValue());
-        readButton.setDisable(ecosChosen ? !anyEcos : !(anyBidib || fileHasNodes));
+        boolean cgiHere = cgiHost() != null;
+        readButton.setDisable(!(anyBidib || anyEcos || cgiHere || fileHasNodes));
         bidibReadMenuItem.setDisable(!(anyBidib || fileHasNodes));
-        // "mc2 Lokomotiven auslesen": nur sichtbar, solange mindestens eine
-        // verbundene mc2 per FTP lesbar ist (siehe BidibConnection.isMc2/
-        // isMc2LocoAvailable) - kommt erst nach, wenn der Hintergrund-Check
-        // durchgelaufen ist.
-        boolean anyMc2Loco = mc2LocoConnections().findFirst().isPresent();
+        // "mc2 Lokomotiven auslesen": nur sichtbar, solange die mc2 dieses
+        // Fensters lesbar ist (CGI-Verbindung, oder netBiDiB mit gepruefter
+        // mc2 - siehe BidibConnection.isMc2/isMc2LocoAvailable, kommt erst
+        // nach dem Hintergrund-Check).
+        mc2CgiDisconnectMenuItem.setDisable(!Mc2CgiConnection.getInstance().isConnected());
+        boolean anyMc2Loco = cgiHere || mc2LocoConnections().findFirst().isPresent();
         mc2LocoButton.setVisible(anyMc2Loco);
         mc2LocoButton.setManaged(anyMc2Loco);
+        boolean canWriteMc2 = anyMc2Loco && mainDocument() != null;
+        mc2WriteButton.setVisible(canWriteMc2);
+        mc2WriteButton.setManaged(canWriteMc2);
+        boolean anyEcosConnected = ecosLinks().stream().anyMatch(EcosConnection::isConnected);
+        ecosLocoButton.setVisible(anyEcosConnected);
+        ecosLocoButton.setManaged(anyEcosConnected);
+        boolean canWriteEcos = anyEcosConnected && mainDocument() != null;
+        ecosWriteButton.setVisible(canWriteEcos);
+        ecosWriteButton.setManaged(canWriteEcos);
+        editUndoMenuItem.setDisable(lastTransfer == null);
+        undoToolButton.setDisable(lastTransfer == null);
         esuReadMenuItem.setDisable(!anyEcos);
         bidibRawLogMenu.setDisable(!anyBidib);
-        rawLogButton.setDisable(!anyBidib);
+        // RX/TX gibt es nur bei BiDiB - als systemspezifischer Knopf nur dann sichtbar.
+        rawLogButton.setVisible(anyBidib);
+        rawLogButton.setManaged(anyBidib);
         editRowMenuItem.setDisable(!anySelected);
         editDeleteRowMenuItem.setDisable(!anySelected);
         exportButton.setDisable(!anyObjects);
@@ -1045,7 +1273,7 @@ public final class SystemsWindow {
         if (selected == null) {
             return;
         }
-        if (SystemsObjectDialog.show(stage, selected)) {
+        if (SystemsObjectDialog.show(stage, selected, matchDocument == null ? null : matchDocument.getRoot())) {
             for (Section s : sections) {
                 s.table.refresh();
             }
@@ -1235,7 +1463,15 @@ public final class SystemsWindow {
     private void onLoadItrainFile() {
         DocumentSession main = HelloController.getMainSession();
         if (main != null) {
-            main.openFileDialog();
+            // Eigenes Fenster als Besitzer und danach wieder nach vorn -
+            // sonst springt Windows nach dem Laden auf das Hauptfenster.
+            main.openFileDialog(stage);
+            stage.toFront();
+            stage.requestFocus();
+            javafx.application.Platform.runLater(() -> {
+                stage.toFront();
+                stage.requestFocus();
+            });
         }
     }
 
@@ -1525,39 +1761,95 @@ public final class SystemsWindow {
     // Verbindungen
     // ------------------------------------------------------------------
 
+    /** BiDiB-Verbindungen dieses Fensters. */
+    private List<BidibConnection> bidibLinks() {
+        List<BidibConnection> result = new ArrayList<>();
+        for (Link link : links) {
+            if (link.bidib() != null) {
+                result.add(link.bidib());
+            }
+        }
+        return result;
+    }
+
+    private boolean hasBidibLink() {
+        return !bidibLinks().isEmpty();
+    }
+
+    /** ECoS-Verbindungen dieses Fensters. */
+    private List<EcosConnection> ecosLinks() {
+        List<EcosConnection> result = new ArrayList<>();
+        for (Link link : links) {
+            if (link.ecos() != null) {
+                result.add(link.ecos());
+            }
+        }
+        return result;
+    }
+
+    /** Host der mc2, wenn dieses Fenster die CGI-Verbindung hat, sonst null. */
+    private String cgiHost() {
+        for (Link link : links) {
+            if (link.cgiHost() != null) {
+                return link.cgiHost();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Beim Schliessen: die Verbindungen DIESES Fensters trennen (nach
+     * Rueckfrage, sofern es welche gibt). Die anderen Fenster behalten ihre.
+     */
     private boolean confirmDisconnect() {
-        BidibConnectionManager manager = BidibConnectionManager.getInstance();
-        if (!manager.hasConnections()) {
-            EcosConnection.closeAll();
+        if (links.isEmpty()) {
             return true;
         }
         ButtonType disconnect = new ButtonType(i18n.t("bidib.disconnectButton"), ButtonBar.ButtonData.OK_DONE);
         ButtonType abort = new ButtonType(i18n.t("bidib.abortButton"), ButtonBar.ButtonData.CANCEL_CLOSE);
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, i18n.t("bidib.closeConfirm"), disconnect, abort);
+        StringBuilder names = new StringBuilder();
+        for (Link link : links) {
+            names.append("\n").append(link.name());
+        }
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, i18n.t("bidib.closeConfirm") + names,
+                disconnect, abort);
         alert.initOwner(stage);
         alert.setHeaderText(null);
-        alert.setTitle(i18n.t("window.systemsTitle"));
+        alert.setTitle(stage.getTitle());
         ThemeManager.apply(alert.getDialogPane().getScene(), settings.getTheme());
         alert.getDialogPane().sceneProperty().addListener((obs, oldScene, newScene) ->
                 ThemeManager.apply(newScene, settings.getTheme()));
         if (alert.showAndWait().orElse(abort) != disconnect) {
             return false;
         }
-        manager.closeAll();
-        EcosConnection.closeAll();
+        for (Link link : new ArrayList<>(links)) {
+            if (link.bidib() != null) {
+                BidibConnection connection = link.bidib();
+                BidibConnectionManager.getInstance().remove(connection);
+                // close() kann haengen, wenn die Gegenseite nicht antwortet.
+                Thread worker = new Thread(connection::close, "bidib-close");
+                worker.setDaemon(true);
+                worker.start();
+            } else if (link.ecos() != null) {
+                link.ecos().close();
+            } else if (link.cgiHost() != null) {
+                Mc2CgiConnection.getInstance().disconnect();
+            }
+        }
         return true;
     }
 
     /**
      * "Auslesen": liest die Knoten und oeffnet den Knotenbaum. Bei genau
-     * einer offenen Verbindung sofort, bei mehreren erst nach Auswahl ueber
-     * ein Klappmenue am Knopf.
+     * einer BiDiB-Verbindung dieses Fensters sofort, bei mehreren erst nach
+     * Auswahl ueber ein Klappmenue am Knopf.
      */
     private void openNodeTree() {
-        if (!BidibConnectionManager.getInstance().hasConnections()) {
+        treeTarget = this;
+        if (!hasBidibLink()) {
             // Nur ECoS verbunden: deren Auslesen. Sonst der Knotenbaum aus
             // der geoeffneten System-Datei.
-            if (!EcosConnection.getConnections().isEmpty()) {
+            if (!ecosLinks().isEmpty()) {
                 readEcos();
             } else if (currentFile != null && !currentFile.getNodes().isEmpty()) {
                 BidibNodeTreeWindow.showFromFile(stage, currentFile);
@@ -1573,10 +1865,11 @@ public final class SystemsWindow {
      * gibt es hier nicht, die Auswahl geschieht ueber die Haken.
      */
     private void readEcos() {
-        List<EcosConnection> connections = EcosConnection.getConnections();
+        List<EcosConnection> connections = ecosLinks();
         if (connections.isEmpty()) {
             return;
         }
+        treeTarget = this;
         // Wie bei BiDiB: erst der Knotenbaum mit Ankreuzkaesten, dann
         // "Auswahl uebernehmen" in die Tabellen.
         java.util.function.Consumer<EcosConnection> read = connection ->
@@ -1593,6 +1886,83 @@ public final class SystemsWindow {
             chooser.getItems().add(item);
         }
         chooser.show(readButton, javafx.geometry.Side.BOTTOM, 0, 0);
+    }
+
+    /**
+     * "ECoS Lokomotiven auslesen" (seit 13.10.2026): Lokliste der ECoS
+     * (Objekte 1000-1999: Name, Adresse, Protokoll) direkt in die Tabelle
+     * "Lokomotiven" - ohne Knotenbaum, wie bei der mc2. Schnittstelle ist die
+     * schon vorhandene ECoS-Schnittstelle der Tabelle, sonst "ECoS".
+     */
+    private void readEcosLocos() {
+        List<EcosConnection> connections = ecosLinks().stream()
+                .filter(EcosConnection::isConnected).collect(java.util.stream.Collectors.toList());
+        if (connections.isEmpty()) {
+            return;
+        }
+        java.util.function.Consumer<EcosConnection> read = connection -> {
+            String interfaceName = "ECoS";
+            for (SystemsObject object : objects) {
+                if (object.isInterface() && "ecos".equals(object.getType())) {
+                    interfaceName = object.getInterfaceName();
+                    break;
+                }
+            }
+            String finalInterfaceName = interfaceName;
+            runWithProgress(i18n.t("ecos.readLocosButton"), i18n.t("ecos.readingLocos"), () -> {
+                EcosClient.Reply reply = connection.getClient().send("queryObjects(10, addr, name, protocol)");
+                if (!reply.isOk()) {
+                    throw new IOException("queryObjects(10): " + reply.message());
+                }
+                return reply.lines();
+            }, lines -> {
+                if (currentFile == null) {
+                    BidibSystemFile placeholder = new BidibSystemFile();
+                    placeholder.setSystemType(BidibSystemFile.SYSTEM_ECOS);
+                    placeholder.setInterfaceName(finalInterfaceName);
+                    currentFile = placeholder;
+                }
+                int added = 0;
+                int total = 0;
+                for (EcosClient.Line line : lines) {
+                    if (line.objectId() < 1000 || line.objectId() >= 2000) {
+                        continue;
+                    }
+                    total++;
+                    String name = line.get("name") == null || line.get("name").isBlank()
+                            ? "Lok " + line.objectId() : line.get("name");
+                    int address = line.getInt("addr", 0);
+                    LocomotiveXmlFactory.LocoInfo info = LocomotiveXmlFactory.parseLocoType(line.get("protocol"));
+                    XmlNode node = LocomotiveXmlFactory.createLocomotive(name, address, info, finalInterfaceName);
+                    SystemsObject object = new SystemsObject(SystemsObject.CATEGORY_LOCOMOTIVES,
+                            info.protocolCode(), String.valueOf(address), name + " (" + address + ")", name,
+                            true, "", "", finalInterfaceName, node);
+                    object.refreshLocomotiveLength();
+                    if (findByItrainId(object) != null) {
+                        continue;
+                    }
+                    objects.add(object);
+                    added++;
+                }
+                updateFileLabel();
+                updateState();
+                if (added == 0 && total > 0) {
+                    error(i18n.t("ecos.noNewLocos"));
+                }
+            });
+        };
+        if (connections.size() == 1) {
+            read.accept(connections.get(0));
+            return;
+        }
+        ContextMenu chooser = new ContextMenu();
+        for (EcosConnection connection : connections) {
+            MenuItem item = new MenuItem();
+            item.textProperty().bind(connection.nameProperty());
+            item.setOnAction(e -> read.accept(connection));
+            chooser.getItems().add(item);
+        }
+        chooser.show(ecosLocoButton, javafx.geometry.Side.BOTTOM, 0, 0);
     }
 
     /**
@@ -1657,7 +2027,7 @@ public final class SystemsWindow {
      * erst nach Auswahl ueber ein Klappmenue unter dem Knopf.
      */
     private void chooseConnection(Button anchor, java.util.function.Consumer<BidibConnection> action) {
-        List<BidibConnection> connections = BidibConnectionManager.getInstance().getConnections();
+        List<BidibConnection> connections = bidibLinks();
         if (connections.isEmpty()) {
             return;
         }
@@ -1676,7 +2046,7 @@ public final class SystemsWindow {
     }
 
     private java.util.stream.Stream<BidibConnection> mc2LocoConnections() {
-        return BidibConnectionManager.getInstance().getConnections().stream()
+        return bidibLinks().stream()
                 .filter(c -> c.isMc2() && c.isMc2LocoAvailable());
     }
 
@@ -1686,16 +2056,56 @@ public final class SystemsWindow {
      * an (kein Knotenbaum noetig - die mc2 liefert schon Name und Adresse je
      * Lok). Bei mehreren mc2-Verbindungen erst Auswahl ueber ein Klappmenue.
      * Referenziert dieselbe iTrain-Schnittstelle wie die bereits vorhandene
-     * BiDiB-Schnittstelle dieser Verbindung (siehe {@link #interfaceNameFor}).
+     * BiDiB-Schnittstelle dieser Verbindung (siehe {@link #interfaceNameFor}),
+     * bei der cgi-Verbindung ohne solche Schnittstelle ersatzweise "mc2".
      */
     private void readMc2Locos() {
-        List<BidibConnection> candidates = mc2LocoConnections().collect(java.util.stream.Collectors.toList());
-        if (candidates.isEmpty()) {
+        withMc2Target(mc2LocoButton, this::readMc2Locos);
+    }
+
+    /** Eine erreichbare mc2: ueber cgi verbunden oder als netBiDiB-Verbindung. */
+    private record Mc2Target(String label, String host, String interfaceFallback) {
+    }
+
+    /** Alle mc2-Ziele, cgi-Verbindung zuerst; derselbe Host nur einmal. */
+    private List<Mc2Target> mc2Targets() {
+        java.util.LinkedHashMap<String, Mc2Target> byHost = new java.util.LinkedHashMap<>();
+        String cgi = cgiHost();
+        if (cgi != null) {
+            byHost.put(cgi, new Mc2Target(i18n.t("mc2.cgiStatus", cgi), cgi, "mc2"));
+        }
+        mc2LocoConnections().forEach(c -> byHost.putIfAbsent(c.getHost(),
+                new Mc2Target(c.getName(), c.getHost(), c.getName())));
+        return new ArrayList<>(byHost.values());
+    }
+
+    /** Bei einem Ziel direkt ausfuehren, bei mehreren erst Auswahl per Klappmenue am Knopf. */
+    private void withMc2Target(javafx.scene.Node anchor, java.util.function.Consumer<Mc2Target> action) {
+        List<Mc2Target> targets = mc2Targets();
+        if (targets.isEmpty()) {
             return;
         }
-        java.util.function.Consumer<BidibConnection> read = connection -> {
-            String interfaceName = interfaceNameFor(connection);
-            Mc2LocoReader.readWithProgress(stage, connection.getHost(), interfaceName, result -> {
+        if (targets.size() == 1) {
+            action.accept(targets.get(0));
+            return;
+        }
+        ContextMenu chooser = new ContextMenu();
+        for (Mc2Target target : targets) {
+            MenuItem item = new MenuItem(target.label());
+            item.setOnAction(e -> action.accept(target));
+            chooser.getItems().add(item);
+        }
+        chooser.show(anchor, javafx.geometry.Side.BOTTOM, 0, 0);
+    }
+
+    private void readMc2Locos(Mc2Target target) {
+        {
+            String interfaceName = interfaceNameFor(target.interfaceFallback());
+            // Vorgabe fuer die Spurweite: die globale Spurweite der geladenen
+            // iTrain-Datei (Einstellungen), sonst Normalspur.
+            String gauge = LocomotiveOptionsFields.globalGauge(
+                    matchDocument == null ? null : matchDocument.getRoot());
+            Mc2LocoReader.readWithProgress(stage, target.host(), interfaceName, gauge, result -> {
                 if (currentFile == null) {
                     BidibSystemFile placeholder = new BidibSystemFile();
                     placeholder.setSystemType(BidibSystemFile.SYSTEM_BIDIB);
@@ -1716,19 +2126,7 @@ public final class SystemsWindow {
                     error(i18n.t("mc2.noNewLocos"));
                 }
             });
-        };
-        if (candidates.size() == 1) {
-            read.accept(candidates.get(0));
-            return;
         }
-        ContextMenu chooser = new ContextMenu();
-        for (BidibConnection connection : candidates) {
-            MenuItem item = new MenuItem();
-            item.textProperty().bind(connection.nameProperty());
-            item.setOnAction(e -> read.accept(connection));
-            chooser.getItems().add(item);
-        }
-        chooser.show(mc2LocoButton, javafx.geometry.Side.BOTTOM, 0, 0);
     }
 
     /**
@@ -1738,25 +2136,38 @@ public final class SystemsWindow {
      * Schnittstelle existiert also normalerweise schon), sonst ersatzweise
      * der Anzeigename der Verbindung.
      */
-    private String interfaceNameFor(BidibConnection connection) {
+    private String interfaceNameFor(String fallback) {
         for (SystemsObject object : objects) {
             if (object.isInterface() && !"ecos".equals(object.getType())) {
                 return object.getInterfaceName();
             }
         }
-        return connection.getName();
+        return fallback;
     }
 
+    /** Verbindungen, an deren Eigenschaften dieses Fenster schon horcht (nicht doppelt anmelden). */
+    private final java.util.Set<Object> watched = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+
+    /**
+     * Statusleiste (nur die Verbindungen DIESES Fensters), RX/TX-Menue und
+     * Fenstertitel neu aufbauen.
+     */
     private void rebuildBidibUi() {
         bidibStatusBox.getChildren().clear();
         bidibRawLogMenu.getItems().clear();
-        for (BidibConnection connection : BidibConnectionManager.getInstance().getConnections()) {
+        updateTitle();
+        if (links.isEmpty()) {
+            Label none = new Label(i18n.t("systems.statusNoConnection"));
+            none.setStyle("-fx-opacity: 0.7;");
+            bidibStatusBox.getChildren().add(none);
+        }
+        for (BidibConnection connection : bidibLinks()) {
             MenuItem rawItem = new MenuItem();
             rawItem.textProperty().bind(connection.nameProperty());
             rawItem.setOnAction(e -> BidibRawLogWindow.show(stage, connection));
             bidibRawLogMenu.getItems().add(rawItem);
         }
-        for (BidibConnection connection : BidibConnectionManager.getInstance().getConnections()) {
+        for (BidibConnection connection : bidibLinks()) {
             Label nameLabel = new Label();
             nameLabel.textProperty().bind(connection.nameProperty());
             Circle indicator = new Circle(5);
@@ -1770,9 +2181,19 @@ public final class SystemsWindow {
             // FTP-Zugriff im Hintergrund erfolgreich geprueft wurde (siehe
             // BidibConnection.resolveNameInBackground) - das kann nach diesem
             // Aufbau noch nachkommen, deshalb hier auf die Eigenschaft hoeren.
-            connection.mc2LocoAvailableProperty().addListener((obs, old, value) -> updateState());
+            if (watched.add(connection)) {
+                connection.mc2LocoAvailableProperty().addListener((obs, old, value) -> updateState());
+                connection.nameProperty().addListener((obs, old, value) -> updateTitle());
+            }
         }
-        for (EcosConnection connection : EcosConnection.getConnections()) {
+        String cgi = cgiHost();
+        if (cgi != null) {
+            Circle indicator = new Circle(5, Color.web("#2e9e4f"));
+            HBox entry = new HBox(5, new Label(i18n.t("mc2.cgiStatus", cgi)), indicator);
+            entry.setAlignment(Pos.CENTER_LEFT);
+            bidibStatusBox.getChildren().add(entry);
+        }
+        for (EcosConnection connection : ecosLinks()) {
             Label nameLabel = new Label();
             nameLabel.textProperty().bind(connection.nameProperty());
             Circle indicator = new Circle(5);
@@ -1782,8 +2203,248 @@ public final class SystemsWindow {
             HBox entry = new HBox(5, nameLabel, indicator);
             entry.setAlignment(Pos.CENTER_LEFT);
             bidibStatusBox.getChildren().add(entry);
+            // Knopf "ECoS Lokomotiven auslesen" folgt dem Verbindungsstatus.
+            if (watched.add(connection)) {
+                connection.connectedProperty().addListener((obs, old, value) -> updateState());
+                connection.nameProperty().addListener((obs, old, value) -> updateTitle());
+            }
         }
         updateState();
+    }
+
+    /** Titel: Hauptfenster "Systeme", weitere Fenster mit dem Namen ihrer Verbindung(en). */
+    private void updateTitle() {
+        if (isMain && links.isEmpty()) {
+            stage.setTitle(i18n.t("window.systemsTitle"));
+            return;
+        }
+        List<String> names = new ArrayList<>();
+        for (Link link : links) {
+            names.add(link.name());
+        }
+        stage.setTitle(names.isEmpty() ? i18n.t("window.systemsTitle")
+                : i18n.t("window.systemsTitle") + " - " + String.join(", ", names));
+    }
+
+    /**
+     * "Lokomotiven zur mc2 uebertragen" (seit 13.10.2026): loco.ini und die
+     * Symbolliste der mc2 lesen, Gegenueberstellung zeigen
+     * ({@link Mc2TransferDialog}), dann schreiben ({@link Mc2LocoWriter} -
+     * mit Sicherung der bisherigen loco.ini auf der mc2, hoechstens 10).
+     */
+    private void writeMc2Locos() {
+        TcdDocument document = mainDocument();
+        if (document == null) {
+            return;
+        }
+        withMc2Target(mc2WriteButton, target -> {
+            String host = target.host();
+            // Lesen per HTTP (cgi, wie die Weboberflaeche): Lokliste, Daten je
+            // Lok, Symbolliste. Geschrieben wird ebenfalls per cgi - siehe
+            // Mc2LocoWriter.
+            record Mc2State(java.util.Map<Integer, Mc2Http.LocoInfo> locos, String texteJs) {
+            }
+            runWithProgress(i18n.t("mc2.reading"), () -> {
+                java.util.Map<Integer, Mc2Http.LocoInfo> locos = new java.util.TreeMap<>();
+                for (int address : Mc2Http.locoAddresses(host)) {
+                    Mc2Http.LocoInfo info = Mc2Http.locoInfo(host, address);
+                    if (info != null) {
+                        locos.put(address, info);
+                    }
+                }
+                String texteJs;
+                try {
+                    texteJs = Mc2Http.get(host, "/texte.js");
+                } catch (IOException ex) {
+                    texteJs = "";
+                }
+                return new Mc2State(locos, texteJs);
+            }, state -> {
+                java.util.Optional<List<Mc2LocoWriter.Profile>> profiles =
+                        Mc2TransferDialog.show(stage, document.getRoot(), state.locos(), state.texteJs());
+                if (profiles.isEmpty()) {
+                    return;
+                }
+                runWithProgress(i18n.t("mc2.writing"),
+                        () -> Mc2LocoWriter.transfer(host, profiles.get(), state.locos()),
+                        result -> {
+                            lastTransfer = result;
+                            updateState();
+                            // Wirksam sofort (cgi); der Neustart-Knopf bleibt
+                            // als Moeglichkeit (Befehl wie "reboot mc²").
+                            ButtonType rebootButton = new ButtonType(i18n.t("mc2.rebootNow"),
+                                    ButtonBar.ButtonData.OTHER);
+                            ButtonType laterButton = new ButtonType(i18n.t("mc2.writeClose"),
+                                    ButtonBar.ButtonData.CANCEL_CLOSE);
+                            Alert done = new Alert(result.failed.isEmpty()
+                                    ? Alert.AlertType.INFORMATION : Alert.AlertType.WARNING,
+                                    transferMessage(result) + "\n\n" + i18n.t("mc2.rebootHint"),
+                                    rebootButton, laterButton);
+                            done.initOwner(stage);
+                            done.setTitle(i18n.t("mc2.writeTitle"));
+                            done.setHeaderText(i18n.t("mc2.writeLive"));
+                            if (done.showAndWait().orElse(laterButton) == rebootButton) {
+                                runWithProgress(i18n.t("mc2.rebooting"), () -> {
+                                    Mc2Http.reboot(host);
+                                    return Boolean.TRUE;
+                                }, ok -> {
+                                    Alert info = new Alert(Alert.AlertType.INFORMATION, i18n.t("mc2.rebootSent"));
+                                    info.initOwner(stage);
+                                    info.setHeaderText(null);
+                                    info.setTitle(i18n.t("mc2.writeTitle"));
+                                    info.showAndWait();
+                                });
+                            }
+                        });
+            });
+        });
+    }
+
+    /** Meldung nach dem Schreiben in eine Zentrale (Anzahl, Sicherung, ggf. Fehler). */
+    private String transferMessage(CentralUndo result) {
+        String text = i18n.t("central.writeDone", result.transferredCount(),
+                result.backupFile.getAbsolutePath());
+        if (!result.failed.isEmpty()) {
+            text += "\n\n" + i18n.t("central.writePartlyFailed", String.join(", ", result.failed));
+        }
+        return text;
+    }
+
+    /**
+     * "Lokomotiven zur ECoS uebertragen" (seit 13.10.2026): Lokliste der
+     * ECoS lesen, Gegenueberstellung zeigen ({@link Mc2TransferDialog} ohne
+     * Funktionssymbole), dann schreiben ({@link EcosLocoWriter} - vorher
+     * Sicherung der Lokliste auf dem PC).
+     */
+    private void writeEcosLocos() {
+        TcdDocument document = mainDocument();
+        List<EcosConnection> connections = ecosLinks().stream()
+                .filter(EcosConnection::isConnected).collect(java.util.stream.Collectors.toList());
+        if (document == null || connections.isEmpty()) {
+            return;
+        }
+        EcosConnection connection = connections.get(0);
+        String title = i18n.t("central.writeTitle", "ECoS");
+        runWithProgress(title, i18n.t("ecos.readingLocos"),
+                () -> EcosLocoWriter.readLocos(connection.getClient()),
+                locos -> {
+                    Map<Integer, String> names = new java.util.HashMap<>();
+                    for (EcosLocoWriter.EcosLoco loco : locos.values()) {
+                        names.putIfAbsent(loco.address(), loco.name());
+                    }
+                    java.util.Optional<List<Mc2LocoWriter.Profile>> profiles = Mc2TransferDialog.show(stage,
+                            document.getRoot(), names, null, "ECoS", EcosLocoWriter::protocolFor);
+                    if (profiles.isEmpty()) {
+                        return;
+                    }
+                    runWithProgress(title, i18n.t("central.writing", "ECoS"),
+                            () -> EcosLocoWriter.transfer(connection, profiles.get()),
+                            result -> {
+                                lastTransfer = result;
+                                updateState();
+                                Alert done = new Alert(result.failed.isEmpty()
+                                        ? Alert.AlertType.INFORMATION : Alert.AlertType.WARNING,
+                                        transferMessage(result));
+                                done.initOwner(stage);
+                                done.setTitle(title);
+                                done.setHeaderText(null);
+                                done.showAndWait();
+                            });
+                });
+    }
+
+    /**
+     * Bearbeiten -&gt; Rueckgaengig (seit 13.10.2026): die letzte Uebertragung
+     * in eine Zentrale aus der Sicherung auf dem PC zuruecknehmen - erst die
+     * Tabelle "Diesen Inhalt in die Zentralen uebertragen?" mit "Abbruch" und
+     * "Austauschen".
+     */
+    private void undoTransfer() {
+        CentralUndo undo = lastTransfer;
+        if (undo == null) {
+            return;
+        }
+        try {
+            if (!undo.confirm(stage)) {
+                return;
+            }
+        } catch (IOException ex) {
+            error(i18n.t("central.undoFailed", String.valueOf(ex.getMessage())));
+            return;
+        }
+        EcosConnection ecos = null;
+        if (undo.kind == CentralUndo.Kind.ECOS) {
+            for (EcosConnection connection : ecosLinks()) {
+                if (undo.host.equals(connection.getHost()) && connection.isConnected()) {
+                    ecos = connection;
+                }
+            }
+            if (ecos == null) {
+                error(i18n.t("central.undoNotConnected", undo.host));
+                return;
+            }
+        }
+        EcosConnection ecosConnection = ecos;
+        String title = i18n.t("central.undoTitle", undo.kind.label + " (" + undo.host + ")");
+        runWithProgress(title, i18n.t("central.undoing"),
+                () -> undo.kind == CentralUndo.Kind.MC2 ? Mc2LocoWriter.undo(undo)
+                        : EcosLocoWriter.undo(ecosConnection, undo),
+                failed -> {
+                    if (failed.isEmpty()) {
+                        lastTransfer = null;
+                    }
+                    updateState();
+                    String text = i18n.t("central.undoDone", undo.overwritten.size(), undo.created.size());
+                    if (!failed.isEmpty()) {
+                        text += "\n\n" + i18n.t("central.writePartlyFailed", String.join(", ", failed));
+                    }
+                    Alert done = new Alert(failed.isEmpty() ? Alert.AlertType.INFORMATION : Alert.AlertType.WARNING,
+                            text);
+                    done.initOwner(stage);
+                    done.setTitle(title);
+                    done.setHeaderText(null);
+                    done.showAndWait();
+                });
+    }
+
+    /** Blockierende Arbeit im Hintergrund mit kleinem Fortschrittsfenster; Fehler als Meldung. */
+    private <T> void runWithProgress(String text, java.util.concurrent.Callable<T> work,
+            java.util.function.Consumer<T> onDone) {
+        runWithProgress(i18n.t("mc2.writeTitle"), text, work, onDone);
+    }
+
+    private <T> void runWithProgress(String title, String text, java.util.concurrent.Callable<T> work,
+            java.util.function.Consumer<T> onDone) {
+        Stage dialog = new Stage();
+        dialog.initOwner(stage);
+        dialog.initModality(javafx.stage.Modality.WINDOW_MODAL);
+        dialog.setTitle(title);
+        dialog.setResizable(false);
+        javafx.scene.control.ProgressIndicator indicator = new javafx.scene.control.ProgressIndicator();
+        indicator.setPrefSize(28, 28);
+        VBox box = new VBox(14, new Label(text), indicator);
+        box.setAlignment(Pos.CENTER);
+        box.setPadding(new javafx.geometry.Insets(20));
+        Scene scene = new Scene(new BorderPane(box));
+        ThemeManager.apply(scene, settings.getTheme());
+        dialog.setScene(scene);
+        dialog.show();
+        Thread worker = new Thread(() -> {
+            try {
+                T result = work.call();
+                javafx.application.Platform.runLater(() -> {
+                    dialog.close();
+                    onDone.accept(result);
+                });
+            } catch (Exception ex) {
+                javafx.application.Platform.runLater(() -> {
+                    dialog.close();
+                    error(title + ":\n" + ex.getMessage());
+                });
+            }
+        }, "mc2-write");
+        worker.setDaemon(true);
+        worker.start();
     }
 
     private void error(String message) {

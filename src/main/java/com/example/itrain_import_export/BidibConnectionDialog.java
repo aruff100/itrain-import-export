@@ -1399,6 +1399,18 @@ public final class BidibConnectionDialog {
                         if (!nodeTableRequested.get() && connection.isConnected()) {
                             LOGGER.warn("Kein MSG_LOCAL_LOGON von {} innerhalb von 6 s nach dem Pairing.", hostPort);
                             Platform.runLater(() -> statusLabel.setText(i18n.t("bidib.statusNoLogon")));
+                            // Seit 13.10.2026: Ist es eine mc2, gehen die
+                            // Lokomotiven-Funktionen (nur FTP) trotzdem -
+                            // dafuer reicht eine lesbare loco.ini.
+                            String host = connection.getHost();
+                            if (host != null && Mc2LocoReader.isAvailable(host)) {
+                                LOGGER.info("{} ohne Logon, aber per FTP als mc2 erkannt.", hostPort);
+                                Platform.runLater(() -> {
+                                    connection.markMc2ByFtp();
+                                    statusLabel.setText(i18n.t("bidib.statusNoLogon") + "\n"
+                                            + i18n.t("bidib.statusMc2FtpOnly"));
+                                });
+                            }
                         }
                     }, "bidib-logon-watch");
                     logonWatch.setDaemon(true);

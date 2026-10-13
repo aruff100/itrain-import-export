@@ -110,6 +110,21 @@ public final class DecoderWindow implements DocumentSession.Host {
         open.stage.show();
     }
 
+    /**
+     * iTrain-Datei laden und danach dieses Fenster vorn lassen - sonst
+     * springt Windows nach dem Laden auf das Hauptfenster (die Datei gehoert
+     * dessen Sitzung).
+     */
+    private void openItrainFile() {
+        session.openFileDialog(stage);
+        stage.toFront();
+        stage.requestFocus();
+        javafx.application.Platform.runLater(() -> {
+            stage.toFront();
+            stage.requestFocus();
+        });
+    }
+
     /** Beim Beenden des Programms mit schließen (siehe {@link HelloApplication}). */
     public static void closeIfOpen() {
         if (open != null && open.stage.isShowing()) {
@@ -122,7 +137,7 @@ public final class DecoderWindow implements DocumentSession.Host {
 
         // --- Menüzeile -------------------------------------------------
         openMenuItem.setGraphic(HelloController.loadIcon("icons/open-icon.png", 16));
-        openMenuItem.setOnAction(e -> session.openFileDialog());
+        openMenuItem.setOnAction(e -> openItrainFile());
         saveMenuItem.setGraphic(HelloController.loadIcon("icons/save-icon.png", 16));
         saveMenuItem.setOnAction(e -> session.saveAsDialog());
         recentFilesMenu.setGraphic(HelloController.loadIcon("icons/open-icon.png", 16));
@@ -166,7 +181,7 @@ public final class DecoderWindow implements DocumentSession.Host {
 
         // --- Ribbon ----------------------------------------------------
         openToolButton.setGraphic(HelloController.loadIcon("icons/open-icon.png", 22));
-        openToolButton.setOnAction(e -> session.openFileDialog());
+        openToolButton.setOnAction(e -> openItrainFile());
         saveToolButton.setGraphic(HelloController.loadIcon("icons/save-icon.png", 22));
         saveToolButton.setOnAction(e -> session.saveAsDialog());
         undoToolButton.setGraphic(HelloController.loadIcon("icons/undo-icon.png", 22));
@@ -190,12 +205,12 @@ public final class DecoderWindow implements DocumentSession.Host {
         // Programmteile (die des Hauptfensters) - laden hier laedt sie
         // ueberall, schreiben speichert sie (mit Sicherung) in ihre Datei.
         loadItrainButton.setStyle("-fx-background-color: #fff3b0; -fx-text-fill: #2b2b2b;");
-        loadItrainButton.setOnAction(e -> session.openFileDialog());
+        loadItrainButton.setOnAction(e -> openItrainFile());
         writeItrainButton.setStyle("-fx-background-color: #fff3b0; -fx-text-fill: #2b2b2b;");
         writeItrainButton.setOnAction(e -> onWriteItrain());
         writeItrainButton.disableProperty().bind(javafx.beans.binding.Bindings.createBooleanBinding(
                 () -> !session.hasDocument(), fileNameLabel.textProperty()));
-        loadItrainMenuItem.setOnAction(e -> session.openFileDialog());
+        loadItrainMenuItem.setOnAction(e -> openItrainFile());
         writeItrainMenuItem.setOnAction(e -> onWriteItrain());
         fileMenu.getItems().addAll(new SeparatorMenuItem(), loadItrainMenuItem, writeItrainMenuItem);
         Region gapItrain = new Region();

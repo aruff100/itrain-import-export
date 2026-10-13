@@ -17,7 +17,7 @@ plugins {
 }
 
 group = "com.example"
-version = "3.1"
+version = "3.4"
 
 repositories {
     mavenCentral()
@@ -281,7 +281,7 @@ jlink {
         // waeren ein Fehler) - "version" oben darf das "beta" tragen (zeigt
         // im Ueber-Dialog und beim Update-Check als Text an), appVersion
         // hier bleibt rein numerisch.
-        appVersion = "3.1"
+        appVersion = "3.4"
         vendor = "Andre Ruff"
 
         // Wird von jpackage als "--java-options" in das installierte

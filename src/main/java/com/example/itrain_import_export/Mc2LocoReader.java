@@ -56,9 +56,20 @@ public final class Mc2LocoReader {
     private Mc2LocoReader() {
     }
 
-    /** Eine Lokomotive aus loco.ini: Adresse (aus dem Abschnittsnamen), Name (kann fehlen) und Format. */
-    public record LocoEntry(int address, String name, String fmt) {
+    /**
+     * Eine Lokomotive aus loco.ini: Adresse (aus dem Abschnittsnamen), Name
+     * (kann fehlen), Format, UID ("" wenn keine, sonst 8-stellig hex wie in
+     * iTrain angezeigt), DCC-A-Kennung ({@code config = DCCA}) und die
+     * Funktionssymbole ({@code icon(n) = Nummer}, Nummer = Position in der
+     * Symbolliste der mc2-Weboberflaeche, siehe {@link #loadIconNames}).
+     */
+    public record LocoEntry(int address, String name, String fmt, String uid, boolean dccA,
+            Map<Integer, Integer> icons) {
     }
+
+    private static final String HTML_DIR = "/html";
+    private static final String TEXT_FILE = "texte.js";
+    private static final Pattern ICON_KEY = Pattern.compile("icon\\((\\d+)\\)");
 
     /**
      * true, wenn sich unter dem Host per FTP {@code config/loco.ini} lesen
@@ -71,7 +82,7 @@ public final class Mc2LocoReader {
             return false;
         }
         try {
-            Mc2FtpClient.fetchText(host, CONFIG_DIR, LOCO_FILE);
+            Mc2Http.get(host, CONFIG_DIR + "/" + LOCO_FILE);
             return true;
         } catch (IOException ex) {
             LOGGER.debug("mc2-Lokdaten unter {} nicht lesbar: {}", host, ex.getMessage());
@@ -118,7 +129,149 @@ public final class Mc2LocoReader {
         } catch (NumberFormatException ex) {
             return;
         }
-        result.add(new LocoEntry(address, fields.get("name"), fields.get("fmt")));
+        Map<Integer, Integer> icons = new java.util.TreeMap<>();
+        for (Map.Entry<String, String> field : fields.entrySet()) {
+            Matcher m = ICON_KEY.matcher(field.getKey());
+            if (m.matches()) {
+                try {
+                    icons.put(Integer.parseInt(m.group(1)), Integer.parseInt(field.getValue().trim()));
+                } catch (NumberFormatException ignored) {
+                    // unlesbarer Eintrag - Funktion bleibt ohne Namen
+                }
+            }
+        }
+        result.add(new LocoEntry(address, fields.get("name"), fields.get("fmt"), formatUid(fields.get("uid")),
+                "DCCA".equalsIgnoreCase(nzTrim(fields.get("config"))), icons));
+    }
+
+    /** "0x75e0807d" -&gt; "75E0807D", "0x2000" -&gt; "00002000" (wie iTrain die UID anzeigt); "" wenn keine. */
+    static String formatUid(String raw) {
+        String text = nzTrim(raw);
+        if (text.isEmpty()) {
+            return "";
+        }
+        String hex = text.toLowerCase(Locale.ROOT).startsWith("0x") ? text.substring(2) : text;
+        try {
+            return String.format(Locale.ROOT, "%08X", Long.parseUnsignedLong(hex, 16));
+        } catch (NumberFormatException ex) {
+            return text.toUpperCase(Locale.ROOT);
+        }
+    }
+
+    private static String nzTrim(String s) {
+        return s == null ? "" : s.trim();
+    }
+
+    /**
+     * Namen der Funktionssymbole aus der Weboberflaeche der mc2
+     * ({@code /html/texte.js}, Liste {@code var icons = [ [Deutsch], [English],
+     * [Français], [Nederlands] ]}, Eintrag 0 = "---" = kein Symbol). Sprache
+     * passend zur Programmsprache, sonst Englisch. Leere Liste, wenn die
+     * Datei nicht lesbar ist - die Funktionen bekommen dann keine Namen.
+     */
+    static List<String> loadIconNames(String host) {
+        try {
+            return parseIconNames(Mc2Http.get(host, "/" + TEXT_FILE),
+                    I18n.getInstance().getCurrentLanguage());
+        } catch (IOException | RuntimeException ex) {
+            LOGGER.info("Funktionsnamen der mc2 {} nicht lesbar: {}", host, ex.getMessage());
+            return List.of();
+        }
+    }
+
+    static List<String> parseIconNames(String text, String language) {
+        List<List<String>> blocks = parseIconBlocks(text);
+        if (blocks.isEmpty()) {
+            return List.of();
+        }
+        int index;
+        switch (language == null ? "" : language) {
+            case "de":
+                index = 0;
+                break;
+            case "fr":
+                index = 2;
+                break;
+            case "nl":
+                index = 3;
+                break;
+            default:
+                index = 1;
+                break;
+        }
+        return blocks.get(Math.min(index, blocks.size() - 1));
+    }
+
+    /** Alle Sprach-Bloecke der Symbolliste (Deutsch, Englisch, Franzoesisch, Niederlaendisch). */
+    static List<List<String>> parseIconBlocks(String text) {
+        int start = text.indexOf("var icons");
+        if (start < 0) {
+            return List.of();
+        }
+        int open = text.indexOf('[', start);
+        // Die Sprach-Bloecke einzeln einsammeln: jeder ist "[ ... ]" mit
+        // Zeichenketten in Anfuehrungszeichen, Kommentare dazwischen.
+        List<List<String>> blocks = new ArrayList<>();
+        int pos = open + 1;
+        while (pos < text.length()) {
+            char c = text.charAt(pos);
+            if (c == ']') {
+                break; // Ende der aeusseren Liste
+            }
+            if (c == '/' && pos + 1 < text.length() && text.charAt(pos + 1) == '*') {
+                int end = text.indexOf("*/", pos + 2);
+                pos = end < 0 ? text.length() : end + 2;
+                continue;
+            }
+            if (c == '/' && pos + 1 < text.length() && text.charAt(pos + 1) == '/') {
+                int end = text.indexOf('\n', pos);
+                pos = end < 0 ? text.length() : end + 1;
+                continue;
+            }
+            if (c == '[') {
+                List<String> block = new ArrayList<>();
+                pos++;
+                while (pos < text.length() && text.charAt(pos) != ']') {
+                    char d = text.charAt(pos);
+                    if (d == '/' && pos + 1 < text.length() && text.charAt(pos + 1) == '*') {
+                        int end = text.indexOf("*/", pos + 2);
+                        pos = end < 0 ? text.length() : end + 2;
+                    } else if (d == '/' && pos + 1 < text.length() && text.charAt(pos + 1) == '/') {
+                        int end = text.indexOf('\n', pos);
+                        pos = end < 0 ? text.length() : end + 1;
+                    } else if (d == '"') {
+                        StringBuilder value = new StringBuilder();
+                        pos++;
+                        while (pos < text.length() && text.charAt(pos) != '"') {
+                            if (text.charAt(pos) == '\\' && pos + 1 < text.length()) {
+                                pos++;
+                            }
+                            value.append(text.charAt(pos));
+                            pos++;
+                        }
+                        block.add(value.toString());
+                        pos++;
+                    } else {
+                        pos++;
+                    }
+                }
+                blocks.add(block);
+            }
+            pos++;
+        }
+        return blocks;
+    }
+
+    /** Funktionsnummer -&gt; Name fuer eine Lok; Symbole 0 ("---") und unbekannte Nummern ohne Namen werden ausgelassen. */
+    static Map<Integer, String> functionNames(LocoEntry entry, List<String> iconNames) {
+        Map<Integer, String> result = new java.util.TreeMap<>();
+        for (Map.Entry<Integer, Integer> icon : entry.icons().entrySet()) {
+            int symbol = icon.getValue();
+            if (symbol > 0 && symbol < iconNames.size()) {
+                result.put(icon.getKey(), iconNames.get(symbol));
+            }
+        }
+        return result;
     }
 
     /**
@@ -149,25 +302,36 @@ public final class Mc2LocoReader {
      * angewaehlt, nie als eigene Lok angelegt worden, und wuerden die
      * Tabelle mit Karteileichen fuellen).
      */
-    static List<SystemsObject> readObjects(String host, String interfaceName) throws IOException {
-        String text = Mc2FtpClient.fetchText(host, CONFIG_DIR, LOCO_FILE);
+    static List<SystemsObject> readObjects(String host, String interfaceName, String gauge) throws IOException {
+        // Seit 13.10.2026 per HTTP (Weboberflaeche der mc2) statt FTP.
+        String text = Mc2Http.get(host, CONFIG_DIR + "/" + LOCO_FILE);
+        List<LocoEntry> entries = parse(text);
+        boolean anyIcons = entries.stream().anyMatch(e -> !e.icons().isEmpty());
+        List<String> iconNames = anyIcons ? loadIconNames(host) : List.of();
         List<SystemsObject> result = new ArrayList<>();
-        for (LocoEntry entry : parse(text)) {
+        for (LocoEntry entry : entries) {
             if (entry.name() == null || entry.name().isBlank()) {
                 continue;
             }
             LocomotiveXmlFactory.LocoInfo info = LocomotiveXmlFactory.parseLocoType(protocolCodeFromFmt(entry.fmt()));
-            XmlNode node = LocomotiveXmlFactory.createLocomotive(entry.name(), entry.address(), info, interfaceName);
+            Map<Integer, String> functions = functionNames(entry, iconNames);
+            XmlNode node = LocomotiveXmlFactory.createMc2Locomotive(entry.name(), entry.address(), info,
+                    interfaceName, gauge, functions);
             SystemsObject object = new SystemsObject(SystemsObject.CATEGORY_LOCOMOTIVES, info.protocolCode(),
                     String.valueOf(entry.address()), entry.name() + " (" + entry.address() + ")", entry.name(),
                     true, "", "", interfaceName, node);
+            // UID nur zur Anzeige - wird NICHT in die iTrain-Datei geschrieben
+            // (wie iTrain sie speichert, ist noch nicht belegt).
+            object.setUid(entry.uid());
+            object.setMc2Functions(functions);
+            object.refreshLocomotiveLength();
             result.add(object);
         }
         return result;
     }
 
     /** Mit kleinem Fortschrittsfenster (kein Prozentwert, die FTP-Uebertragung ist zu kurz dafuer) und Fehlerdialog. */
-    public static void readWithProgress(Window owner, String host, String interfaceName,
+    public static void readWithProgress(Window owner, String host, String interfaceName, String gauge,
             Consumer<List<SystemsObject>> onDone) {
         I18n i18n = I18n.getInstance();
         AppSettings settings = AppSettings.getInstance();
@@ -190,7 +354,7 @@ public final class Mc2LocoReader {
 
         Thread worker = new Thread(() -> {
             try {
-                List<SystemsObject> result = readObjects(host, interfaceName);
+                List<SystemsObject> result = readObjects(host, interfaceName, gauge);
                 Platform.runLater(() -> {
                     dialog.close();
                     onDone.accept(result);

@@ -198,7 +198,23 @@ public final class BidibConnection {
     /** true, wenn die Gegenseite sich als "MC2" meldet (Tams mc2) - siehe {@link #productNameProperty()}. */
     public boolean isMc2() {
         String product = productName.get();
-        return product != null && product.trim().equalsIgnoreCase("MC2");
+        return mc2ByFtp || (product != null && product.trim().equalsIgnoreCase("MC2"));
+    }
+
+    /**
+     * true, wenn die Gegenseite allein ueber ihren FTP-Zugang als mc2 erkannt
+     * wurde (seit 13.10.2026): Meldet sich die mc2 nach dem Pairing nicht an
+     * (kein MSG_LOCAL_LOGON - sie ist dann meist bei einem anderen Programm
+     * angemeldet), wird auch ihr Produktname nie abgefragt. Die
+     * Lokomotiven-Funktionen brauchen aber nur FTP - deshalb genuegt dann
+     * eine lesbare loco.ini (siehe BidibConnectionDialog, Logon-Waechter).
+     */
+    private volatile boolean mc2ByFtp;
+
+    /** Nur aus dem JavaFX-Thread aufrufen: als mc2 mit lesbaren Lokdaten markieren. */
+    public void markMc2ByFtp() {
+        mc2ByFtp = true;
+        mc2LocoAvailable.set(true);
     }
 
     public BooleanProperty mc2LocoAvailableProperty() {

@@ -77,6 +77,7 @@ public final class HelpDialog {
         // welche es überhaupt gibt.
         addParagraph(content, i18n.t("help.windowsTitle"), i18n.t("help.windowsText"));
         addParagraph(content, i18n.t("help.referenceRenameTitle"), i18n.t("help.referenceRenameText"));
+        addParagraph(content, i18n.t("help.cleanupTitle"), i18n.t("help.cleanupText"));
         addParagraph(content, i18n.t("help.statusBarTitle"), i18n.t("help.statusBarText"));
 
         showDialog(owner, content);
@@ -105,7 +106,11 @@ public final class HelpDialog {
         VBox content = new VBox(4);
         content.setPadding(new Insets(15));
         addParagraph(content, i18n.t("help.systemsTitle"), i18n.t("help.systemsText"));
+        addParagraph(content, i18n.t("help.systemWindowsTitle"), i18n.t("help.systemWindowsText"));
+        addParagraph(content, i18n.t("help.mc2Title"), i18n.t("help.mc2Text"));
+        addParagraph(content, i18n.t("help.centralUndoTitle"), i18n.t("help.centralUndoText"));
         addParagraph(content, i18n.t("help.bidibTitle"), i18n.t("help.bidibText"));
+        addParagraph(content, i18n.t("help.esuTitle"), i18n.t("help.esuText"));
         showDialog(owner, content);
     }
 

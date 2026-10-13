@@ -139,6 +139,16 @@ public final class DocumentSession {
     private int importCounter = 0;
 
     /**
+     * Seit dem Öffnen wurde etwas importiert - dann schlägt "Speichern
+     * unter" den Dateinamen mit angehängtem {@value #IMPORT_SUFFIX} vor
+     * (seit 13.10.2026), damit die Originaldatei nicht versehentlich
+     * überschrieben wird.
+     */
+    private boolean importedSinceOpen = false;
+
+    private static final String IMPORT_SUFFIX = "_import_export";
+
+    /**
      * @param tabPane        Reiterleiste des Fensters, wird von der Sitzung befüllt
      * @param categoryFilter Kategorien, die als Reiter erscheinen sollen -
      *                       {@code null} für alle (siehe {@link #categoryFilter})
@@ -163,6 +173,14 @@ public final class DocumentSession {
 
     public boolean hasDocument() {
         return getDocument() != null;
+    }
+
+    private void markImported() {
+        if (primary != null) {
+            primary.markImported();
+            return;
+        }
+        importedSinceOpen = true;
     }
 
     private int nextImportSuffix() {
@@ -311,7 +329,12 @@ public final class DocumentSession {
         openFileDialog(host.stage());
     }
 
-    private void openFileDialog(Stage owner) {
+    /**
+     * Wie {@link #openFileDialog()}, aber mit dem aufrufenden Fenster als
+     * Besitzer des Dateidialogs - so bleibt z.B. das Systeme-Fenster vorn,
+     * statt dass Windows nach dem Dialog das Hauptfenster aktiviert.
+     */
+    public void openFileDialog(Stage owner) {
         if (primary != null) {
             primary.openFileDialog(owner);
             return;
@@ -419,6 +442,7 @@ public final class DocumentSession {
             // Neue Datei = neue Sitzung für die Import-Nummerierung (siehe
             // nextImportSuffix()).
             importCounter = 0;
+            importedSinceOpen = false;
             rebuildTabs();
             host.showFileName(file.getName());
             host.showStatus(i18n.t("status.fileLoaded", file.getName()));
@@ -454,6 +478,7 @@ public final class DocumentSession {
         undoStack.clear();
         redoStack.clear();
         importCounter = 0;
+        importedSinceOpen = false;
         rebuildTabs();
         host.showFileName(i18n.t("status.noFileLoaded"));
         host.showStatus("");
@@ -490,7 +515,9 @@ public final class DocumentSession {
 
         if (document.getFile() != null) {
             chooser.setInitialDirectory(document.getFile().getParentFile());
-            chooser.setInitialFileName(document.getFile().getName());
+            chooser.setInitialFileName(importedSinceOpen
+                    ? withImportSuffix(document.getFile().getName())
+                    : document.getFile().getName());
         } else {
             applyDefaultTcdDirectory(chooser);
         }
@@ -511,6 +538,20 @@ public final class DocumentSession {
         } catch (Exception ex) {
             showError(i18n.t("error.saveTitle"), ex);
         }
+    }
+
+    /**
+     * "Kurpfalz_860_V6.tcdz" → "Kurpfalz_860_V6_import_export.tcdz"; ist der
+     * Zusatz schon vorhanden (erneutes Speichern), bleibt der Name, wie er ist.
+     */
+    private static String withImportSuffix(String fileName) {
+        int dot = fileName.lastIndexOf('.');
+        String base = dot > 0 ? fileName.substring(0, dot) : fileName;
+        String extension = dot > 0 ? fileName.substring(dot) : "";
+        if (base.endsWith(IMPORT_SUFFIX)) {
+            return fileName;
+        }
+        return base + IMPORT_SUFFIX + extension;
     }
 
     private void applyDefaultTcdDirectory(FileChooser chooser) {
@@ -542,6 +583,48 @@ public final class DocumentSession {
         if (editor != null) {
             editor.triggerImport();
         }
+    }
+
+    /**
+     * Funktionen → "Verwaiste Einträge prüfen" (seit 13.10.2026): Tabelle
+     * der verwaisten und "~"-Einträge (siehe {@link OrphanCleanup}), die zum
+     * Löschen markierten werden nach "Weiter und schließen" entfernt - als
+     * EIN Rückgängig-Schritt.
+     */
+    public void cleanupOrphans() {
+        if (primary != null) {
+            primary.cleanupOrphans();
+            return;
+        }
+        if (document == null) {
+            new Alert(Alert.AlertType.INFORMATION, i18n.t("error.pleaseOpenFirst")).showAndWait();
+            return;
+        }
+        List<OrphanCleanup.Row> rows = OrphanCleanup.find(document.getRoot());
+        if (rows.isEmpty()) {
+            Alert none = new Alert(Alert.AlertType.INFORMATION, i18n.t("cleanup.nothingFound"));
+            none.initOwner(host.stage());
+            none.setTitle(i18n.t("cleanup.title"));
+            none.setHeaderText(null);
+            none.showAndWait();
+            return;
+        }
+        if (!OrphanCleanup.show(host.stage(), i18n, rows)) {
+            return;
+        }
+        List<OrphanCleanup.Row> toDelete = rows.stream().filter(OrphanCleanup.Row::isDelete).toList();
+        if (toDelete.isEmpty()) {
+            return;
+        }
+        recordUndoSnapshot();
+        for (OrphanCleanup.Row row : toDelete) {
+            // Nach Identität entfernen - zwei Einträge könnten inhaltlich gleich sein.
+            row.categoryNode().getChildren().removeIf(entry -> entry == row.entry());
+        }
+        document.markDirty();
+        rebuildTabs();
+        notifySecondaries();
+        host.showStatus(i18n.t("cleanup.done", toDelete.size()));
     }
 
     // ------------------------------------------------------------------
@@ -825,6 +908,11 @@ public final class DocumentSession {
                 this::rebuildTabs, this::recordUndoSnapshot, this::nextImportSuffix);
         // Decoder-Fenster: Fahrzeug auswaehlen springt auf "configuration"
         editor.setFocusConfiguration(categoryFilter != null);
+        editor.setSourceFileSupplier(() -> {
+            TcdDocument doc = getDocument();
+            return doc == null ? null : doc.getFile();
+        });
+        editor.setOnImported(this::markImported);
         Tab tab = editor.createTab();
         editorsByTab.put(tab, editor);
         editor.entryCountProperty().addListener((obs, oldV, newV) -> {

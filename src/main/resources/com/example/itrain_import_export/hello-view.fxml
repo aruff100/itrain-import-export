@@ -63,6 +63,10 @@
                 <Menu fx:id="functionsMenu" text="Funktionen">
                     <MenuItem fx:id="functionsDecoderMenuItem" text="Decoder" onAction="#onOpenDecoderWindow"/>
                     <MenuItem fx:id="functionsSystemsMenuItem" text="Systeme" onAction="#onOpenSystemsWindow"/>
+                    <!-- Seit 13.10.2026: Aufräumen der geladenen Datei,
+                         abgesetzt von den beiden Fenster-Einträgen. -->
+                    <SeparatorMenuItem/>
+                    <MenuItem fx:id="functionsCleanupMenuItem" text="Verwaiste Einträge prüfen" onAction="#onCleanupOrphans"/>
                 </Menu>
                 <Menu fx:id="helpMenu" text="Hilfe">
                     <MenuItem fx:id="helpMenuItem" text="Hilfe" onAction="#onHelp"/>
@@ -85,6 +89,9 @@
                 <Separator orientation="VERTICAL"/>
                 <Button fx:id="exportSelectedToolButton" onAction="#onExportSelected"/>
                 <Button fx:id="importCategoryToolButton" onAction="#onImportCategory"/>
+                <!-- Seit 13.10.2026: verwaiste und ~-Einträge aufräumen. -->
+                <Separator orientation="VERTICAL"/>
+                <Button fx:id="cleanupToolButton" onAction="#onCleanupOrphans"/>
                 <!-- Zweiter Trennstrich, deutlich abgesetzt: rechts davon
                      die beiden Knöpfe, die die Zusatzfenster "Decoder" und
                      "Systeme" öffnen. Die drei Decoder-Knöpfe, die hier bis

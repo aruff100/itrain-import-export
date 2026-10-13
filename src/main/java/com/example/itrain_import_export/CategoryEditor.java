@@ -196,6 +196,38 @@ public class CategoryEditor {
         this.categoryNode = controlItemsNode.findChild(categoryName);
     }
 
+    /**
+     * Liefert die aktuell geöffnete iTrain-Datei - für den vorgeschlagenen
+     * Export-Dateinamen ("feedbacks-export-Kurpfalz_860_V6"). Als Lieferant
+     * statt fester Wert, da sich der Dateiname nach "Speichern unter" ändert,
+     * ohne dass die Reiter neu aufgebaut werden.
+     */
+    private java.util.function.Supplier<File> sourceFileSupplier = () -> null;
+
+    /** Wird nach jedem Import aufgerufen, der die Datei tatsächlich verändert hat. */
+    private Runnable onImported = () -> { };
+
+    public void setSourceFileSupplier(java.util.function.Supplier<File> supplier) {
+        this.sourceFileSupplier = supplier != null ? supplier : () -> null;
+    }
+
+    public void setOnImported(Runnable onImported) {
+        this.onImported = onImported != null ? onImported : () -> { };
+    }
+
+    /**
+     * Name der geöffneten iTrain-Datei ohne Endung (.tcd/.tcdz, bei geladenen
+     * Backups auch ohne ".N.bak"), oder null, wenn keine Datei bekannt ist.
+     */
+    private String sourceBaseName() {
+        File file = sourceFileSupplier.get();
+        if (file == null) {
+            return null;
+        }
+        String name = file.getName().replaceFirst("\\.\\d{1,2}\\.bak$", "");
+        return name.replaceFirst("(?i)\\.tcdz?$", "");
+    }
+
     public ReadOnlyIntegerProperty entryCountProperty() {
         return entryCount;
     }
@@ -324,6 +356,18 @@ public class CategoryEditor {
      * ursprünglich übergebenen Einträge.
      */
     private Map<XmlNode, String> resolveLinkedEntries(List<XmlNode> selectedEntries) {
+        return resolveLinkedEntries(selectedEntries, true);
+    }
+
+    /**
+     * Wie {@link #resolveLinkedEntries(List)}; mit {@code transitive=false}
+     * werden nur die DIREKT von den übergebenen Einträgen referenzierten
+     * Einträge geliefert - gebraucht für den Export "Ohne Verknüpfungen", bei
+     * dem nur leere Platzhalter exportiert werden: Ein Platzhalter hat keinen
+     * Inhalt und damit auch keine eigenen Verweise, weiter entfernte
+     * Verknüpfungen würden beim Import nie gebraucht.
+     */
+    private Map<XmlNode, String> resolveLinkedEntries(List<XmlNode> selectedEntries, boolean transitive) {
         Map<XmlNode, String> result = new LinkedHashMap<>();
         Set<XmlNode> alreadyHandled = new HashSet<>(selectedEntries);
         Deque<XmlNode> toScan = new ArrayDeque<>(selectedEntries);
@@ -348,7 +392,9 @@ public class CategoryEditor {
                     String category = index.categoryOf(found);
                     if (category != null) {
                         result.put(found, category);
-                        toScan.add(found);
+                        if (transitive) {
+                            toScan.add(found);
+                        }
                     }
                 }
             }
@@ -696,11 +742,26 @@ public class CategoryEditor {
         // Zieldatei nach dem Import in iTrain nicht mehr öffnen.
         Map<XmlNode, String> linkedEntries = resolveLinkedEntries(selected);
 
+        // Seit 13.10.2026: Gibt es Verknüpfungen, fragt der Dialog, ob sie
+        // vollständig ("Mit Verknüpfungen") oder nur als leere Platzhalter
+        // ("Ohne Verknüpfungen") exportiert werden. Platzhalter müssen beim
+        // Import durch vorhandene Einträge der Zieldatei ersetzt werden
+        // (siehe LinkMappingDialog).
         ButtonType cancelButton = new ButtonType(i18n.t("editor.exportConfirmCancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
         ButtonType continueButton = new ButtonType(i18n.t("editor.exportConfirmContinue"), ButtonBar.ButtonData.OK_DONE);
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
-                i18n.t("editor.exportConfirmMessage", selected.size(), linkedEntries.size()),
-                cancelButton, continueButton);
+        ButtonType withLinksButton = new ButtonType(i18n.t("editor.exportWithLinks"), ButtonBar.ButtonData.YES);
+        ButtonType withoutLinksButton = new ButtonType(i18n.t("editor.exportWithoutLinks"), ButtonBar.ButtonData.NO);
+        Alert confirm;
+        if (linkedEntries.isEmpty()) {
+            confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                    i18n.t("editor.exportConfirmMessage", selected.size(), 0),
+                    cancelButton, continueButton);
+        } else {
+            confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                    i18n.t("editor.exportConfirmMessage", selected.size(), linkedEntries.size())
+                            + "\n\n" + i18n.t("editor.exportLinksQuestion"),
+                    cancelButton, withLinksButton, withoutLinksButton);
+        }
         confirm.setTitle(i18n.t("editor.exportConfirmTitle"));
         confirm.setHeaderText(null);
         // Ohne feste Breite/Hoehe schneidet JavaFX den dreizeiligen Text ab
@@ -710,8 +771,12 @@ public class CategoryEditor {
         confirm.getDialogPane().setPrefWidth(640);
         confirm.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
         Optional<ButtonType> confirmResult = confirm.showAndWait();
-        if (confirmResult.isEmpty() || confirmResult.get() != continueButton) {
+        if (confirmResult.isEmpty() || confirmResult.get() == cancelButton) {
             return;
+        }
+        boolean placeholdersOnly = confirmResult.get() == withoutLinksButton;
+        if (placeholdersOnly) {
+            linkedEntries = resolveLinkedEntries(selected, false);
         }
 
         String exportDir = AppSettings.getInstance().getExportDirectory();
@@ -726,7 +791,11 @@ public class CategoryEditor {
             AppSettings.getInstance().setExportDirectory(exportDir);
         }
 
-        TextInputDialog nameDialog = new TextInputDialog(categoryName + "-export");
+        // Vorschlag mit dem Namen der geöffneten Datei, z.B.
+        // "feedbacks-export-Kurpfalz_860_V6" (seit 13.10.2026).
+        String sourceName = sourceBaseName();
+        TextInputDialog nameDialog = new TextInputDialog(categoryName + "-export"
+                + (sourceName == null || sourceName.isBlank() ? "" : "-" + sourceName));
         nameDialog.setTitle(i18n.t("editor.exportFileNameTitle"));
         nameDialog.setHeaderText(i18n.t("editor.exportFileNameHeader", exportDir));
         Optional<String> nameResult = nameDialog.showAndWait();
@@ -745,9 +814,13 @@ public class CategoryEditor {
         File target = new File(exportDir, baseName + ".zip");
 
         try {
+            // 6. Spalte (seit 13.10.2026): Art der Zeile - leer für markierte
+            // Einträge, LINK_MARKER_LINKED für mitgeführte Verknüpfungen,
+            // LINK_MARKER_PLACEHOLDER für leere Platzhalter. Ältere Versionen
+            // lesen nur die ersten 5 Spalten und stören sich nicht daran.
             List<String> header = List.of("Kategorie",
                     i18n.t("editor.columnType"), i18n.t("editor.columnName"),
-                    i18n.t("editor.columnDescription"), "XML");
+                    i18n.t("editor.columnDescription"), "XML", LINK_MARKER_HEADER);
 
             // Verknüpfte Einträge werden beim Export UMBENANNT (Original-Name
             // -> "~"+Original-Name) - sowohl ihre eigene Definition als auch
@@ -772,19 +845,27 @@ public class CategoryEditor {
                 // Der direkt ausgewählte Eintrag selbst behält seinen Namen -
                 // nur Referenzen DARIN auf verknüpfte Einträge werden angepasst.
                 renameReferencedChildren(copy, renameMap);
-                rows.add(toExportRow(categoryName, copy));
+                rows.add(toExportRow(categoryName, copy, ""));
             }
             // Verknüpfte Einträge mit ihrer JEWEILS EIGENEN Kategorie anhängen
             // (nicht der Kategorie dieses Reiters), inklusive umbenannter
             // eigener Definition und ggf. umbenannter eigener Referenzen.
             for (Map.Entry<XmlNode, String> linked : linkedEntries.entrySet()) {
+                if (placeholdersOnly) {
+                    // Nur die Struktur (Kategorie, Typ, Name), kein Inhalt.
+                    XmlNode placeholder = new XmlNode(linked.getKey().getTagName());
+                    placeholder.setAttribute("name", renameMap.getOrDefault(
+                            linked.getKey().getName(), linked.getKey().getName()));
+                    rows.add(toExportRow(linked.getValue(), placeholder, LINK_MARKER_PLACEHOLDER));
+                    continue;
+                }
                 XmlNode copy = linked.getKey().deepCopy();
                 String renamedName = renameMap.get(copy.getName());
                 if (renamedName != null) {
                     copy.setAttribute("name", renamedName);
                 }
                 renameReferencedChildren(copy, renameMap);
-                rows.add(toExportRow(linked.getValue(), copy));
+                rows.add(toExportRow(linked.getValue(), copy, LINK_MARKER_LINKED));
             }
             CsvUtil.writeZipped(target, csvEntryName, header, rows);
             new Alert(Alert.AlertType.INFORMATION,
@@ -797,13 +878,18 @@ public class CategoryEditor {
         }
     }
 
-    /** Baut eine CSV-Export-Zeile (Kategorie/Typ/Name/Beschreibung/XML) für einen Eintrag. */
-    private static List<String> toExportRow(String category, XmlNode node) throws Exception {
+    /** Überschrift und Werte der 6. Export-Spalte (Art der Zeile), siehe {@link #onExport()}. */
+    private static final String LINK_MARKER_HEADER = "Verknuepfung";
+    private static final String LINK_MARKER_LINKED = "linked";
+    private static final String LINK_MARKER_PLACEHOLDER = "placeholder";
+
+    /** Baut eine CSV-Export-Zeile (Kategorie/Typ/Name/Beschreibung/XML/Art) für einen Eintrag. */
+    private static List<String> toExportRow(String category, XmlNode node, String linkMarker) throws Exception {
         XmlNode description = node.findChild("description");
         String descText = description != null && description.getTextContent() != null
                 ? description.getTextContent() : "";
         String xml = TcdDocument.nodeToXmlString(node);
-        return List.of(category, node.getTagName(), node.getName(), descText, xml);
+        return List.of(category, node.getTagName(), node.getName(), descText, xml, linkMarker);
     }
 
     /**
@@ -875,6 +961,128 @@ public class CategoryEditor {
             }
             renameReferencedChildren(node, renameMap);
         }
+    }
+
+    /**
+     * Zeilen-Indizes eines Imports, die nach der Zuordnung der Verknüpfungen
+     * noch gebraucht werden: alle markierten Einträge (ohne Verknüpfungs-
+     * Kennzeichen) plus alle NICHT ersetzten Verknüpfungen, die von diesen -
+     * direkt oder über weitere nicht ersetzte Verknüpfungen - referenziert
+     * werden. Ersetzte Verknüpfungen sind nie dabei; ihre eigenen Verweise
+     * werden daher auch nicht weiterverfolgt.
+     * <p>
+     * Enthält der Import gar keine markierten Einträge (nur bei sehr alten
+     * Exporten denkbar), werden alle nicht ersetzten Zeilen behalten, statt
+     * versehentlich alles wegzulassen.
+     */
+    private static Set<Integer> rowsStillNeeded(List<XmlNode> nodes, List<String> linkMarkers,
+                                                Map<String, String> replaced) {
+        // Liste je Name: Lok und Zug teilen sich z.B. oft denselben Namen -
+        // im Zweifel werden beide behalten statt einer fälschlich weggelassen.
+        Map<String, List<Integer>> openLinksByName = new HashMap<>();
+        Set<Integer> needed = new HashSet<>();
+        Deque<Integer> toScan = new ArrayDeque<>();
+        for (int i = 0; i < nodes.size(); i++) {
+            String name = nodes.get(i).getName();
+            if (linkMarkers.get(i).isEmpty()) {
+                needed.add(i);
+                toScan.add(i);
+            } else if (!replaced.containsKey(name)) {
+                openLinksByName.computeIfAbsent(name, k -> new ArrayList<>()).add(i);
+            }
+        }
+        if (needed.isEmpty()) {
+            openLinksByName.values().forEach(needed::addAll);
+            return needed;
+        }
+        while (!toScan.isEmpty()) {
+            XmlNode current = nodes.get(toScan.poll());
+            for (XmlNode reference : allDescendants(current)) {
+                String refName = reference.getAttribute("name");
+                List<Integer> targets = refName == null ? null : openLinksByName.get(refName);
+                if (targets == null) {
+                    continue;
+                }
+                for (Integer target : targets) {
+                    if (needed.add(target)) {
+                        toScan.add(target);
+                    }
+                }
+            }
+        }
+        return needed;
+    }
+
+    /**
+     * Art einer Import-Zeile: aus der 6. Spalte (Exporte ab 13.10.2026), bei
+     * älteren Exporten ersatzweise am führenden "~" im Namen erkannt - so
+     * wurden mitgeführte Verknüpfungen schon immer gekennzeichnet.
+     */
+    private static String linkMarkerOf(List<String> row, XmlNode node) {
+        if (row.size() > 5) {
+            return row.get(5).trim();
+        }
+        return node.getName().startsWith("~") ? LINK_MARKER_LINKED : "";
+    }
+
+    /**
+     * Ermittelt für alle mitgeführten Verknüpfungen eines Imports, ob sie
+     * durch vorhandene Einträge der Zieldatei ersetzt werden. Liefert die
+     * Zuordnung Import-Name → vorhandener Name (leer = alles neu anlegen),
+     * oder {@code Optional.empty()}, wenn der Nutzer abbricht.
+     * <p>
+     * Sind alle Verknüpfungen unter ihrem Original-Namen bereits vorhanden
+     * (und keine Platzhalter dabei), genügt eine einfache Rückfrage - sonst
+     * erscheint die Zuordnungstabelle.
+     */
+    private Optional<Map<String, String>> mapLinksToExisting(List<List<String>> dataRows, List<XmlNode> parsedNodes,
+                                                             List<String> linkMarkers, List<String> originalNames) {
+        List<LinkMappingDialog.LinkRow> linkRows = new ArrayList<>();
+        for (int i = 0; i < dataRows.size(); i++) {
+            String marker = linkMarkers.get(i);
+            if (marker.isEmpty()) {
+                continue;
+            }
+            XmlNode node = parsedNodes.get(i);
+            String rowCategory = dataRows.get(i).get(0);
+            XmlNode existingCategory = findCategoryNodeGeneric(rowCategory);
+            List<String> candidates = new ArrayList<>();
+            if (existingCategory != null) {
+                for (XmlNode entry : existingCategory.getChildren()) {
+                    String name = entry.getAttribute("name");
+                    if (entry.getTagName().equals(node.getTagName()) && name != null && !name.isBlank()) {
+                        candidates.add(name);
+                    }
+                }
+            }
+            candidates.sort(String.CASE_INSENSITIVE_ORDER);
+            linkRows.add(new LinkMappingDialog.LinkRow(rowCategory, node.getTagName(), node.getName(),
+                    originalNames.get(i), LINK_MARKER_PLACEHOLDER.equals(marker), candidates));
+        }
+        if (linkRows.isEmpty()) {
+            return Optional.of(Map.of());
+        }
+
+        boolean allPresent = linkRows.stream().allMatch(r -> r.hasExactMatch() && !r.isPlaceholder());
+        if (allPresent) {
+            ButtonType cancelButton = new ButtonType(i18n.t("editor.exportConfirmCancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+            ButtonType continueButton = new ButtonType(i18n.t("editor.exportConfirmContinue"), ButtonBar.ButtonData.OK_DONE);
+            Alert ask = new Alert(Alert.AlertType.CONFIRMATION,
+                    i18n.t("editor.importLinksAllPresent", linkRows.size()), cancelButton, continueButton);
+            ask.setTitle(i18n.t("editor.importLinksTitle"));
+            ask.setHeaderText(null);
+            ask.initOwner(getWindow());
+            Optional<ButtonType> answer = ask.showAndWait();
+            if (answer.isEmpty() || answer.get() != continueButton) {
+                return Optional.empty();
+            }
+            Map<String, String> mapping = new LinkedHashMap<>();
+            for (LinkMappingDialog.LinkRow row : linkRows) {
+                mapping.put(row.importName(), row.replacementName());
+            }
+            return Optional.of(mapping);
+        }
+        return LinkMappingDialog.show(getWindow(), i18n, linkRows);
     }
 
     /**
@@ -969,8 +1177,48 @@ public class CategoryEditor {
             for (List<String> row : dataRows) {
                 parsedNodes.add(TcdDocument.xmlStringToNode(row.get(4)));
             }
+            // Art jeder Zeile und Original-Name (ohne "~") VOR der
+            // Sitzungs-Nummerierung merken - danach heißt "~RM1" evtl. "~2RM1".
+            List<String> linkMarkers = new ArrayList<>();
+            List<String> originalNames = new ArrayList<>();
+            for (int i = 0; i < dataRows.size(); i++) {
+                linkMarkers.add(linkMarkerOf(dataRows.get(i), parsedNodes.get(i)));
+                String name = parsedNodes.get(i).getName();
+                originalNames.add(name.startsWith("~") ? name.substring(1) : name);
+            }
             if (!parsedNodes.isEmpty()) {
                 renameLinkedEntriesForThisImport(parsedNodes);
+            }
+
+            // Mitgeführte Verknüpfungen durch vorhandene Einträge der Zieldatei
+            // ersetzen (seit 13.10.2026, siehe LinkMappingDialog).
+            Optional<Map<String, String>> linkMapping = mapLinksToExisting(dataRows, parsedNodes, linkMarkers, originalNames);
+            if (linkMapping.isEmpty()) {
+                return;
+            }
+            int linksReplaced = linkMapping.get().size();
+            // Ersetzte Verknüpfungen fallen weg, ebenso neu einzutragende,
+            // die danach niemand mehr referenziert (z.B. die Rückmelder eines
+            // Blocks, der selbst durch einen vorhandenen ersetzt wurde).
+            Set<Integer> stillNeeded = rowsStillNeeded(parsedNodes, linkMarkers, linkMapping.get());
+            int linksUnused = 0;
+            if (stillNeeded.size() < dataRows.size() || linksReplaced > 0) {
+                List<List<String>> keptRows = new ArrayList<>();
+                List<XmlNode> keptNodes = new ArrayList<>();
+                for (int i = 0; i < dataRows.size(); i++) {
+                    XmlNode node = parsedNodes.get(i);
+                    if (!stillNeeded.contains(i)) {
+                        if (!linkMapping.get().containsKey(node.getName())) {
+                            linksUnused++;
+                        }
+                        continue;
+                    }
+                    renameReferencedChildren(node, linkMapping.get());
+                    keptRows.add(dataRows.get(i));
+                    keptNodes.add(node);
+                }
+                dataRows = keptRows;
+                parsedNodes = keptNodes;
             }
 
             // iTrain verlangt pro Kategorie eindeutige Namen (siehe
@@ -1072,6 +1320,15 @@ public class CategoryEditor {
                     : i18n.t("editor.importSuccess", imported);
             if (replaced > 0) {
                 successMessage += "\n" + i18n.t("editor.importReplaced", replaced);
+            }
+            if (linksReplaced > 0) {
+                successMessage += "\n" + i18n.t("editor.importLinksReplaced", linksReplaced);
+            }
+            if (linksUnused > 0) {
+                successMessage += "\n" + i18n.t("editor.importLinksUnused", linksUnused);
+            }
+            if (imported > 0 || replaced > 0) {
+                onImported.run();
             }
             new Alert(Alert.AlertType.INFORMATION, successMessage).showAndWait();
         } catch (Exception ex) {

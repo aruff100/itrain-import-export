@@ -55,6 +55,15 @@ public final class SystemsObjectDialog {
 
     /** Zeigt das Fenster; true, wenn mit "Uebernehmen" geschlossen (die Zeile ist dann geaendert). */
     public static boolean show(Window owner, SystemsObject object) {
+        return show(owner, object, null);
+    }
+
+    /**
+     * Wie {@link #show(Window, SystemsObject)}; {@code itrainRoot} ist die
+     * Wurzel der geladenen iTrain-Datei (oder null) - Lokomotiven nehmen
+     * daraus Massstab und globale Spurweite (siehe {@link LocomotiveOptionsFields}).
+     */
+    public static boolean show(Window owner, SystemsObject object, XmlNode itrainRoot) {
         I18n i18n = I18n.getInstance();
         AppSettings settings = AppSettings.getInstance();
 
@@ -99,7 +108,11 @@ public final class SystemsObjectDialog {
                 apply = boosterFields(grid, row, object, i18n, nameField, descriptionField);
                 break;
             case SystemsObject.CATEGORY_LOCOMOTIVES:
-                apply = locomotiveFields(grid, row, object, i18n, nameField, descriptionField);
+                // Seit 13.10.2026: alle Felder des iTrain-Reiters "Optionen";
+                // Adresse/Protokoll/Schnittstelle nur noch zur Anzeige.
+                apply = object.getXml() != null
+                        ? LocomotiveOptionsFields.build(grid, row, object, i18n, nameField, descriptionField, itrainRoot)
+                        : locomotiveFields(grid, row, object, i18n, nameField, descriptionField);
                 break;
             default:
                 apply = interfaceFields(grid, row, object, i18n, nameField, descriptionField);
@@ -122,7 +135,16 @@ public final class SystemsObjectDialog {
         HBox buttons = new HBox(8, spacer, cancelButton, okButton);
         buttons.setAlignment(Pos.CENTER_RIGHT);
 
-        VBox content = new VBox(14, grid, buttons);
+        // Lokomotiven haben viele Zeilen - bei kleinem Bildschirm rollbar.
+        javafx.scene.control.ScrollPane scroll = new javafx.scene.control.ScrollPane(grid);
+        scroll.setFitToWidth(true);
+        scroll.setStyle("-fx-background-color: transparent; -fx-background: transparent;");
+        grid.setPadding(new Insets(0, 12, 0, 0));
+        // Ohne feste Viewport-Hoehe nimmt die ScrollPane die Hoehe des
+        // Inhalts; das Fenster wird nur auf die Bildschirmhoehe begrenzt.
+        stage.setMaxHeight(javafx.stage.Screen.getPrimary().getVisualBounds().getHeight());
+        VBox.setVgrow(scroll, Priority.ALWAYS);
+        VBox content = new VBox(14, scroll, buttons);
         content.setPadding(new Insets(16));
         javafx.scene.Scene scene = new javafx.scene.Scene(content);
         ThemeManager.apply(scene, settings.getTheme());

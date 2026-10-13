@@ -255,6 +255,82 @@ public final class SystemsObject {
         return interfaceName;
     }
 
+    /**
+     * Decoder-UID einer Lokomotive (mc2: Schluessel {@code uid} der
+     * loco.ini, 8-stellig hex) - NUR zur Anzeige in Tabelle und
+     * Bearbeitungsfenster; wird bewusst nicht in den iTrain-Eintrag
+     * geschrieben (Andre, 13.10.2026), und auch nicht in der System-Datei
+     * gespeichert (nach erneutem Auslesen wieder da).
+     */
+    private final StringProperty uid = new SimpleStringProperty("");
+
+    /**
+     * Funktionen der Lok auf der mc2 (Nummer -&gt; Name aus der Symbolliste,
+     * siehe {@link Mc2LocoReader#functionNames}) - fuer die Gegenueberstellung
+     * im Fenster "Funktionen" ({@link FunctionMappingDialog}). Wie die UID
+     * nur nach dem Auslesen vorhanden, nicht in der System-Datei.
+     */
+    private java.util.Map<Integer, String> mc2Functions = java.util.Map.of();
+
+    /**
+     * true, sobald im Fenster "Funktionen" etwas uebernommen wurde - dann
+     * schreibt {@link #exportXml()} auch bei einer Zuordnung zu einem
+     * vorhandenen iTrain-Eintrag die eigene Funktionsliste.
+     */
+    private boolean functionsEdited;
+
+    public java.util.Map<Integer, String> getMc2Functions() {
+        return mc2Functions;
+    }
+
+    public void setMc2Functions(java.util.Map<Integer, String> functions) {
+        mc2Functions = functions == null ? java.util.Map.of() : java.util.Map.copyOf(functions);
+    }
+
+    public void setFunctionsEdited(boolean edited) {
+        functionsEdited = edited;
+    }
+
+    public boolean isFunctionsEdited() {
+        return functionsEdited;
+    }
+
+    public StringProperty uidProperty() {
+        return uid;
+    }
+
+    public String getUid() {
+        return uid.get();
+    }
+
+    public void setUid(String value) {
+        uid.set(nz(value));
+    }
+
+    /**
+     * Spalte "Laenge" einer Lokomotive aus ihrem {@code <length unit="cm">}
+     * nachziehen - angezeigt in mm wie in iTrain ("141 mm"). Bei Rueckmeldern
+     * ohne Wirkung (deren Laenge ist ein eigenes, editierbares Feld in cm).
+     */
+    public void refreshLocomotiveLength() {
+        if (xml == null || !CATEGORY_LOCOMOTIVES.equals(category)) {
+            return;
+        }
+        XmlNode node = xml.findChild("length");
+        if (node == null || node.getTextContent() == null || node.getTextContent().isBlank()) {
+            length.set("");
+            return;
+        }
+        try {
+            double value = Double.parseDouble(node.getTextContent().trim());
+            double mm = "mm".equals(node.getAttribute("unit")) ? value : value * 10.0;
+            length.set((mm == Math.rint(mm) ? String.valueOf((long) mm)
+                    : String.format(Locale.ROOT, "%.1f", mm)) + " mm");
+        } catch (NumberFormatException ex) {
+            length.set("");
+        }
+    }
+
     public String getInterfaceName() {
         return interfaceName.get();
     }
@@ -357,6 +433,19 @@ public final class SystemsObject {
                 } else {
                     theirInterface.getAttributes().putAll(ourInterface.getAttributes());
                 }
+            }
+        }
+        if (functionsEdited && xml.findChild("functions") != null) {
+            // Im Fenster "Funktionen" bearbeitete Liste (auf Basis der
+            // Funktionen des vorhandenen Eintrags) an deren Stelle setzen.
+            XmlNode ours = xml.findChild("functions").deepCopy();
+            XmlNode theirs = merged.findChild("functions");
+            if (theirs != null) {
+                merged.getChildren().set(merged.getChildren().indexOf(theirs), ours);
+            } else {
+                XmlNode fuel = merged.findChild("fuel");
+                merged.getChildren().add(fuel != null ? merged.getChildren().indexOf(fuel)
+                        : merged.getChildren().size(), ours);
             }
         }
         if (!getDescription().isEmpty()) {
