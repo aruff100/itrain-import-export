@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import org.bidib.jbidibc.messages.BidibLibrary;
+import org.bidib.jbidibc.messages.utils.NodeUtils;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -63,6 +66,42 @@ public final class BidibSystemFile {
         public NodeRecord(long uniqueId, String address, String userName, String productName,
                 String portKind, Integer portCount, List<FeatureRecord> features) {
             this(uniqueId, address, userName, productName, portKind, portCount, features, null, null, null);
+        }
+
+        /**
+         * Anzahl der Rückmelder dieses Knotens. Ein BiDiB-Knoten kann zugleich
+         * Rückmelder und Zubehör haben (z. B. LightControl, ST4, LED_IO_24);
+         * {@link #portKind} hält aus Kompatibilitätsgründen nur EINE Art, die
+         * andere ergibt sich aus Klasse und Merkmal. Ohne Rückmelder: null.
+         */
+        public Integer feedbackPorts() {
+            return ports("FEEDBACK", BidibLibrary.FEATURE_BM_SIZE, "FEATURE_BM_SIZE", true);
+        }
+
+        /** Anzahl der Zubehörartikel dieses Knotens (siehe {@link #feedbackPorts}); ohne Zubehör null. */
+        public Integer accessoryPorts() {
+            return ports("ACCESSORY", BidibLibrary.FEATURE_ACCESSORY_COUNT, "FEATURE_ACCESSORY_COUNT", false);
+        }
+
+        private Integer ports(String kind, int featureType, String featureName, boolean feedback) {
+            if (kind.equals(portKind) && portCount != null && portCount > 0) {
+                return portCount;
+            }
+            // ECoS-Objekte und Lokomotiven tragen ihre Anschlüsse nur in portKind/portCount.
+            if (uniqueId == 0L || portNames != null || "LOCOMOTIVE".equals(portKind) || features == null) {
+                return null;
+            }
+            boolean hasClass = feedback ? NodeUtils.hasFeedbackFunctions(uniqueId)
+                    : NodeUtils.hasAccessoryFunctions(uniqueId);
+            if (!hasClass) {
+                return null;
+            }
+            for (FeatureRecord feature : features) {
+                if ((feature.type() == featureType || featureName.equals(feature.name())) && feature.value() > 0) {
+                    return feature.value();
+                }
+            }
+            return null;
         }
 
         public String portName(int index) {

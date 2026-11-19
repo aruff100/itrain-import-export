@@ -241,7 +241,19 @@ public final class BidibItemFactory {
      * @param ports       Anzahl der Anschlüsse, oder {@code null} wenn der
      *                    Knoten keine hat (Gleisausgang, Booster, Verteiler)
      */
-    public record NodeInfo(long uniqueId, String productName, String userName, Integer ports) {
+    /**
+     * Ein Knoten für die Knotenliste der Schnittstelle. {@code ports} ist die
+     * Zahl der Rückmelder, {@code accessoryPorts} die der Zubehörartikel -
+     * ein Knoten mit beiden Rollen (LightControl, ST4, LED_IO_24) steht in
+     * iTrain zweimal in der Liste, jeweils mit seiner eigenen Anzahl.
+     */
+    public record NodeInfo(long uniqueId, String productName, String userName, Integer ports,
+            Integer accessoryPorts) {
+
+        /** Knoten mit nur einer Anschlussart (bisheriges Verhalten). */
+        public NodeInfo(long uniqueId, String productName, String userName, Integer ports) {
+            this(uniqueId, productName, userName, ports, ports);
+        }
     }
 
     /** Baut die Hülle aus einem von jbidibc gemeldeten Knoten. */
@@ -345,7 +357,7 @@ public final class BidibItemFactory {
                 // Die Anschlusszahl vermerkt iTrain nur dort, wo es
                 // Anschlüsse gibt - bei Gleisausgang, Booster und Verteiler
                 // stünde sonst eine sinnlose Null.
-                Integer portCount = node.ports();
+                Integer portCount = "accessory".equals(type) ? node.accessoryPorts() : node.ports();
                 if (portCount != null && portCount > 0
                         && ("feedback".equals(type) || "accessory".equals(type))) {
                     nodeElement.setAttribute("ports", String.valueOf(portCount));

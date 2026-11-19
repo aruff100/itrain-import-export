@@ -80,16 +80,7 @@ public final class BidibNodeTreeWindow {
     }
 
     private enum PortKind {
-        FEEDBACK, ACCESSORY, LOCOMOTIVE;
-
-        static PortKind of(String portKind) {
-            if ("ACCESSORY".equals(portKind)) {
-                return ACCESSORY;
-            } else if ("LOCOMOTIVE".equals(portKind)) {
-                return LOCOMOTIVE;
-            }
-            return FEEDBACK;
-        }
+        FEEDBACK, ACCESSORY, LOCOMOTIVE
     }
 
     /** Ein einzelner Anschluss eines Knotens (Nummer zero-basiert, wie iTrain sie führt). */
@@ -101,8 +92,8 @@ public final class BidibNodeTreeWindow {
         private final BidibSystemFile.NodeRecord record;
         private final boolean isInterface;
         private final String fallbackLabel;
-        private PortKind portKind;
-        private Integer portCount;
+        private Integer feedbackCount;
+        private Integer accessoryCount;
 
         NodeHolder(BidibSystemFile.NodeRecord record, boolean isInterface, String fallbackLabel) {
             this.record = record;
@@ -392,24 +383,39 @@ public final class BidibNodeTreeWindow {
             item.getChildren().add(featureFolder);
         }
 
-        if (record.portKind() != null && record.portCount() != null && record.portCount() > 0) {
-            PortKind kind = PortKind.of(record.portKind());
-            holder.portKind = kind;
-            holder.portCount = record.portCount();
-            String folderLabel = kind == PortKind.FEEDBACK
-                    ? i18n.t("bidib.portFolderFeedback", record.portCount())
-                    : kind == PortKind.LOCOMOTIVE ? i18n.t("bidib.portFolderLocomotive", record.portCount())
-                    : i18n.t("bidib.portFolderAccessory", record.portCount());
-            TreeItem<Object> portFolder = new TreeItem<>(new PortFolder(folderLabel));
-            for (int port = 0; port < record.portCount(); port++) {
-                portFolder.getChildren().add(new TreeItem<>(new PortEntry(kind, holder, port)));
+        if ("LOCOMOTIVE".equals(record.portKind()) && record.portCount() != null && record.portCount() > 0) {
+            item.getChildren().add(portFolder(PortKind.LOCOMOTIVE,
+                    i18n.t("bidib.portFolderLocomotive", record.portCount()), record.portCount(), holder));
+        } else {
+            // Ein Knoten kann Rückmelder UND Zubehör haben (LightControl,
+            // ST4, LED_IO_24) - dann bekommt er beide Ordner. Bis 3.4 kam nur
+            // die erste Art in den Baum, das Zubehör solcher Knoten fehlte
+            // (Forum t=30438, Uwe, 19.11.2026).
+            Integer feedback = record.feedbackPorts();
+            Integer accessory = record.accessoryPorts();
+            holder.feedbackCount = feedback;
+            holder.accessoryCount = accessory;
+            if (feedback != null) {
+                item.getChildren().add(portFolder(PortKind.FEEDBACK,
+                        i18n.t("bidib.portFolderFeedback", feedback), feedback, holder));
             }
-            item.getChildren().add(portFolder);
+            if (accessory != null) {
+                item.getChildren().add(portFolder(PortKind.ACCESSORY,
+                        i18n.t("bidib.portFolderAccessory", accessory), accessory, holder));
+            }
         }
         if (isInterface) {
             item.setExpanded(true);
         }
         return item;
+    }
+
+    private static TreeItem<Object> portFolder(PortKind kind, String label, int count, NodeHolder holder) {
+        TreeItem<Object> folder = new TreeItem<>(new PortFolder(label));
+        for (int port = 0; port < count; port++) {
+            folder.getChildren().add(new TreeItem<>(new PortEntry(kind, holder, port)));
+        }
+        return folder;
     }
 
     // ------------------------------------------------------------------
@@ -467,7 +473,7 @@ public final class BidibNodeTreeWindow {
                 continue;
             }
             infos.add(new BidibItemFactory.NodeInfo(holder.record.uniqueId(), holder.record.productName(),
-                    holder.record.userName(), holder.portCount));
+                    holder.record.userName(), holder.feedbackCount, holder.accessoryCount));
         }
         XmlNode iface;
         String ifaceType;
