@@ -20,22 +20,22 @@ import java.util.regex.Pattern;
  * würde diese Zugangsdaten allen Nutzern zugänglich machen - siehe
  * Besprechung vom 23.07.2026 in STATUS.md).
  * <p>
- * Stattdessen liegt auf einem öffentlichen GitHub Gist eine winzige
- * JSON-Datei mit genau drei Feldern:
+ * Stattdessen liegt auf der Webseite itrainplus.de eine winzige JSON-Datei
+ * ({@code import-export-daten/manifest.json}, im Repository itrainplus-web):
  * <pre>
  * {
- *   "version": "1.12",
- *   "url": "https://drive.proton.me/urls/DEIN-FREIGABELINK",
- *   "manualUrl": "https://drive.proton.me/urls/DEIN-FREIGABELINK",
- *   "decoderUrl": "https://drive.proton.me/urls/DEIN-FREIGABELINK",
+ *   "version": "3.4.1",
+ *   "url": "https://itrainplus.de/import-export.html#download",
+ *   "manualUrl": "https://itrainplus.de/import-export.html#handbuch",
+ *   "decoderUrl": "https://itrainplus.de/import-export.html#decoder",
  *   "notes": "Kurze Beschreibung der Neuerungen (optional, darf fehlen)"
  * }
  * </pre>
- * Bei jedem neuen Release muss NUR diese eine Datei von Hand aktualisiert
- * werden (Gist bearbeiten, "version"/"url"/"notes" anpassen, speichern) -
- * am Proton-Drive-Freigabelink selbst ändert sich nichts, der Anwender lädt
- * die neue Version weiterhin ganz normal über den Browser herunter, die App
- * öffnet dafür nur den Link.
+ * Bei jedem neuen Release wird diese Datei zusammen mit der Download-Seite
+ * angepasst. Bis Version 3.4.1 lag sie als GitHub Gist
+ * (aruff100/5535471917759f7b5adaddf26a930e06); ältere installierte Versionen
+ * fragen weiter das Gist ab, es muss deshalb noch eine Weile mitgepflegt
+ * werden.
  *
  * <h2>Warum auch Handbuch und Decoder-Vorlagen hierüber laufen</h2>
  *
@@ -60,16 +60,11 @@ import java.util.regex.Pattern;
 public final class UpdateChecker {
 
     /**
-     * "Raw"-URL des GitHub Gists von Andre (aruff100), der das
-     * Update-Manifest enthält. Bewusst OHNE Dateinamen und OHNE
-     * Commit-Hash am Ende: bei Ein-Datei-Gists liefert diese Form immer
-     * den NEUESTEN Stand der Datei und übersteht auch ein späteres
-     * Umbenennen der Datei im Gist. Bei jedem Release nur den Gist
-     * bearbeiten (version/notes, ggf. url) - diese URL bleibt für immer
-     * gleich, ein neuer Build ist dafür nicht nötig.
+     * Versions-Datei auf itrainplus.de (wie bei iTrain-Analyse die
+     * manifest.properties). Bei jedem Release nur diese Datei auf der
+     * Webseite anpassen - ein neuer Build ist dafür nicht nötig.
      */
-    private static final String MANIFEST_URL =
-            "https://gist.githubusercontent.com/aruff100/5535471917759f7b5adaddf26a930e06/raw";
+    private static final String MANIFEST_URL = "https://itrainplus.de/import-export-daten/manifest.json";
 
     private static final Duration TIMEOUT = Duration.ofSeconds(6);
 
@@ -172,10 +167,9 @@ public final class UpdateChecker {
         try {
             HttpClient client = HttpClient.newBuilder()
                     .connectTimeout(TIMEOUT)
-                    // GitHub kann die kurze Gist-"/raw"-URL per HTTP-Weiterleitung
-                    // auf die commit-feste Adresse umlenken - der Java-HttpClient
-                    // folgt Weiterleitungen standardmäßig NICHT (Redirect.NEVER)
-                    // und würde sonst einen 302 als Fehler werten.
+                    // Weiterleitungen folgen (z. B. http -> https oder ein späterer
+                    // Umzug der Datei) - der Java-HttpClient tut das standardmäßig
+                    // NICHT (Redirect.NEVER) und würde sonst einen 302 als Fehler werten.
                     .followRedirects(HttpClient.Redirect.NORMAL)
                     .build();
             HttpRequest request = HttpRequest.newBuilder()
